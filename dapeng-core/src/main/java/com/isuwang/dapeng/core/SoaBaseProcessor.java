@@ -33,6 +33,10 @@ public class SoaBaseProcessor<I> implements TProcessor {
         this.processMap = processMap;
     }
 
+    public I getIface() {
+        return iface;
+    }
+
     @Override
     public boolean process(TProtocol in, TProtocol out) throws TException {
         // threadlocal

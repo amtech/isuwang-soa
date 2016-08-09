@@ -3,6 +3,7 @@
         <soa-server-container name="logbackContainer" ref="com.isuwang.dapeng.container.logback.LogbackContainer"/>
         <soa-server-container name="springContainer" ref="com.isuwang.dapeng.container.spring.SpringContainer"/>
         <soa-server-container name="registryContainer" ref="com.isuwang.dapeng.container.registry.ZookeeperRegistryContainer"/>
+        <soa-server-container name="registryContainer" ref="com.isuwang.dapeng.container.message.MessageConsumerContainer"/>
         <soa-server-container name="nettyContainer" ref="com.isuwang.dapeng.container.netty.NettyContainer"/>
         <soa-server-container name="filterContainer" ref="com.isuwang.dapeng.container.filter.FilterContainer"/>
         <soa-server-container name="versionContainer" ref="com.isuwang.dapeng.container.version.VersionContainer"/>

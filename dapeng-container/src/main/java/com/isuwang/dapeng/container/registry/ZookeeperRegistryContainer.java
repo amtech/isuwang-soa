@@ -1,7 +1,7 @@
 package com.isuwang.dapeng.container.registry;
 
-import com.isuwang.dapeng.container.spring.SpringContainer;
 import com.isuwang.dapeng.container.Container;
+import com.isuwang.dapeng.container.spring.SpringContainer;
 import com.isuwang.dapeng.core.ProcessorKey;
 import com.isuwang.dapeng.core.Service;
 import com.isuwang.dapeng.core.SoaBaseProcessor;
@@ -11,8 +11,6 @@ import com.isuwang.dapeng.registry.zookeeper.RegistryAgentImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Set;
@@ -42,8 +40,6 @@ public class ZookeeperRegistryContainer implements Container {
         for (Object ctx : ctxs) {
             Class<?> contextClass = contexts.get(ctx);
 
-            InputStream filterInput = null;
-
             try {
                 Method method = contextClass.getMethod("getBeansOfType", Class.class);
                 Map<String, SoaBaseProcessor<?>> processorMap = (Map<String, SoaBaseProcessor<?>>) method.invoke(ctx, contextClass.getClassLoader().loadClass(SoaBaseProcessor.class.getName()));
@@ -62,12 +58,6 @@ public class ZookeeperRegistryContainer implements Container {
                 }
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
-            } finally {
-                if (filterInput != null)
-                    try {
-                        filterInput.close();
-                    } catch (IOException e) {
-                    }
             }
         }
     }
