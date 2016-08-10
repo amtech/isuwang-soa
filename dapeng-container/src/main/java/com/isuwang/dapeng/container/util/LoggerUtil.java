@@ -12,4 +12,6 @@ public class LoggerUtil {
 
     public static final String SLOWTIME_LOG = "container.slowtime.log";
 
+    public static final String KAFKA_CONSUMER_LOG = "container.kafka.consumer";
+
 }

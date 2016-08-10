@@ -1,5 +1,7 @@
 package com.isuwang.dapeng.container.message;
 
+import com.isuwang.dapeng.container.util.LoggerUtil;
+import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
@@ -14,19 +16,20 @@ import java.util.*;
  */
 public class KafkaConsumer extends Thread {
 
-    private static final Logger logger = LoggerFactory.getLogger(KafkaConsumer.class);
+    private static final Logger logger = LoggerFactory.getLogger(LoggerUtil.KAFKA_CONSUMER_LOG);
 
     private List<ConsumerContext> customers = new ArrayList<>();
 
-    String topic;
+    private String groupId, topic;
 
-    public KafkaConsumer(String topic) {
+    public KafkaConsumer(String groupId, String topic) {
+        this.groupId = groupId;
         this.topic = topic;
         init();
     }
 
-    private String zookeeperConnect = "127.0.0.1:2181";
-    private String groupId = "DapengContainer";
+    private String zookeeperConnect = SoaSystemEnvProperties.SOA_ZOOKEEPER_KAFKA_HOST;
+
     protected ConsumerConnector consumer;
     protected final static String ZookeeperSessionTimeoutMs = "40000";
     protected final static String ZookeeperSyncTimeMs = "200";
@@ -80,6 +83,7 @@ public class KafkaConsumer extends Thread {
      */
     private void receive(byte[] message) {
 
+        logger.info("KafkaConsumer groupId({}) topic({}) 收到消息", groupId, topic);
         for (ConsumerContext customer : customers) {
             ConsumerExecutor.doAction(customer, message);
         }

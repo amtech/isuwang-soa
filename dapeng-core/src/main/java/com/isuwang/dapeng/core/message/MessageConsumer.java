@@ -11,4 +11,8 @@ import java.lang.annotation.*;
 @Documented
 public @interface MessageConsumer {
 
+    String groupId() default "";
+
+    String zkHost() default "127.0.0.1";
+
 }

@@ -18,6 +18,7 @@ public class SoaSystemEnvProperties {
     private static final String KEY_SOA_ZOOKEEPER_HOST = "soa.zookeeper.host";
     private static final String KEY_SOA_ZOOKEEPER_REGISTRY_HOST = "soa.zookeeper.registry.host";
     private static final String KEY_SOA_ZOOKEEPER_FALLBACK_HOST = "soa.zookeeper.fallback.host";
+    private static final String KEY_SOA_ZOOKEEPER_KAFKA_HOST = "soa.zookeeper.kafka.host";
 
 
     private static final String KEY_SOA_CONTAINER_USETHREADPOOL = "soa.container.usethreadpool";
@@ -38,6 +39,7 @@ public class SoaSystemEnvProperties {
     public static final String SOA_ZOOKEEPER_REGISTRY_HOST = get(KEY_SOA_ZOOKEEPER_REGISTRY_HOST, SOA_ZOOKEEPER_HOST);
     public static final String SOA_ZOOKEEPER_FALLBACK_HOST = get(KEY_SOA_ZOOKEEPER_FALLBACK_HOST, null);
     public static final boolean SOA_ZOOKEEPER_FALLBACK_ISCONFIG = get(KEY_SOA_ZOOKEEPER_FALLBACK_HOST) != null;
+    public static final String SOA_ZOOKEEPER_KAFKA_HOST = get(KEY_SOA_ZOOKEEPER_KAFKA_HOST, "127.0.0.1:2181");
 
 
     public static final boolean SOA_CONTAINER_USETHREADPOOL = Boolean.valueOf(get(KEY_SOA_CONTAINER_USETHREADPOOL, Boolean.TRUE.toString()));

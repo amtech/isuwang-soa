@@ -50,6 +50,10 @@ public class MessageConsumerContainer implements Container {
 
                     if (processor.getIface().getClass().isAnnotationPresent(MessageConsumer.class)) {
 
+                        MessageConsumer messageConsumer = processor.getIface().getClass().getAnnotation(MessageConsumer.class);
+
+                        String groupId = "".equals(messageConsumer.groupId()) ? processor.getIface().getClass().getName() : messageConsumer.groupId();
+
                         for (Method method : processor.getIface().getClass().getMethods()) {
                             if (method.isAnnotationPresent(MessageConsumerAction.class)) {
 
@@ -58,16 +62,18 @@ public class MessageConsumerContainer implements Container {
                                 MessageConsumerAction annotation = method.getAnnotation(MessageConsumerAction.class);
                                 String topic = annotation.topic();
 
-                                if (topicConsumers.containsKey(topic)) {
+                                String consumerKey = groupId + ":" + topic;
+
+                                if (topicConsumers.containsKey(consumerKey)) {
 
                                     ConsumerContext consumerContext = new ConsumerContext();
                                     consumerContext.setIface(processor.getIface());
                                     consumerContext.setSoaProcessFunction(soaProcessFunction);
 
-                                    topicConsumers.get(topic).addCustomer(consumerContext);
+                                    topicConsumers.get(consumerKey).addCustomer(consumerContext);
 
                                 } else {
-                                    KafkaConsumer consumer = new KafkaConsumer(topic);
+                                    KafkaConsumer consumer = new KafkaConsumer(groupId, topic);
                                     consumer.start();
 
                                     ConsumerContext context = new ConsumerContext();
@@ -75,7 +81,7 @@ public class MessageConsumerContainer implements Container {
                                     context.setSoaProcessFunction(soaProcessFunction);
 
                                     consumer.addCustomer(context);
-                                    topicConsumers.put(topic, consumer);
+                                    topicConsumers.put(consumerKey, consumer);
                                 }
                             }
                         }

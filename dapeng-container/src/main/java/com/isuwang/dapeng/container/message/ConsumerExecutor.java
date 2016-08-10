@@ -1,7 +1,10 @@
 package com.isuwang.dapeng.container.message;
 
+import com.isuwang.dapeng.container.util.LoggerUtil;
 import com.isuwang.dapeng.core.SoaProcessFunction;
 import com.isuwang.dapeng.core.TBeanSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
@@ -14,6 +17,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by tangliu on 2016/8/4.
  */
 public class ConsumerExecutor {
+
+    private static final Logger logger = LoggerFactory.getLogger(LoggerUtil.KAFKA_CONSUMER_LOG);
 
     private static ExecutorService executorService = Executors.newFixedThreadPool(10, new DefaultThreadFactory("MessageConsumerExecutor"));
 
@@ -33,7 +38,10 @@ public class ConsumerExecutor {
         ByteBuffer buf = ByteBuffer.wrap(message);
         try {
             field.set(args, buf);
+
+            logger.info("{}收到kafka消息，执行{}方法", iface.getClass().getName(), soaProcessFunction.getMethodName());
             soaProcessFunction.getResult(iface, args);
+            logger.info("{}收到kafka消息，执行{}方法完成", iface.getClass().getName(), soaProcessFunction.getMethodName());
         } catch (Exception e) {
             e.printStackTrace();
         }

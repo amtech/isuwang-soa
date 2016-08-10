@@ -11,10 +11,6 @@ import java.lang.annotation.*;
 @Documented
 public @interface MessageConsumerAction {
 
-    String groupId() default "";
-
-    String topic() default "";
-
-    String zkHost() default "";
+    String topic() default "Binlog";
 
 }
