@@ -115,6 +115,18 @@ public class BaseServiceClient {
             soaHeader.setOperatorName(headerProxy.operatorName());
         }
 
+        //如果在容器内调用其它服务，将原始的调用者信息(customerId/customerName/operatorId/operatorName)传递
+        if (TransactionContext.hasCurrentInstance()) {
+
+            TransactionContext transactionContext = TransactionContext.Factory.getCurrentInstance();
+            SoaHeader oriHeader = transactionContext.getHeader();
+
+            soaHeader.setCustomerId(oriHeader.getCustomerId());
+            soaHeader.setCustomerName(oriHeader.getCustomerName());
+            soaHeader.setOperatorId(oriHeader.getOperatorId());
+            soaHeader.setOperatorName(oriHeader.getOperatorName());
+        }
+
         soaHeader.setCallerIp(Optional.of(SoaSystemEnvProperties.SOA_CALLER_IP));
         soaHeader.setServiceName(serviceName);
         soaHeader.setMethodName(methodName);
