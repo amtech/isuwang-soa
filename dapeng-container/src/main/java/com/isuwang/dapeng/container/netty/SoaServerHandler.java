@@ -107,7 +107,7 @@ public class SoaServerHandler extends ChannelHandlerAdapter {
             boolean b = true;
 
             String serviceKey = soaHeader.getServiceName() + "." + soaHeader.getVersionName() + "." + soaHeader.getMethodName() + ".producer";
-            Map<ConfigKey, Object> configs = RegistryAgentProxy.getCurrentInstance(RegistryAgentProxy.Type.Server).getConfig().get(serviceKey);
+            Map<ConfigKey, Object> configs = RegistryAgentProxy.getCurrentInstance(RegistryAgentProxy.Type.Server).getConfig(false, serviceKey);
 
             if (null != configs) {
                 Boolean aBoolean = (Boolean) configs.get(ConfigKey.ThreadPool);

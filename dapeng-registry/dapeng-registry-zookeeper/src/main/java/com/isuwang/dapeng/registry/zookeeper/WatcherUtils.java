@@ -16,8 +16,7 @@ import java.util.Map;
  */
 public class WatcherUtils {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ZookeeperWatcher.class);
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(WatcherUtils.class);
 
     public static void processConfigData(String configNode, byte[] data, Map<String, Map<ConfigKey, Object>> config) {
         Map<ConfigKey, Object> propertyMap = new HashMap<>();
@@ -77,7 +76,6 @@ public class WatcherUtils {
      */
     public static void resetServiceInfoByName(String serviceName, String path, List<String> infos, Map<String, List<ServiceInfo>> caches) {
         LOGGER.info(serviceName + "   " + infos);
-
         List<ServiceInfo> sinfos = new ArrayList<>();
 
         for (String info : infos) {

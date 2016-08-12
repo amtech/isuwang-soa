@@ -52,17 +52,22 @@ public interface RegistryAgent {
      * @param compatible  是否兼容模式
      * @return
      */
-    List<ServiceInfo> loadMatchedServices(String serviceName, String versionName, boolean compatible);
+    ServiceInfos loadMatchedServices(String serviceName, String versionName, boolean compatible);
 
     /**
      * 获取配置
      *
+     * @param usingFallback
+     * @param serviceKey
      * @return
      */
-    Map<String, Map<ConfigKey, Object>> getConfig();
+    Map<ConfigKey, Object> getConfig(boolean usingFallback, String serviceKey);
 
     /**
      * 获取路由规则
+     *
+     * @param usingFallback
+     * @return
      */
-    List<Route> getRoutes();
+    List<Route> getRoutes(boolean usingFallback);
 }

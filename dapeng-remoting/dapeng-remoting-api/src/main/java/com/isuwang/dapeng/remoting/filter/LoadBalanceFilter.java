@@ -5,24 +5,16 @@ import com.isuwang.dapeng.core.SoaHeader;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.core.filter.Filter;
 import com.isuwang.dapeng.core.filter.FilterChain;
-import com.isuwang.dapeng.registry.ConfigKey;
-import com.isuwang.dapeng.registry.RegistryAgent;
-import com.isuwang.dapeng.registry.RegistryAgentProxy;
-import com.isuwang.dapeng.registry.ServiceInfo;
-import com.isuwang.dapeng.route.Route;
-import com.isuwang.dapeng.route.RouteExecutor;
+import com.isuwang.dapeng.registry.*;
 import com.isuwang.org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * Created by tangliu on 2016/1/15.
@@ -42,14 +34,19 @@ public class LoadBalanceFilter implements Filter {
         String callerInfo = null;
 
         List<ServiceInfo> usableList;
-        if (isLocal)
+        ServiceInfos serviceInfos;
+
+        if (isLocal) {
             usableList = new ArrayList<>();
-        else {
-            usableList = RegistryAgentProxy.getCurrentInstance(RegistryAgentProxy.Type.Client).loadMatchedServices(soaHeader.getServiceName(), soaHeader.getVersionName(), true);
+            serviceInfos = new ServiceInfos(false, usableList);
+        } else {
+            serviceInfos = RegistryAgentProxy.getCurrentInstance(RegistryAgentProxy.Type.Client).loadMatchedServices(soaHeader.getServiceName(), soaHeader.getVersionName(), true);
+            usableList = serviceInfos.getServiceInfoList();
         }
+        chain.setAttribute(StubFilterChain.ATTR_KEY_USERING_FBZK, serviceInfos.isUsingFallbackZk());
 
         String serviceKey = soaHeader.getServiceName() + "." + soaHeader.getVersionName() + "." + soaHeader.getMethodName() + ".consumer";
-        LoadBalanceStratage balance = getLoadBalanceStratage(serviceKey) == null ? LoadBalanceStratage.LeastActive : getLoadBalanceStratage(serviceKey);
+        LoadBalanceStratage balance = getLoadBalanceStratage(serviceInfos.isUsingFallbackZk(), serviceKey) == null ? LoadBalanceStratage.LeastActive : getLoadBalanceStratage(serviceInfos.isUsingFallbackZk(), serviceKey);
 
         switch (balance) {
             case Random:
@@ -66,7 +63,7 @@ public class LoadBalanceFilter implements Filter {
         }
 
         if (callerInfo != null) {
-            LOGGER.info("{} {} {} zookeeper:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), callerInfo);
+            LOGGER.info("{} {} {} target:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), callerInfo);
 
             String[] infos = callerInfo.split(":");
             context.setCalleeIp(infos[0]);
@@ -90,14 +87,17 @@ public class LoadBalanceFilter implements Filter {
         String callerInfo = null;
 
         List<ServiceInfo> usableList;
-        if (isLocal)
+        ServiceInfos serviceInfos;
+        if (isLocal) {
             usableList = new ArrayList<>();
-        else {
-            usableList = RegistryAgentProxy.getCurrentInstance(RegistryAgentProxy.Type.Client).loadMatchedServices(serviceName, versionName, true);
+            serviceInfos = new ServiceInfos(false, usableList);
+        } else {
+            serviceInfos = RegistryAgentProxy.getCurrentInstance(RegistryAgentProxy.Type.Client).loadMatchedServices(serviceName, versionName, true);
+            usableList = serviceInfos.getServiceInfoList();
         }
 
         String serviceKey = serviceName + "." + versionName + "." + methodName + ".consumer";
-        LoadBalanceStratage balance = getLoadBalanceStratage(serviceKey) == null ? LoadBalanceStratage.LeastActive : getLoadBalanceStratage(serviceKey);
+        LoadBalanceStratage balance = getLoadBalanceStratage(serviceInfos.isUsingFallbackZk(), serviceKey) == null ? LoadBalanceStratage.LeastActive : getLoadBalanceStratage(serviceInfos.isUsingFallbackZk(), serviceKey);
 
         switch (balance) {
             case Random:
@@ -116,12 +116,12 @@ public class LoadBalanceFilter implements Filter {
         return callerInfo;
     }
 
-    private static LoadBalanceStratage getLoadBalanceStratage(String key) {
+    private static LoadBalanceStratage getLoadBalanceStratage(boolean usingFallbackZk, String key) {
         RegistryAgent currentInstance = RegistryAgentProxy.getCurrentInstance(RegistryAgentProxy.Type.Client);
         if (currentInstance == null)
             return null;
 
-        Map<ConfigKey, Object> configs = RegistryAgentProxy.getCurrentInstance(RegistryAgentProxy.Type.Client).getConfig().get(key);
+        Map<ConfigKey, Object> configs = RegistryAgentProxy.getCurrentInstance(RegistryAgentProxy.Type.Client).getConfig(usingFallbackZk, key);
         if (null != configs) {
             return LoadBalanceStratage.findByValue((String) configs.get(ConfigKey.LoadBalance));
         }

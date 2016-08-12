@@ -4,6 +4,7 @@ import com.isuwang.dapeng.core.*;
 import com.isuwang.dapeng.registry.ConfigKey;
 import com.isuwang.dapeng.registry.RegistryAgent;
 import com.isuwang.dapeng.registry.ServiceInfo;
+import com.isuwang.dapeng.registry.ServiceInfos;
 import com.isuwang.dapeng.route.Route;
 import com.isuwang.dapeng.route.RouteExecutor;
 import org.slf4j.Logger;
@@ -18,20 +19,19 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Registry Agent
+ * RegistryAgent using Synchronous zookeeper requesting
  *
- * @author craneding
- * @date 16/1/13
+ * @author tangliu
+ * @date 2016-08-12
  */
 public class RegistryAgentImpl implements RegistryAgent {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RegistryAgentImpl.class);
 
     private final boolean isClient;
     private final ZookeeperHelper zooKeeperHelper = new ZookeeperHelper(this);
 
-    private ZookeeperWatcher siw;
-
-    private ZookeeperFallbackWatcher zkfbw;
+    private ZookeeperWatcher siw, zkfbw;
 
     private Map<ProcessorKey, SoaBaseProcessor<?>> processorMap;
 
@@ -51,11 +51,11 @@ public class RegistryAgentImpl implements RegistryAgent {
             zooKeeperHelper.connect();
         }
 
-        siw = new ZookeeperWatcher(isClient);
+        siw = new ZookeeperWatcher(isClient, SoaSystemEnvProperties.SOA_ZOOKEEPER_HOST);
         siw.init();
 
         if (SoaSystemEnvProperties.SOA_ZOOKEEPER_FALLBACK_ISCONFIG) {
-            zkfbw = new ZookeeperFallbackWatcher();
+            zkfbw = new ZookeeperWatcher(isClient, SoaSystemEnvProperties.SOA_ZOOKEEPER_FALLBACK_HOST);
             zkfbw.init();
         }
     }
@@ -116,7 +116,7 @@ public class RegistryAgentImpl implements RegistryAgent {
     }
 
     @Override
-    public List<ServiceInfo> loadMatchedServices(String serviceName, String versionName, boolean compatible) {
+    public ServiceInfos loadMatchedServices(String serviceName, String versionName, boolean compatible) {
 
         boolean usingFallbackZookeeper = false;
         List<ServiceInfo> serviceInfos = siw.getServiceInfo(serviceName, versionName, compatible);
@@ -148,18 +148,28 @@ public class RegistryAgentImpl implements RegistryAgent {
             LOGGER.info("路由过滤后可用列表{}", serviceInfos.stream().map(s -> s.getHost()).collect(Collectors.toList()));
         }
 
-        return serviceInfos;
+        return new ServiceInfos(usingFallbackZookeeper, serviceInfos);
     }
 
     @Override
-    public Map<String, Map<ConfigKey, Object>> getConfig() {
-        return siw.getConfig();
+    public Map<ConfigKey, Object> getConfig(boolean usingFallback, String serviceKey) {
+
+        if (usingFallback) {
+            if (zkfbw.getConfigWithKey(serviceKey).entrySet().size() <= 0)
+                return null;
+            else
+                return zkfbw.getConfigWithKey(serviceKey);
+        } else {
+
+            if (siw.getConfigWithKey(serviceKey).entrySet().size() <= 0)
+                return null;
+            else
+                return siw.getConfigWithKey(serviceKey);
+        }
     }
 
     @Override
-    public List<Route> getRoutes() {
-        return siw.getRoutes();
+    public List<Route> getRoutes(boolean usingFallback) {
+        return null;
     }
-
-
 }

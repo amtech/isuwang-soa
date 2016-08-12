@@ -6,10 +6,7 @@ import com.isuwang.dapeng.core.ProcessorKey;
 import com.isuwang.dapeng.core.Service;
 import com.isuwang.dapeng.core.SoaBaseProcessor;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
-import com.isuwang.dapeng.registry.ConfigKey;
-import com.isuwang.dapeng.registry.RegistryAgent;
-import com.isuwang.dapeng.registry.RegistryAgentProxy;
-import com.isuwang.dapeng.registry.ServiceInfo;
+import com.isuwang.dapeng.registry.*;
 import com.isuwang.dapeng.route.Route;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,21 +92,21 @@ public class LocalRegistryContainer implements Container, RegistryAgent {
     }
 
     @Override
-    public List<ServiceInfo> loadMatchedServices(String serviceName, String versionName, boolean compatible) {
+    public ServiceInfos loadMatchedServices(String serviceName, String versionName, boolean compatible) {
         final List<ServiceInfo> objects = new ArrayList<>();
         objects.add(new ServiceInfo("127.0.0.1", SoaSystemEnvProperties.SOA_CONTAINER_PORT, "*"));
 
-        return objects;
+        return new ServiceInfos(false, objects);
     }
 
+
     @Override
-    public Map<String, Map<ConfigKey, Object>> getConfig() {
+    public Map<ConfigKey, Object> getConfig(boolean usingFallback, String serviceKey) {
         return new HashMap<>();
     }
 
     @Override
-    public List<Route> getRoutes() {
+    public List<Route> getRoutes(boolean usingFallback) {
         return new ArrayList<>();
     }
-
 }

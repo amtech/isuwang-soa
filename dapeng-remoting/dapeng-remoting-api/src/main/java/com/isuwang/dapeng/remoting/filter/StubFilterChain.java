@@ -26,6 +26,7 @@ public class StubFilterChain implements FilterChain {
     public static final String ATTR_KEY_REQUEST = "request";
     public static final String ATTR_KEY_RESPONSE = "response";
     public static final String ATTR_KEY_SERVERINFO = "server";
+    public static final String ATTR_KEY_USERING_FBZK = "usingFBZK";
 
     @Override
     public void doFilter() throws TException {

@@ -185,9 +185,13 @@ public class BaseServiceClient {
                 int failOverTimes = 0;
                 String serviceKey = soaHeader.getServiceName() + "." + soaHeader.getVersionName() + "." + soaHeader.getMethodName() + ".consumer";
                 RegistryAgent registryAgent = RegistryAgentProxy.getCurrentInstance(RegistryAgentProxy.Type.Client);
-                Map<ConfigKey, Object> configs = registryAgent != null ? registryAgent.getConfig().get(serviceKey) : null;
-                if (null != configs) {
-                    failOverTimes = (Integer) configs.get(ConfigKey.FailOver);
+
+                Boolean usingFallbackZK = (Boolean) stubFilterChain.getAttribute(StubFilterChain.ATTR_KEY_USERING_FBZK);
+                if (usingFallbackZK != null) {
+                    Map<ConfigKey, Object> configs = registryAgent != null ? registryAgent.getConfig(usingFallbackZK, serviceKey) : null;
+                    if (null != configs) {
+                        failOverTimes = (Integer) configs.get(ConfigKey.FailOver);
+                    }
                 }
 
                 if (context.getFailedTimes() < failOverTimes) {
