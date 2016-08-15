@@ -3,7 +3,7 @@
     <parent>
         <artifactId>dapeng-parent</artifactId>
         <groupId>com.isuwang</groupId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -21,13 +21,13 @@
         <dependency>
             <groupId>com.isuwang</groupId>
             <artifactId>dapeng-remoting-netty</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <version>${project.version}</version>
 
         </dependency>
         <dependency>
             <groupId>com.isuwang</groupId>
             <artifactId>dapeng-registry-zookeeper</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.zookeeper</groupId>
