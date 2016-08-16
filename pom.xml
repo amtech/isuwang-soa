@@ -141,6 +141,10 @@
                     <id>soa</id>
                     <url>http://nexus.oa.isuwang.com/content/repositories/soa</url>
                 </snapshotRepository>
+                <repository>
+                    <id>nexus-snapshots</id>
+                    <url>http://nexus.oa.isuwang.com/content/repositories/releases/</url>
+                </repository>
             </distributionManagement>
 
             <build>

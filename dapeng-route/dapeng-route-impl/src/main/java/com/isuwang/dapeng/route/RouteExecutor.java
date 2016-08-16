@@ -19,7 +19,7 @@ public class RouteExecutor {
 
     /**
      * 通过请求上下文，规则列表，当前服务ip，判断该请求是否可以访问此ip
-     * <p/>
+     * <p>
      * 对于多个规则可能冲突的情况，目前的处理是，匹配到第一个规则，则跳出匹配
      *
      * @param ctx    上下文
@@ -117,7 +117,7 @@ public class RouteExecutor {
 
     /**
      * 判断上下文是否满足Matchers条件,Matchers由一系列Matcher组成:
-     * <p/>
+     * <p>
      * 如果是“and（与）”关系，则全部满足才返回true，否则返回false;
      * 如果是“or(或)”关系，则有一个满足则返回true,都不满足返回false
      *
@@ -141,6 +141,8 @@ public class RouteExecutor {
                             if (!matched(pattern, value))
                                 return false;
                         }
+                    } else {
+                        return false;   //如果没有找到值，那么认为肯定不满足条件
                     }
                 }
                 return true;
@@ -181,6 +183,8 @@ public class RouteExecutor {
             return ctx.getHeader().getServiceName();
         } else if ("method".equals(id.getName())) {
             return ctx.getHeader().getMethodName();
+        } else if ("version".equals(id.getName())) {
+            return ctx.getHeader().getVersionName();
         } else {
             throw new AssertionError("not support Field: " + id.getName());
         }

@@ -25,7 +25,8 @@ public class RouteParserTest {
                 "      ip match ~ip'1.2.3.0/24|192.168.3.39' => ~ip'1.2.3.4|192.168.1.39/32'\n";
 
 //        String str = "operatorId match %'1024n+0..9' and ip match ip'192.168.3/24' => ~ip'1.2.3.4|192.168.1.1/24'";
-        String str = "service match s'ArticleService' => ~ip'1.2.3.4|192.168.1.1/24'";
+//        String str = "service match s'ArticleService' => ~ip'1.2.3.4|192.168.1.1/24'";
+        String str = "service match s'com.isuwang.soa.user.service.UserService' and version match s'1.0.0' => ~ip'192.168.3.39'";
         RouteParser parser = new RouteParser();
 
         List routes = new ArrayList<Route>();
@@ -41,7 +42,8 @@ public class RouteParserTest {
         soaHeader.setCallerIp(Optional.of("192.168.3.39"));
         soaHeader.setCallerFrom(Optional.of("app"));
 
-        soaHeader.setServiceName("ArticleService");
+        soaHeader.setServiceName("com.isuwang.soa.user.service.UserService");
+        soaHeader.setVersionName("1.0.0");
         soaHeader.setMethodName("getArticleDetail");
 
         ctx.setHeader(soaHeader);
