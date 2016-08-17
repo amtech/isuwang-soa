@@ -48,7 +48,7 @@
         <dependency>
             <groupId>com.github.wangzaixiang</groupId>
             <artifactId>scala-sql_2.11</artifactId>
-            <version>1.0.4</version>
+            <version>1.0.6</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.scala-lang</groupId>
