@@ -321,7 +321,7 @@ public class ZookeeperWatcher {
             WatcherUtils.processConfigData(configNodeName, data, config);
 
         } catch (KeeperException e) {
-            LOGGER.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage());
             if (e instanceof KeeperException.NoNodeException) {
                 config.put(configNodeName, new HashMap<>());
             }
