@@ -11,9 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Message Consumer Container
@@ -48,13 +46,20 @@ public class MessageConsumerContainer implements Container {
                 for (String key : keys) {
                     SoaBaseProcessor<?> processor = processorMap.get(key);
 
-                    if (processor.getIface().getClass().isAnnotationPresent(MessageConsumer.class)) {
+                    long count = new ArrayList<>(Arrays.asList(processor.getIface().getClass().getInterfaces()))
+                            .stream()
+                            .filter(m -> m.getName().equals("org.springframework.aop.framework.Advised"))
+                            .count();
 
-                        MessageConsumer messageConsumer = processor.getIface().getClass().getAnnotation(MessageConsumer.class);
+                    Class<?> ifaceClass = (Class) (count > 0 ? processor.getIface().getClass().getMethod("getTargetClass").invoke(processor.getIface()) : processor.getIface().getClass());
 
-                        String groupId = "".equals(messageConsumer.groupId()) ? processor.getIface().getClass().getName() : messageConsumer.groupId();
+                    if (ifaceClass.isAnnotationPresent(MessageConsumer.class)) {
 
-                        for (Method method : processor.getIface().getClass().getMethods()) {
+                        MessageConsumer messageConsumer = ifaceClass.getAnnotation(MessageConsumer.class);
+
+                        String groupId = "".equals(messageConsumer.groupId()) ? ifaceClass.getName() : messageConsumer.groupId();
+
+                        for (Method method : ifaceClass.getMethods()) {
                             if (method.isAnnotationPresent(MessageConsumerAction.class)) {
 
                                 String methodName = method.getName();

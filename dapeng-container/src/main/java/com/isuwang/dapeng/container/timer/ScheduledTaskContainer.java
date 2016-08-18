@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
@@ -49,10 +51,16 @@ public class ScheduledTaskContainer implements Container {
                 for (String key : keys) {
                     SoaBaseProcessor<?> processor = processorMap.get(key);
 
-                    if (processor.getIface().getClass().isAnnotationPresent(ScheduledTask.class)) {
+                    long count = new ArrayList<>(Arrays.asList(processor.getIface().getClass().getInterfaces()))
+                            .stream()
+                            .filter(m -> m.getName().equals("org.springframework.aop.framework.Advised"))
+                            .count();
 
-                        for (Method method : processor.getIface().getClass().getMethods()) {
+                    Class<?> ifaceClass = (Class) (count > 0 ? processor.getIface().getClass().getMethod("getTargetClass").invoke(processor.getIface()) : processor.getIface().getClass());
 
+                    if (ifaceClass.isAnnotationPresent(ScheduledTask.class)) {
+
+                        for (Method method : ifaceClass.getMethods()) {
                             if (method.isAnnotationPresent(ScheduledTaskCron.class)) {
 
                                 String methodName = method.getName();
@@ -71,7 +79,7 @@ public class ScheduledTaskContainer implements Container {
                                 jobDataMap.put("iface", processor.getIface());
                                 jobDataMap.put("serviceName", serviceName);
                                 jobDataMap.put("versionName", versionName);
-                                JobDetail job = JobBuilder.newJob(ScheduledJob.class).withIdentity(processor.getIface().getClass().getName() + ":" + methodName).setJobData(jobDataMap).build();
+                                JobDetail job = JobBuilder.newJob(ScheduledJob.class).withIdentity(ifaceClass.getName() + ":" + methodName).setJobData(jobDataMap).build();
 
                                 CronTriggerImpl trigger = new CronTriggerImpl();
                                 trigger.setName(job.getKey().getName());
@@ -79,7 +87,7 @@ public class ScheduledTaskContainer implements Container {
                                 try {
                                     trigger.setCronExpression(cronStr);
                                 } catch (ParseException e) {
-                                    LOGGER.error("定时任务({}:{})Cron解析出错", processor.getIface().getClass().getName(), methodName);
+                                    LOGGER.error("定时任务({}:{})Cron解析出错", ifaceClass.getName(), methodName);
                                     LOGGER.error(e.getMessage(), e);
                                     continue;
                                 }
@@ -95,6 +103,7 @@ public class ScheduledTaskContainer implements Container {
                                     }
                                 }
                                 scheduler.scheduleJob(job, trigger);
+                                LOGGER.info("添加定时任务({}:{})成功", ifaceClass.getName(), methodName);
                             }
                         }
                     }

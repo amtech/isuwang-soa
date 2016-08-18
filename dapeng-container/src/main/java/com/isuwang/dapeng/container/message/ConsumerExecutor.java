@@ -43,7 +43,8 @@ public class ConsumerExecutor {
             soaProcessFunction.getResult(iface, args);
             logger.info("{}收到kafka消息，执行{}方法完成", iface.getClass().getName(), soaProcessFunction.getMethodName());
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("{}收到kafka消息，执行{}方法异常", iface.getClass().getName(), soaProcessFunction.getMethodName());
+            logger.error(e.getMessage(), e);
         }
     }
 
