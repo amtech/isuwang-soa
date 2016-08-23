@@ -113,6 +113,7 @@ public class BaseServiceClient {
             soaHeader.setCustomerName(headerProxy.customerName());
             soaHeader.setOperatorId(headerProxy.operatorId());
             soaHeader.setOperatorName(headerProxy.operatorName());
+            soaHeader.setSessionId(headerProxy.sessionId());
         }
 
         //如果在容器内调用其它服务，将原始的调用者信息(customerId/customerName/operatorId/operatorName)传递
@@ -125,6 +126,7 @@ public class BaseServiceClient {
             soaHeader.setCustomerName(oriHeader.getCustomerName());
             soaHeader.setOperatorId(oriHeader.getOperatorId());
             soaHeader.setOperatorName(oriHeader.getOperatorName());
+            soaHeader.setSessionId(headerProxy.sessionId());
         }
 
         soaHeader.setCallerIp(Optional.of(SoaSystemEnvProperties.SOA_CALLER_IP));

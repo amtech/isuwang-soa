@@ -25,6 +25,8 @@ public class InvocationContext extends Context {
             Optional<Integer> operatorId();
 
             Optional<String> operatorName();
+
+            Optional<String> sessionId();
         }
 
         public static void setSoaHeaderProxy(ISoaHeaderProxy soaHeaderProxy) {
