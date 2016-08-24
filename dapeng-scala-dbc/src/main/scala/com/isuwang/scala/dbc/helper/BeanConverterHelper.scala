@@ -252,7 +252,7 @@ object BeanConverterHelper {
             java.util.Optional.empty()
           else {
             val destValue = copyValue(srcValue, srcFieldType, destOptionInnerType, null, setDefaultValForNull)
-            java.util.Optional.of(destValue)
+            if (destValue == null) java.util.Optional.empty() else java.util.Optional.of(destValue)
           }
         }
         case _ =>
