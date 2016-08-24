@@ -486,6 +486,38 @@ class JavaClientGenerator extends CodeGenerator {
   }
 
 
+  def toReadDataTemplate(dataType: DataType):Elem = {
+
+    dataType.kind match {
+      case KIND.STRING => <div>iprot.readString()</div>
+      case KIND.BOOLEAN => <div>iprot.readBool()</div>
+      case KIND.BYTE => <div>iprot.readByte()</div>
+      case KIND.SHORT => <div>iprot.readI16()</div>
+      case KIND.INTEGER => <div>iprot.readI32()</div>
+      case KIND.LONG => <div>iprot.readI64()</div>
+      case KIND.DOUBLE => <div>iprot.readDouble()</div>
+      case KIND.ENUM => <div>iprot.readI32()</div>
+      case KIND.BINARY => <div> iprot.readBinary()</div>
+    }
+  }
+
+  def toWriteDataTemplate(dataType: DataType):Elem = {
+
+    dataType.kind match {
+      case KIND.STRING => <div>oprot.writeString(</div>
+      case KIND.BOOLEAN => <div>oprot.writeBool(</div>
+      case KIND.BYTE => <div>oprot.writeByte(</div>
+      case KIND.SHORT => <div>oprot.writeI16(</div>
+      case KIND.INTEGER => <div>oprot.writeI32(</div>
+      case KIND.LONG => <div>oprot.writeI64(</div>
+      case KIND.DOUBLE => <div>oprot.writeDouble(</div>
+      case KIND.ENUM => <div>oprot.writeI32(</div>
+      case KIND.BINARY => <div> oprot.writeBinary(</div>
+    }
+
+  }
+
+
   def toTDateType(dataType:DataType): Elem = {
     dataType.kind match {
       case KIND.VOID => <div>com.isuwang.org.apache.thrift.protocol.TType.VOID</div>
@@ -548,6 +580,14 @@ class JavaClientGenerator extends CodeGenerator {
               case KIND.DATE => <div>oprot.writeI64(item.getTime());</div>
               case KIND.BIGDECIMAL => <div>oprot.writeString(item.toString());</div>
               case KIND.BINARY => <div>oprot.writeBinary(item);</div>
+              case KIND.MAP => <div>
+              oprot.writeMapBegin(new com.isuwang.org.apache.thrift.protocol.TMap({toTDateType(field.dataType.valueType.keyType)},{toTDateType(field.dataType.valueType.valueType)}, item.size()));
+              for(java.util.Map.Entry{lt}{toDataTypeTemplate(field.dataType.valueType.keyType)},{toDataTypeTemplate(field.dataType.valueType.valueType)}{gt} _it1 : item.entrySet())<block>
+                  {toWriteDataTemplate(field.dataType.valueType.keyType)}_it1.getKey());
+                  {toWriteDataTemplate(field.dataType.valueType.valueType)}_it1.getValue());
+                </block>
+                oprot.writeMapEnd();
+              </div>
               case _ => <div></div>
             }
           }
@@ -654,6 +694,16 @@ class JavaClientGenerator extends CodeGenerator {
                 case KIND.DATE => <div>Long time = iprot.readI64(); java.util.Date _elem1 = new java.util.Date(time);</div>
                 case KIND.BIGDECIMAL => <div>java.math.BigDecimal _elem1 = new java.math.BigDecimal(iprot.readString());</div>
                 case KIND.BINARY => <div>ByteBuffer _elem1 = iprot.readBinary();</div>
+                case KIND.MAP => <div>
+                  com.isuwang.org.apache.thrift.protocol.TMap _map1 = iprot.readMapBegin();
+                  java.util.Map{lt}{toDataTypeTemplate(field.dataType.valueType.keyType)},{toDataTypeTemplate(field.dataType.valueType.valueType)}{gt} _elem1 = new java.util.HashMap{lt}{gt}();
+                  for(int _i3 = 0; _i3 {lt} _map1.size; ++ _i3)<block>
+                    {toDataTypeTemplate(field.dataType.valueType.keyType)} _key1 = {toReadDataTemplate(field.dataType.valueType.keyType)};
+                    {toDataTypeTemplate(field.dataType.valueType.valueType)} _val1 = {toReadDataTemplate(field.dataType.valueType.valueType)};
+                    _elem1.put(_key1, _val1);
+                  </block>
+                  iprot.readMapEnd();
+                </div>
                 case _ => <div></div>
               }
               }
