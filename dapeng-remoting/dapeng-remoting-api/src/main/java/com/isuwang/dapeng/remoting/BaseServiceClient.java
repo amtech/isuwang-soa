@@ -127,7 +127,7 @@ public class BaseServiceClient {
             soaHeader.setCustomerName(oriHeader.getCustomerName());
             soaHeader.setOperatorId(oriHeader.getOperatorId());
             soaHeader.setOperatorName(oriHeader.getOperatorName());
-            soaHeader.setSessionId(headerProxy.sessionId());
+            soaHeader.setSessionId(oriHeader.getSessionId());
         }
 
         soaHeader.setCallerIp(Optional.of(SoaSystemEnvProperties.SOA_CALLER_IP));
