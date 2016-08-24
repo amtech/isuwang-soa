@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -137,6 +138,10 @@ public class BaseServiceClient {
         if (!soaHeader.getCallerFrom().isPresent())
             soaHeader.setCallerFrom(Optional.of(SoaSystemEnvProperties.SOA_SERVICE_CALLERFROM));
 
+
+        if(!soaHeader.getSessionId().isPresent()){
+            soaHeader.setSessionId(Optional.of(UUID.randomUUID().toString()));
+        }
 
         context.setHeader(soaHeader);
 
