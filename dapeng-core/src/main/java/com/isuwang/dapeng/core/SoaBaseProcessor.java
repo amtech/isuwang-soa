@@ -63,7 +63,9 @@ public class SoaBaseProcessor<I> implements TProcessor {
             in.readMessageEnd();
 
             SoaHeader soaHeader = (SoaHeader) chain.getAttribute(ContainerFilterChain.ATTR_KEY_HEADER);
-            soaHeader.setSessionId(Optional.of(UUID.randomUUID().toString()));
+            if(!soaHeader.getSessionId().isPresent()){
+                soaHeader.setSessionId(Optional.of(UUID.randomUUID().toString()));
+            }
 
             LOGGER.info("{} {} {} {} request header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid(), soaHeader.toString(), formatToString(soaProcessFunction.getReqSerializer().toString(args)));
             long startTime = System.currentTimeMillis();
