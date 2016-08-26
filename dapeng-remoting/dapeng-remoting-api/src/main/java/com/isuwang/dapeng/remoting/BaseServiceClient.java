@@ -21,6 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -113,6 +114,7 @@ public class BaseServiceClient {
             soaHeader.setCustomerName(headerProxy.customerName());
             soaHeader.setOperatorId(headerProxy.operatorId());
             soaHeader.setOperatorName(headerProxy.operatorName());
+            soaHeader.setSessionId(headerProxy.sessionId());
         }
 
         //如果在容器内调用其它服务，将原始的调用者信息(customerId/customerName/operatorId/operatorName)传递
@@ -125,6 +127,7 @@ public class BaseServiceClient {
             soaHeader.setCustomerName(oriHeader.getCustomerName());
             soaHeader.setOperatorId(oriHeader.getOperatorId());
             soaHeader.setOperatorName(oriHeader.getOperatorName());
+            soaHeader.setSessionId(oriHeader.getSessionId());
         }
 
         soaHeader.setCallerIp(Optional.of(SoaSystemEnvProperties.SOA_CALLER_IP));
@@ -135,6 +138,10 @@ public class BaseServiceClient {
         if (!soaHeader.getCallerFrom().isPresent())
             soaHeader.setCallerFrom(Optional.of(SoaSystemEnvProperties.SOA_SERVICE_CALLERFROM));
 
+
+        if(!soaHeader.getSessionId().isPresent()){
+            soaHeader.setSessionId(Optional.of(UUID.randomUUID().toString()));
+        }
 
         context.setHeader(soaHeader);
 
