@@ -79,6 +79,11 @@ public class SoaHeader {
      */
     private boolean isAsyncCall = false;
 
+    /**
+     * SessionId
+     */
+    private Optional<String> sessionId = Optional.empty();
+
     public String toString() {
 
         StringBuilder sb = new StringBuilder("{");
@@ -94,6 +99,7 @@ public class SoaHeader {
         sb.append("\"").append("operatorName").append("\":\"").append(this.operatorName.isPresent() ? this.operatorName.get() : null).append("\",");
         sb.append("\"").append("customerId").append("\":").append(this.customerId.isPresent() ? this.customerId.get() : null).append(",");
         sb.append("\"").append("customerName").append("\":\"").append(this.customerName.isPresent() ? this.customerName.get() : null).append("\",");
+        sb.append("\"").append("sessionId").append("\":\"").append(this.sessionId.isPresent() ? this.sessionId.get() : null).append("\",");
         sb.append("\"").append("respCode").append("\":\"").append(this.respCode.isPresent() ? this.respCode.get() : null).append("\",");
         sb.append("\"").append("respMessage").append("\":\"").append(this.respMessage.isPresent() ? this.respMessage.get() : null).append("\",");
 
@@ -212,5 +218,13 @@ public class SoaHeader {
 
     public void setAsyncCall(boolean asyncCall) {
         isAsyncCall = asyncCall;
+    }
+
+    public Optional<String> getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(Optional<String> sessionId) {
+        this.sessionId = sessionId;
     }
 }

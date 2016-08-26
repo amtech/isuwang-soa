@@ -48,6 +48,9 @@ public class ContainerSoaHeader {
         public Optional<String> operatorName() {
             return Optional.empty();
         }
+
+        @Override
+        public Optional<String> sessionId() { return Optional.empty();}
     }
 
 }

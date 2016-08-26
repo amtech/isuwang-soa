@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -41,16 +42,17 @@ public class SoaBaseProcessor<I> implements TProcessor {
     public boolean process(TProtocol in, TProtocol out) throws TException {
         // threadlocal
         TransactionContext context = TransactionContext.Factory.getCurrentInstance();
-        String methodName = context.getHeader().getMethodName();
+        SoaHeader soaHeaderOrigin = context.getHeader();
+        String methodName = soaHeaderOrigin.getMethodName();
 
-        final String logId = context.getHeader().getServiceName() + "/" + context.getHeader().getMethodName();
+        final String logId = soaHeaderOrigin.getServiceName() + "/" + soaHeaderOrigin.getMethodName();
 
         ContainerFilterChain filterChain = new ContainerFilterChain();
         filterChain.setLastFilter(new DispatchFilter());
 
         filterChain.setAttribute(ContainerFilterChain.ATTR_KEY_LOGID, logId);
         filterChain.setAttribute(ContainerFilterChain.ATTR_KEY_CONTEXT, context);
-        filterChain.setAttribute(ContainerFilterChain.ATTR_KEY_HEADER, context.getHeader());
+        filterChain.setAttribute(ContainerFilterChain.ATTR_KEY_HEADER, soaHeaderOrigin);
         filterChain.setAttribute(ContainerFilterChain.ATTR_KEY_IFACE, iface);
         filterChain.setAttribute(DispatchFilter.ATTR_KEY_CONTAINER_DISPATCH_ACTION, (DispatchFilter.DispatchAction) chain -> {
 
@@ -65,6 +67,9 @@ public class SoaBaseProcessor<I> implements TProcessor {
             in.readMessageEnd();
 
             SoaHeader soaHeader = (SoaHeader) chain.getAttribute(ContainerFilterChain.ATTR_KEY_HEADER);
+            if(!soaHeader.getSessionId().isPresent()){
+                soaHeader.setSessionId(Optional.of(UUID.randomUUID().toString()));
+            }
 
             LOGGER.info("{} {} {} {} request header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid(), soaHeader.toString(), formatToString(soaProcessFunction.getReqSerializer().toString(args)));
             long startTime = System.currentTimeMillis();

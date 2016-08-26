@@ -124,7 +124,13 @@ public class SoaHeaderSerializer implements TBeanSerializer<SoaHeader> {
                         TProtocolUtil.skip(iprot, schemeField.type);
                     }
                     break;
-
+                case 22:
+                    if (schemeField.type == TType.STRING) {
+                        bean.setSessionId(Optional.of(iprot.readString()));
+                    } else {
+                        TProtocolUtil.skip(iprot, schemeField.type);
+                    }
+                    break;
                 default:
                     TProtocolUtil.skip(iprot, schemeField.type);
             }
@@ -212,6 +218,12 @@ public class SoaHeaderSerializer implements TBeanSerializer<SoaHeader> {
         oprot.writeFieldBegin(new TField("isAsyncCall", TType.BOOL, (short) 21));
         oprot.writeBool(bean.isAsyncCall());
         oprot.writeFieldEnd();
+
+        if (bean.getSessionId().isPresent()) {
+            oprot.writeFieldBegin(new TField("sessionId", TType.STRING, (short) 22));
+            oprot.writeString(bean.getSessionId().get());
+            oprot.writeFieldEnd();
+        }
 
         oprot.writeFieldStop();
         oprot.writeStructEnd();

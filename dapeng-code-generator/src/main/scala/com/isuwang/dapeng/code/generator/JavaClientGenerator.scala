@@ -486,6 +486,38 @@ class JavaClientGenerator extends CodeGenerator {
   }
 
 
+  def toReadDataTemplate(dataType: DataType):Elem = {
+
+    dataType.kind match {
+      case KIND.STRING => <div>iprot.readString()</div>
+      case KIND.BOOLEAN => <div>iprot.readBool()</div>
+      case KIND.BYTE => <div>iprot.readByte()</div>
+      case KIND.SHORT => <div>iprot.readI16()</div>
+      case KIND.INTEGER => <div>iprot.readI32()</div>
+      case KIND.LONG => <div>iprot.readI64()</div>
+      case KIND.DOUBLE => <div>iprot.readDouble()</div>
+      case KIND.ENUM => <div>iprot.readI32()</div>
+      case KIND.BINARY => <div> iprot.readBinary()</div>
+    }
+  }
+
+  def toWriteDataTemplate(dataType: DataType):Elem = {
+
+    dataType.kind match {
+      case KIND.STRING => <div>oprot.writeString(</div>
+      case KIND.BOOLEAN => <div>oprot.writeBool(</div>
+      case KIND.BYTE => <div>oprot.writeByte(</div>
+      case KIND.SHORT => <div>oprot.writeI16(</div>
+      case KIND.INTEGER => <div>oprot.writeI32(</div>
+      case KIND.LONG => <div>oprot.writeI64(</div>
+      case KIND.DOUBLE => <div>oprot.writeDouble(</div>
+      case KIND.ENUM => <div>oprot.writeI32(</div>
+      case KIND.BINARY => <div> oprot.writeBinary(</div>
+    }
+
+  }
+
+
   def toTDateType(dataType:DataType): Elem = {
     dataType.kind match {
       case KIND.VOID => <div>com.isuwang.org.apache.thrift.protocol.TType.VOID</div>
@@ -548,6 +580,14 @@ class JavaClientGenerator extends CodeGenerator {
               case KIND.DATE => <div>oprot.writeI64(item.getTime());</div>
               case KIND.BIGDECIMAL => <div>oprot.writeString(item.toString());</div>
               case KIND.BINARY => <div>oprot.writeBinary(item);</div>
+              case KIND.MAP => <div>
+              oprot.writeMapBegin(new com.isuwang.org.apache.thrift.protocol.TMap({toTDateType(field.dataType.valueType.keyType)},{toTDateType(field.dataType.valueType.valueType)}, item.size()));
+              for(java.util.Map.Entry{lt}{toDataTypeTemplate(field.dataType.valueType.keyType)},{toDataTypeTemplate(field.dataType.valueType.valueType)}{gt} _it1 : item.entrySet())<block>
+                  {toWriteDataTemplate(field.dataType.valueType.keyType)}_it1.getKey());
+                  {toWriteDataTemplate(field.dataType.valueType.valueType)}_it1.getValue());
+                </block>
+                oprot.writeMapEnd();
+              </div>
               case _ => <div></div>
             }
           }
@@ -599,6 +639,39 @@ class JavaClientGenerator extends CodeGenerator {
           <div>  new {field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().write(bean.get{field.name.charAt(0).toUpper + field.name.substring(1)}(){if(field.isOptional) <div>.get()</div>}, oprot);</div>
         }
 
+      case KIND.SET =>
+        return{
+        <div>
+          oprot.writeSetBegin(new com.isuwang.org.apache.thrift.protocol.TSet({toTDateType(field.dataType.valueType)}, bean.get{field.name.charAt(0).toUpper + field.name.substring(1)}(){if(field.isOptional) <div>.get()</div>}.size()));
+          for({toDataTypeTemplate(field.dataType.valueType)} item : bean.get{field.name.charAt(0).toUpper + field.name.substring(1)}(){if(field.isOptional) <div>.get()</div>})<block>
+          {
+          field.dataType.valueType.kind match{
+            case KIND.STRUCT => <div>     new {field.dataType.valueType.qualifiedName.substring(field.dataType.valueType.qualifiedName.lastIndexOf(".")+1)}Serializer().write(item, oprot);</div>
+            case KIND.STRING => <div>oprot.writeString(item);</div>
+            case KIND.INTEGER => <div>oprot.writeI32(item);</div>
+            case KIND.DOUBLE => <div>oprot.writeDouble(item);</div>
+            case KIND.BOOLEAN => <div>oprot.writeBool(item);</div>
+            case KIND.BYTE => <div>oprot.writeByte(item);</div>
+            case KIND.SHORT => <div>oprot.writeI16(item);</div>
+            case KIND.LONG => <div>oprot.writeI64(item);</div>
+            case KIND.ENUM => <div>oprot.writeI32(item.getValue());</div>
+            case KIND.DATE => <div>oprot.writeI64(item.getTime());</div>
+            case KIND.BIGDECIMAL => <div>oprot.writeString(item.toString());</div>
+            case KIND.BINARY => <div>oprot.writeBinary(item);</div>
+            case KIND.MAP => <div>
+              oprot.writeMapBegin(new com.isuwang.org.apache.thrift.protocol.TMap({toTDateType(field.dataType.valueType.keyType)},{toTDateType(field.dataType.valueType.valueType)}, item.size()));
+              for(java.util.Map.Entry{lt}{toDataTypeTemplate(field.dataType.valueType.keyType)},{toDataTypeTemplate(field.dataType.valueType.valueType)}{gt} _it1 : item.entrySet())<block>
+                {toWriteDataTemplate(field.dataType.valueType.keyType)}_it1.getKey());
+                {toWriteDataTemplate(field.dataType.valueType.valueType)}_it1.getValue());
+              </block>
+              oprot.writeMapEnd();
+            </div>
+            case _ => <div></div>
+          }
+          }
+        </block>
+          oprot.writeSetEnd();
+        </div>}
       case KIND.VOID =>
         return {<div></div>}
 
@@ -654,6 +727,16 @@ class JavaClientGenerator extends CodeGenerator {
                 case KIND.DATE => <div>Long time = iprot.readI64(); java.util.Date _elem1 = new java.util.Date(time);</div>
                 case KIND.BIGDECIMAL => <div>java.math.BigDecimal _elem1 = new java.math.BigDecimal(iprot.readString());</div>
                 case KIND.BINARY => <div>ByteBuffer _elem1 = iprot.readBinary();</div>
+                case KIND.MAP => <div>
+                  com.isuwang.org.apache.thrift.protocol.TMap _map1 = iprot.readMapBegin();
+                  java.util.Map{lt}{toDataTypeTemplate(field.dataType.valueType.keyType)},{toDataTypeTemplate(field.dataType.valueType.valueType)}{gt} _elem1 = new java.util.HashMap{lt}{gt}();
+                  for(int _i3 = 0; _i3 {lt} _map1.size; ++ _i3)<block>
+                    {toDataTypeTemplate(field.dataType.valueType.keyType)} _key1 = {toReadDataTemplate(field.dataType.valueType.keyType)};
+                    {toDataTypeTemplate(field.dataType.valueType.valueType)} _val1 = {toReadDataTemplate(field.dataType.valueType.valueType)};
+                    _elem1.put(_key1, _val1);
+                  </block>
+                  iprot.readMapEnd();
+                </div>
                 case _ => <div></div>
               }
               }
@@ -715,6 +798,45 @@ class JavaClientGenerator extends CodeGenerator {
           <div>
             bean.set{field.name.charAt(0).toUpper + field.name.substring(1)}({if(field.optional) <div>Optional.of(</div>}new {field.dataType.qualifiedName}(){if(field.optional) <div>)</div>});
             new {field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().read(bean.get{field.name.charAt(0).toUpper + field.name.substring(1)}(){if(field.optional) <div>.get()</div>}, iprot);
+          </div>
+        }
+      case KIND.SET =>
+        return {
+          <div>
+            com.isuwang.org.apache.thrift.protocol.TSet _set0 = iprot.readSetBegin();
+            bean.set{field.name.charAt(0).toUpper + field.name.substring(1)}({if(field.optional) <div>Optional.of(</div>}new java.util.HashSet{lt}{gt}(_set0.size){if(field.optional) <div>)</div>});
+            for(int _i0 = 0; _i0 {lt} _set0.size; ++ _i0)<block>
+            {
+            field.dataType.valueType.kind match {
+              case KIND.BOOLEAN => <div>boolean _elem1 = iprot.readBool();</div>
+              case KIND.BYTE => <div>byte _elem1 = iprot.readByte();</div>
+              case KIND.SHORT => <div>short _elem1 = iprot.readI16();</div>
+              case KIND.LONG => <div>long _elem1 = iprot.readI64();</div>
+              case KIND.STRING => <div> String _elem1 = iprot.readString();</div>
+              case KIND.INTEGER => <div> int _elem1 = iprot.readI32();</div>
+              case KIND.DOUBLE => <div> double _elem1 = iprot.readDouble();</div>
+              case KIND.ENUM => <div>{field.dataType.valueType.qualifiedName} _elem1 = {field.dataType.valueType.qualifiedName}.findByValue(iprot.readI32());</div>
+              case KIND.STRUCT => <div>{field.dataType.valueType.qualifiedName} _elem1 = new {field.dataType.valueType.qualifiedName}();
+                new {field.dataType.valueType.qualifiedName.substring(field.dataType.valueType.qualifiedName.lastIndexOf(".")+1)}Serializer().read(_elem1, iprot);</div>
+              case KIND.DATE => <div>Long time = iprot.readI64(); java.util.Date _elem1 = new java.util.Date(time);</div>
+              case KIND.BIGDECIMAL => <div>java.math.BigDecimal _elem1 = new java.math.BigDecimal(iprot.readString());</div>
+              case KIND.BINARY => <div>ByteBuffer _elem1 = iprot.readBinary();</div>
+              case KIND.MAP => <div>
+                com.isuwang.org.apache.thrift.protocol.TMap _map1 = iprot.readMapBegin();
+                java.util.Map{lt}{toDataTypeTemplate(field.dataType.valueType.keyType)},{toDataTypeTemplate(field.dataType.valueType.valueType)}{gt} _elem1 = new java.util.HashMap{lt}{gt}();
+                for(int _i3 = 0; _i3 {lt} _map1.size; ++ _i3)<block>
+                  {toDataTypeTemplate(field.dataType.valueType.keyType)} _key1 = {toReadDataTemplate(field.dataType.valueType.keyType)};
+                  {toDataTypeTemplate(field.dataType.valueType.valueType)} _val1 = {toReadDataTemplate(field.dataType.valueType.valueType)};
+                  _elem1.put(_key1, _val1);
+                </block>
+                iprot.readMapEnd();
+              </div>
+              case _ => <div></div>
+            }
+            }
+            bean.get{field.name.charAt(0).toUpper + field.name.substring(1)}(){if(field.optional) <div>.get()</div>}.add(_elem1);
+          </block>
+            iprot.readSetEnd();
           </div>
         }
       case KIND.VOID =>
