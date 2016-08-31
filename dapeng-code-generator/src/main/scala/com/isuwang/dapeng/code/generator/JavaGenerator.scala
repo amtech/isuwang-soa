@@ -97,7 +97,7 @@ class JavaGenerator extends CodeGenerator {
 
 
       println(s"生成Codec:${service.name}Codec.java")
-      val codecTemplate = new StringTemplate(new JavaClientGenerator().toCodecTemplate(service, namespaces))
+      val codecTemplate = new StringTemplate(new JavaCodecGenerator().toCodecTemplate(service, namespaces))
       val codecWriter = new PrintWriter(new File(rootDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))), s"${service.name}Codec.java"), "UTF-8")
       codecWriter.write(codecTemplate.toString())
       codecWriter.close()
