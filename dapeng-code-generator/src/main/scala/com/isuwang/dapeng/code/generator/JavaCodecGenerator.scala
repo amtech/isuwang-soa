@@ -636,7 +636,7 @@ class JavaCodecGenerator extends CodeGenerator {
       case KIND.SET =>
         return{
           <div>
-            oprot.writeSetBegin(new com.isuwang.org.apache.thrift.protocol.TSet({toThriftDateType(dataType.valueType)}, item{index}.size()));
+            oprot.writeSetBegin(new com.isuwang.org.apache.thrift.protocol.TSet({toThriftDateType(dataType.valueType)}, elem{index}.size()));
             for({toJavaDataType(dataType.valueType)} elem{index+1} : elem{index})<block>
             {toJavaWriteElement(dataType.valueType, index+1)}
           </block>
