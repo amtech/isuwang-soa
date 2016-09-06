@@ -127,6 +127,9 @@ object Implicit {
 
   implicit class DoubleEx(value: Double) {
     def toBigDecimal = BigDecimal(value)
+    def toRoundBigDecimal = {
+      BigDecimal(value).setScale(2, BigDecimal.RoundingMode.HALF_UP);
+    }
   }
 
   implicit class JavaDoubleEx(value: java.lang.Double) {
