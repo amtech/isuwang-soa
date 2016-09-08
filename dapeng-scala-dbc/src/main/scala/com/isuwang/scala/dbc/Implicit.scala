@@ -134,6 +134,9 @@ object Implicit {
 
   implicit class JavaDoubleEx(value: java.lang.Double) {
     def toBigDecimal = BigDecimal(value)
+    def toRoundBigDecimal = {
+      BigDecimal(value).setScale(2, BigDecimal.RoundingMode.HALF_UP);
+    }
   }
 
   implicit class BeanThriftEx[O <: AnyRef](value: O) {
