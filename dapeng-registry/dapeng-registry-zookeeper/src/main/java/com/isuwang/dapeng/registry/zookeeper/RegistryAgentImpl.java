@@ -30,6 +30,7 @@ public class RegistryAgentImpl implements RegistryAgent {
 
     private final boolean isClient;
     private final ZookeeperHelper zooKeeperHelper = new ZookeeperHelper(this);
+    private ZookeeperHelper zooKeeperMasterHelper = null;
 
     private ZookeeperWatcher siw, zkfbw;
 
@@ -49,6 +50,12 @@ public class RegistryAgentImpl implements RegistryAgent {
         if (!isClient) {
             zooKeeperHelper.setZookeeperHost(SoaSystemEnvProperties.SOA_ZOOKEEPER_HOST);
             zooKeeperHelper.connect();
+
+            if (SoaSystemEnvProperties.SOA_ZOOKEEPER_MASTER_ISCONFIG) {
+                zooKeeperMasterHelper = new ZookeeperHelper(this);
+                zooKeeperMasterHelper.setZookeeperHost(SoaSystemEnvProperties.SOA_ZOOKEEPER_MASTER_HOST);
+                zooKeeperMasterHelper.connect();
+            }
         }
 
         siw = new ZookeeperWatcher(isClient, SoaSystemEnvProperties.SOA_ZOOKEEPER_HOST);
@@ -76,7 +83,11 @@ public class RegistryAgentImpl implements RegistryAgent {
             String path = "/soa/runtime/services/" + serverName + "/" + SoaSystemEnvProperties.SOA_CONTAINER_IP + ":" + SoaSystemEnvProperties.SOA_CONTAINER_PORT + ":" + versionName;
             String data = "";
             zooKeeperHelper.addOrUpdateServerInfo(path, data);
-            zooKeeperHelper.runForMaster(ZookeeperHelper.generateKey(serverName, versionName));
+
+            if (SoaSystemEnvProperties.SOA_ZOOKEEPER_MASTER_ISCONFIG)
+                zooKeeperMasterHelper.runForMaster(ZookeeperHelper.generateKey(serverName, versionName));
+            else
+                zooKeeperHelper.runForMaster(ZookeeperHelper.generateKey(serverName, versionName));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
