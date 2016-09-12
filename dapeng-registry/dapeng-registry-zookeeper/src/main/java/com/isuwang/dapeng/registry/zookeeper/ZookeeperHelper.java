@@ -184,7 +184,7 @@ public class ZookeeperHelper {
 
     /**
      * 竞选Master
-     * <p/>
+     * <p>
      * /soa/master/services/**.**.**.AccountService:1.0.0   data [192.168.99.100:9090]
      */
     public void runForMaster(String key) {
@@ -200,14 +200,12 @@ public class ZookeeperHelper {
             case OK:
                 //被选为master
                 isMaster.put((String) ctx, true);
-                LOGGER.info("{}竞选master成功, data为[{}]", (String) ctx, currentContainerAddr);
+                LOGGER.info("{}竞选master成功, master[{}]", (String) ctx, currentContainerAddr);
                 break;
             case NODEEXISTS:
-                //master节点上已存在相同的service:version，自己没选上
-                isMaster.put((String) ctx, false);
-                LOGGER.info("{}竞选master失败, data为[{}]", (String) ctx, currentContainerAddr);
-                //保持监听
-                masterExists((String) ctx);
+                //master节点上已存在相同的service:version，需检查节点的值，判断是否自己
+                LOGGER.info("{}竞选master,节点已存在,检查数据", (String) ctx);
+                checkMaster((String) ctx);
                 break;
             case NONODE:
                 LOGGER.error("{}的父节点不存在，创建失败", path);
@@ -241,8 +239,6 @@ public class ZookeeperHelper {
                 case OK:
                     if (stat == null) {
                         runForMaster((String) ctx);
-                    } else {
-                        checkMaster((String) ctx);
                     }
                     break;
                 default:
@@ -270,10 +266,15 @@ public class ZookeeperHelper {
                     return;
                 case OK:
                     String value = new String(data);
-                    if (value.equals(currentContainerAddr))
+                    if (value.equals(currentContainerAddr)) {
+                        LOGGER.info("{}竞选master成功, master[{}]", (String) ctx, value);
                         isMaster.put((String) ctx, true);
-                    else
+                    } else {
+                        LOGGER.info("{}竞选master失败, master[{}]", (String) ctx, value);
                         isMaster.put((String) ctx, false);
+                        //保持监听
+                        masterExists((String) ctx);
+                    }
                     return;
             }
 
