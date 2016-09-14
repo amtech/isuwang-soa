@@ -1,8 +1,8 @@
-package com.isuwang.dapeng.container.message;
+package com.isuwang.dapeng.message.consumer.kafka;
 
-import com.isuwang.dapeng.container.util.LoggerUtil;
 import com.isuwang.dapeng.core.SoaProcessFunction;
 import com.isuwang.dapeng.core.TBeanSerializer;
+import com.isuwang.dapeng.message.consumer.api.context.ConsumerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ConsumerExecutor {
 
-    private static final Logger logger = LoggerFactory.getLogger(LoggerUtil.KAFKA_CONSUMER_LOG);
+    private static final Logger logger = LoggerFactory.getLogger("container.kafka.consumer");
 
     private static ExecutorService executorService = Executors.newFixedThreadPool(10, new DefaultThreadFactory("MessageConsumerExecutor"));
 

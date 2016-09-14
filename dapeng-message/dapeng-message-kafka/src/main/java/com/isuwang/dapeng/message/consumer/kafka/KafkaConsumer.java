@@ -1,7 +1,7 @@
-package com.isuwang.dapeng.container.message;
+package com.isuwang.dapeng.message.consumer.kafka;
 
-import com.isuwang.dapeng.container.util.LoggerUtil;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
+import com.isuwang.dapeng.message.consumer.api.context.ConsumerContext;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
@@ -16,7 +16,7 @@ import java.util.*;
  */
 public class KafkaConsumer extends Thread {
 
-    private static final Logger logger = LoggerFactory.getLogger(LoggerUtil.KAFKA_CONSUMER_LOG);
+    private static final Logger logger = LoggerFactory.getLogger("container.kafka.consumer");
 
     private List<ConsumerContext> customers = new ArrayList<>();
 

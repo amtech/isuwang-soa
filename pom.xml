@@ -51,6 +51,7 @@
         <module>dapeng-scala-dbc</module>
         <module>dapeng-route</module>
         <module>dapeng-tools</module>
+        <module>dapeng-message</module>
     </modules>
 
     <properties>
