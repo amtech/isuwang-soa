@@ -1,7 +1,5 @@
 package com.isuwang.dapeng.message.consumer.kafka;
 
-import com.isuwang.dapeng.core.message.MessageConsumer;
-import com.isuwang.dapeng.core.message.MessageConsumerAction;
 import com.isuwang.dapeng.message.consumer.api.context.ConsumerContext;
 import com.isuwang.dapeng.message.consumer.api.service.MessageConsumerService;
 
@@ -19,15 +17,14 @@ public class MessageConsumerServiceImpl implements MessageConsumerService {
     @Override
     public void addConsumer(ConsumerContext context) {
 
-        MessageConsumer messageConsumer = context.getConsumer();
-        MessageConsumerAction annotation = context.getAction();
+        String groupId = context.getGroupId();
+        String topic = context.getTopic();
+
         Class<?> ifaceClass = context.getIface().getClass();
 
         try {
-            String className = context.getIface() instanceof Proxy ? ((Class)ifaceClass.getMethod("getTargetClass").invoke(context.getIface())).getName() : ifaceClass.getName();
-            String groupId = "".equals(messageConsumer.groupId()) ? className : ifaceClass.getName();
-            messageConsumer.groupId();
-            String topic = annotation.topic();
+            String className = context.getIface() instanceof Proxy ? ((Class) ifaceClass.getMethod("getTargetClass").invoke(context.getIface())).getName() : ifaceClass.getName();
+            groupId = "".equals(groupId) ? className : ifaceClass.getName();
             String consumerKey = groupId + ":" + topic;
 
             if (topicConsumers.containsKey(consumerKey)) {

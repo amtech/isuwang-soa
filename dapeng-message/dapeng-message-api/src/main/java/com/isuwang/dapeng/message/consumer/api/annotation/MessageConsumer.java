@@ -1,4 +1,4 @@
-package com.isuwang.dapeng.core.message;
+package com.isuwang.dapeng.message.consumer.api.annotation;
 
 import java.lang.annotation.*;
 

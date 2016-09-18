@@ -2,8 +2,6 @@ package com.isuwang.dapeng.message.consumer.api.context;
 
 import com.isuwang.dapeng.core.SoaProcessFunction;
 import com.isuwang.dapeng.core.TBeanSerializer;
-import com.isuwang.dapeng.core.message.MessageConsumer;
-import com.isuwang.dapeng.core.message.MessageConsumerAction;
 
 
 /**
@@ -31,22 +29,42 @@ public class ConsumerContext {
         this.soaProcessFunction = soaProcessFunction;
     }
 
-    MessageConsumerAction action;
-    MessageConsumer consumer;
+    Object action;
+    Object consumer;
 
-    public MessageConsumerAction getAction() {
+    public Object getAction() {
         return action;
     }
 
-    public void setAction(MessageConsumerAction action) {
+    public void setAction(Object action) {
         this.action = action;
     }
 
-    public MessageConsumer getConsumer() {
+    public Object getConsumer() {
         return consumer;
     }
 
-    public void setConsumer(MessageConsumer consumer) {
+    public void setConsumer(Object consumer) {
         this.consumer = consumer;
+    }
+
+    String groupId;
+
+    String topic;
+
+    public String getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(String groupId) {
+        this.groupId = groupId;
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
     }
 }
