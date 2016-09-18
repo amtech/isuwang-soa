@@ -88,7 +88,8 @@
                                     <overWriteSnapshots>false</overWriteSnapshots>
                                     <overWriteIfNewer>true</overWriteIfNewer>
                                     <excludeArtifactIds>
-                                        dapeng-core,slf4j-api,logback-classic,logback-core,janino,commons-compiler,dapeng-transaction-api,gson
+                                        dapeng-core,slf4j-api,logback-classic,logback-core,janino,commons-compiler,dapeng-transaction-api,gson,
+                                        dapeng-message-api,dapeng-message-kafka,kafka_2.11,kafka-clients,jopt-simple,metrics-core
                                     </excludeArtifactIds>
                                 </configuration>
                             </execution>
@@ -110,6 +111,7 @@
                                     <tasks>
                                         <mkdir dir="${project.build.directory}/${devName}/apps"/>
                                         <mkdir dir="${project.build.directory}/${devName}/logs"/>
+                                        <mkdir dir="${project.build.directory}/${devName}/plugin"/>
                                     </tasks>
                                 </configuration>
                             </execution>
@@ -197,12 +199,6 @@
             <artifactId>dapeng-message-kafka</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-        <!--<dependency>-->
-            <!--<groupId>org.apache.kafka</groupId>-->
-            <!--<artifactId>kafka_2.11</artifactId>-->
-            <!--<version>0.8.2.1</version>-->
-        <!--</dependency>-->
 
         <dependency>
             <groupId>org.quartz-scheduler</groupId>

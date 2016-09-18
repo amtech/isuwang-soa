@@ -17,4 +17,5 @@ public class ClassLoaderManager {
 
     public static List<AppClassLoader> appClassLoaders = new ArrayList<>();
 
+    public static List<PluginClassLoader> pluginClassLoaders = new ArrayList<>();
 }
