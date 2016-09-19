@@ -2,9 +2,12 @@ package com.isuwang.dapeng.container.plugin;
 
 import com.isuwang.dapeng.container.Container;
 import com.isuwang.dapeng.container.spring.SpringContainer;
+import com.isuwang.dapeng.core.xml.container.DapengPluginContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.xml.bind.JAXB;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -22,10 +25,11 @@ public class PluginContainer implements Container {
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 
         for (ClassLoader pluginClassLoader : SpringContainer.pluginClassLoaders) {
-            try {
-//               pluginClassLoader.getResourceAsStream("container.xml");
-                String containerRef = "com.isuwang.dapeng.message.consumer.container.KafkaMessageContainer";
-                Class<?> containerClass = pluginClassLoader.loadClass(containerRef);
+            try (InputStream is = pluginClassLoader.getResourceAsStream("dapeng-plugin-container.xml")) {
+
+                final DapengPluginContainer pluginContainer = JAXB.unmarshal(is, DapengPluginContainer.class);
+
+                Class<?> containerClass = pluginClassLoader.loadClass(pluginContainer.getRef());
 
                 Field contextField = containerClass.getField("contexts");
                 contextField.set(containerClass, SpringContainer.getContexts());
@@ -35,6 +39,7 @@ public class PluginContainer implements Container {
                 Thread.currentThread().setContextClassLoader(pluginClassLoader);
                 Method startMethod = containerClass.getMethod("start");
                 startMethod.invoke(containerObj);
+
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             }
