@@ -29,9 +29,9 @@ import java.util.*;
  * @author Eric on 2016/2/15.
  */
 public class RequestHelper {
-    private static final String SERVICENAME="serviceName";
-    private static final String VERSION="version";
-    private static final String METHODNAME="methodName";
+    private static final String SERVICENAME = "serviceName";
+    private static final String VERSION = "version";
+    private static final String METHODNAME = "methodName";
 
     private static final String TAGSTART = "<%s>";
     private static final String TAGEND = "</%s>";
@@ -63,7 +63,7 @@ public class RequestHelper {
         invokeService(header, parameter, isJson);
     }
 
-    private static SoaHeader constructHeader(JsonObject jsonObject){
+    public static SoaHeader constructHeader(JsonObject jsonObject) {
 
         String serviceName = jsonObject.get(SERVICENAME).getAsString();
         String versionName = jsonObject.get(VERSION).getAsString();
@@ -95,14 +95,14 @@ public class RequestHelper {
     }
 
 
-    private static void invokeService(SoaHeader header, String parameter, boolean isJson) {
+    public static String invokeService(SoaHeader header, String parameter, boolean isJson) {
 
         System.out.println("Getting service from server...");
         Service service = ServiceCache.getService(header.getServiceName(), header.getVersionName());
 
         if (service == null) {
-            System.out.println("没有找到可用服务");
-            return;
+            System.out.println("无可用服务");
+            return "{\"message\":\"无可用服务\"}";
         }
 
         System.out.println("Getting caller Info ...");
@@ -116,8 +116,8 @@ public class RequestHelper {
             jsonPost = new JSONPost(SoaSystemEnvProperties.SOA_SERVICE_IP, SoaSystemEnvProperties.SOA_SERVICE_PORT, true);
 
         } else {
-            System.out.println("{\"message\":\"没找到可用服务\"}");
-            return;
+            System.out.println("{\"message\":\"无可用服务\"}");
+            return "{\"message\":\"无可用服务\"}";
         }
 
         try {
@@ -126,6 +126,7 @@ public class RequestHelper {
             String response = jsonPost.callServiceMethod(header, parameter, service);
             if (isJson) {
                 System.out.println(response);
+                return response;
             } else {
                 JsonObject jsonObject = new JsonParser().parse(response).getAsJsonObject();
                 StringBuffer xmlBuf = new StringBuffer();
@@ -133,10 +134,14 @@ public class RequestHelper {
                 parseFromJsonToXml(xmlBuf, jsonObject);
                 xmlBuf.append("</soaResponse>");
                 printPrettyXml(xmlBuf);
+
+                return xmlBuf.toString();
             }
         } catch (Exception e) {
             e.printStackTrace();
+            return "{\"message\":\"" + e.getMessage() + "\"}";
         }
+
     }
 
     private static void printPrettyXml(StringBuffer xmlBuf) throws DocumentException, IOException {
@@ -178,7 +183,7 @@ public class RequestHelper {
                 xmlTemp.append(String.format(TAGEND, tag)).append("\n");
                 sbxml.append(xmlTemp);
             } else if (innerEl.isJsonPrimitive()) {
-                xmlTemp.append(String.format(TAGSTART+"%s"+TAGEND, tag, innerEl.getAsJsonPrimitive(), tag)).append("\n");
+                xmlTemp.append(String.format(TAGSTART + "%s" + TAGEND, tag, innerEl.getAsJsonPrimitive(), tag)).append("\n");
                 sbxml.append(xmlTemp);
             } else if (innerEl.isJsonNull()) {
                 xmlTemp.append(String.format(TAGEMPTY, tag));
