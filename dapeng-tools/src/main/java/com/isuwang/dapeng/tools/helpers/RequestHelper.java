@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.isuwang.dapeng.core.SoaHeader;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
+import com.isuwang.dapeng.core.helper.SoaHeaderHelper;
 import com.isuwang.dapeng.core.metadata.Service;
 import com.isuwang.dapeng.remoting.fake.json.JSONPost;
 import com.isuwang.dapeng.remoting.filter.LoadBalanceFilter;
@@ -68,7 +69,7 @@ public class RequestHelper {
         String serviceName = jsonObject.get(SERVICENAME).getAsString();
         String versionName = jsonObject.get(VERSION).getAsString();
         String methodName = jsonObject.get(METHODNAME).getAsString();
-        SoaHeader header = new SoaHeader();
+        SoaHeader header = SoaHeaderHelper.getSoaHeader(true);
         header.setServiceName(serviceName);
         header.setVersionName(versionName);
         header.setMethodName(methodName);
