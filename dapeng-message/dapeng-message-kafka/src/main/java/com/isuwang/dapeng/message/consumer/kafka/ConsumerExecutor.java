@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -31,6 +33,19 @@ public class ConsumerExecutor {
         SoaProcessFunction<Object, Object, Object, ? extends TBeanSerializer<Object>, ? extends TBeanSerializer<Object>> soaProcessFunction = customer.getSoaProcessFunction();
         Object iface = customer.getIface();
 
+        long count = new ArrayList<>(Arrays.asList(iface.getClass().getInterfaces()))
+                .stream()
+                .filter(m -> m.getName().equals("org.springframework.aop.framework.Advised"))
+                .count();
+
+        Class<?> ifaceClass;
+        try {
+            ifaceClass = (Class) (count > 0 ? iface.getClass().getMethod("getTargetClass").invoke(iface) : iface.getClass());
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            ifaceClass = iface.getClass();
+        }
+
         Object args = soaProcessFunction.getEmptyArgsInstance();
         Field field = args.getClass().getDeclaredFields()[0];
         field.setAccessible(true);//暴力访问，取消私有权限,让对象可以访问
@@ -39,11 +54,11 @@ public class ConsumerExecutor {
         try {
             field.set(args, buf);
 
-            logger.info("{}收到kafka消息，执行{}方法", iface.getClass().getName(), soaProcessFunction.getMethodName());
+            logger.info("{}收到kafka消息，执行{}方法", ifaceClass.getName(), soaProcessFunction.getMethodName());
             soaProcessFunction.getResult(iface, args);
-            logger.info("{}收到kafka消息，执行{}方法完成", iface.getClass().getName(), soaProcessFunction.getMethodName());
+            logger.info("{}收到kafka消息，执行{}方法完成", ifaceClass.getName(), soaProcessFunction.getMethodName());
         } catch (Exception e) {
-            logger.error("{}收到kafka消息，执行{}方法异常", iface.getClass().getName(), soaProcessFunction.getMethodName());
+            logger.error("{}收到kafka消息，执行{}方法异常", ifaceClass.getName(), soaProcessFunction.getMethodName());
             logger.error(e.getMessage(), e);
         }
     }
