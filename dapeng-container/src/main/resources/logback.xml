@@ -73,16 +73,16 @@
         </filter>
     </appender>
 
-    <appender name="KAFKACONSUMER" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <prudent>true</prudent>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${soa.base}/logs/kafka-consumer.%d{yyyy-MM-dd}.log</fileNamePattern>
-            <maxHistory>30</maxHistory>
-        </rollingPolicy>
-        <encoder>
-            <pattern>%d{MM-dd HH:mm:ss SSS} %t %p - %m%n</pattern>
-        </encoder>
-    </appender>
+    <!--<appender name="KAFKACONSUMER" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+        <!--<prudent>true</prudent>-->
+        <!--<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">-->
+            <!--<fileNamePattern>${soa.base}/logs/kafka-consumer.%d{yyyy-MM-dd}.log</fileNamePattern>-->
+            <!--<maxHistory>30</maxHistory>-->
+        <!--</rollingPolicy>-->
+        <!--<encoder>-->
+            <!--<pattern>%d{MM-dd HH:mm:ss SSS} %t %p - %m%n</pattern>-->
+        <!--</encoder>-->
+    <!--</appender>-->
 
     <appender name="SCHEDULEDTASK" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <prudent>true</prudent>
@@ -95,10 +95,10 @@
         </encoder>
     </appender>
 
-    <logger name="container.kafka.consumer" additivity="true">
-        <level value="INFO"/>
-        <appender-ref ref="KAFKACONSUMER"/>
-    </logger>
+    <!--<logger name="container.kafka.consumer" additivity="true">-->
+        <!--<level value="INFO"/>-->
+        <!--<appender-ref ref="KAFKACONSUMER"/>-->
+    <!--</logger>-->
 
     <logger name="container.scheduled.task" additivity="true">
         <level value="INFO"/>

@@ -16,7 +16,7 @@ import java.util.*;
  */
 public class KafkaConsumer extends Thread {
 
-    private static final Logger logger = LoggerFactory.getLogger("container.kafka.consumer");
+    private static final Logger logger = LoggerFactory.getLogger(KafkaConsumer.class);
 
     private List<ConsumerContext> customers = new ArrayList<>();
 

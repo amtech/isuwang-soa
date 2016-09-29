@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ConsumerExecutor {
 
-    private static final Logger logger = LoggerFactory.getLogger("container.kafka.consumer");
+    private static final Logger logger = LoggerFactory.getLogger(ConsumerExecutor.class);
 
     private static ExecutorService executorService = Executors.newFixedThreadPool(10, new DefaultThreadFactory("MessageConsumerExecutor"));
 
