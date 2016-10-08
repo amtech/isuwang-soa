@@ -324,7 +324,14 @@ class JavaGenerator extends CodeGenerator {
             /**
             *{field.doc}
             **/
-            {if(field.isPrivacy)  <div>private</div> else <div>public</div>} {if(field.isOptional) <div>Optional{lt}</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>{gt}</div>} {field.name} {if(field.isOptional) <div>= Optional.empty()</div>};
+            {if(field.isPrivacy)  <div>private</div> else <div>public</div>} {if(field.isOptional) <div>Optional{lt}</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>{gt}</div>} {field.name} {if(field.isOptional) <div>= Optional.empty()</div> else {
+            field.dataType.kind match {
+              case KIND.LIST => <div>= new java.util.ArrayList()</div>
+              case KIND.SET => <div>= new java.util.HashSet{lt}{gt}()</div>
+              case KIND.MAP => <div>= new java.util.HashMap{lt}{gt}()</div>
+              case _ => <div></div>
+            }
+          }};
             public {if(field.isOptional) <div>Optional{lt}</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>{gt}</div>} get{field.name.charAt(0).toUpper + field.name.substring(1)}()<block> return this.{field.name}; </block>
             public void set{field.name.charAt(0).toUpper + field.name.substring(1)}({if(field.isOptional) <div>Optional{lt}</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>{gt}</div>} {field.name})<block> this.{field.name} = {field.name}; </block>
 
