@@ -1,10 +1,7 @@
 package com.isuwang.dapeng.maven.plugin;
 
 import com.isuwang.dapeng.bootstrap.Bootstrap;
-import com.isuwang.dapeng.bootstrap.classloader.AppClassLoader;
-import com.isuwang.dapeng.bootstrap.classloader.ClassLoaderManager;
-import com.isuwang.dapeng.bootstrap.classloader.PlatformClassLoader;
-import com.isuwang.dapeng.bootstrap.classloader.ShareClassLoader;
+import com.isuwang.dapeng.bootstrap.classloader.*;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -60,38 +57,36 @@ public class RunContainerPlugin extends SoaAbstractMojo {
 
                     if (removeServiceProjectArtifact(iterator, url)) continue;
                 }
+//                List<URL> pluginUrls = new ArrayList<>(Arrays.asList(urls));
+//                iterator = pluginUrls.iterator();
+//                while (iterator.hasNext()) {
+//                    URL url = iterator.next();
+//                    if (url.getFile().matches("^.*/dapeng-transaction-impl.*\\.jar$")) {
+//                        iterator.remove();
+//                        continue;
+//                    }
+//                    if (removeContainerAndBootstrap(iterator, url)) continue;
+//                    if (removeServiceProjectArtifact(iterator, url)) continue;
+//                }
 
                 List<URL> appUrls = new ArrayList<>(Arrays.asList(urls));
                 iterator = appUrls.iterator();
                 while (iterator.hasNext()) {
                     URL url = iterator.next();
-
                     if (removeContainerAndBootstrap(iterator, url)) continue;
-
-                    //if (url.getFile().matches("^.*/isuwang-soa-transaction.*\\.jar$")) {
-                    //    iterator.remove();
-                    //
-                    //    continue;
-                    //}
                 }
 
                 List<URL> platformUrls = new ArrayList<>(Arrays.asList(urls));
                 iterator = platformUrls.iterator();
                 while (iterator.hasNext()) {
                     URL url = iterator.next();
-
-                    //if (url.getFile().matches("^.*/isuwang-soa-transaction.*\\.jar$")) {
-                    //   iterator.remove();
-                    //
-                    //    continue;
-                    //}
-
                     if (removeServiceProjectArtifact(iterator, url)) continue;
                 }
 
                 ClassLoaderManager.shareClassLoader = new ShareClassLoader(shareUrls.toArray(new URL[shareUrls.size()]));
                 ClassLoaderManager.platformClassLoader = new PlatformClassLoader(platformUrls.toArray(new URL[platformUrls.size()]));
                 ClassLoaderManager.appClassLoaders.add(new AppClassLoader(appUrls.toArray(new URL[appUrls.size()])));
+                ClassLoaderManager.pluginClassLoaders.add(new PluginClassLoader(shareUrls.toArray(new URL[shareUrls.size()])));
 
                 Bootstrap.main(new String[]{});
             } catch (Exception e) {

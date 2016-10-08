@@ -1,9 +1,6 @@
 package com.isuwang.dapeng.bootstrap;
 
-import com.isuwang.dapeng.bootstrap.classloader.AppClassLoader;
-import com.isuwang.dapeng.bootstrap.classloader.ClassLoaderManager;
-import com.isuwang.dapeng.bootstrap.classloader.PlatformClassLoader;
-import com.isuwang.dapeng.bootstrap.classloader.ShareClassLoader;
+import com.isuwang.dapeng.bootstrap.classloader.*;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -25,6 +22,7 @@ public class Bootstrap {
     private static final List<URL> shareURLs = new ArrayList<>();
     private static final List<URL> platformURLs = new ArrayList<>();
     private static final List<List<URL>> appURLs = new ArrayList<>();
+    private static final List<List<URL>> pluginURLs = new ArrayList<>();
     private static final String enginePath = System.getProperty("soa.base", new File(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent());
     private static final String soaRunMode = System.getProperty("soa.run.mode", "maven");
 
@@ -53,6 +51,10 @@ public class Bootstrap {
             Class<?> springContainerClass = ClassLoaderManager.platformClassLoader.loadClass("com.isuwang.dapeng.container.spring.SpringContainer");
             Field appClassLoaderField = springContainerClass.getField("appClassLoaders");
             appClassLoaderField.set(springContainerClass, ClassLoaderManager.appClassLoaders);
+
+            Field pluginClassLoaderField = springContainerClass.getField("pluginClassLoaders");
+            pluginClassLoaderField.set(springContainerClass, ClassLoaderManager.pluginClassLoaders);
+
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (NoSuchFieldException e) {
@@ -76,8 +78,12 @@ public class Bootstrap {
 
         for (List<URL> appURL : appURLs) {
             AppClassLoader appClassLoader = new AppClassLoader(appURL.toArray(new URL[appURL.size()]));
-
             ClassLoaderManager.appClassLoaders.add(appClassLoader);
+        }
+
+        for (List<URL> pluginURL : pluginURLs) {
+            PluginClassLoader pluginClassLoader = new PluginClassLoader(pluginURL.toArray(new URL[pluginURL.size()]));
+            ClassLoaderManager.pluginClassLoaders.add(pluginClassLoader);
         }
     }
 
@@ -87,7 +93,6 @@ public class Bootstrap {
         platformURLs.addAll(findJarURLs(new File(enginePath, "bin/lib")));
 
         final File appsPath = new File(enginePath, "apps");
-
         if (appsPath.exists() && appsPath.isDirectory()) {
             final File[] files = appsPath.listFiles();
 
@@ -103,6 +108,23 @@ public class Bootstrap {
                     appURLs.add(urlList);
             }
         }
+
+
+        final File pluginPath = new File(enginePath, "plugin");
+        if (pluginPath.exists() && pluginPath.isDirectory()) {
+            final File[] files = pluginPath.listFiles();
+            for (File file : files) {
+                final List<URL> urlList = new ArrayList<>();
+                if (file.isDirectory()) {
+                    urlList.addAll(findJarURLs(file));
+                } else if (file.isFile() && file.getName().endsWith(".jar")) {
+                    urlList.add(file.toURI().toURL());
+                }
+                if (!urlList.isEmpty())
+                    pluginURLs.add(urlList);
+            }
+        }
+
     }
 
     private static List<URL> findJarURLs(File file) throws MalformedURLException {

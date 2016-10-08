@@ -23,6 +23,7 @@ public class SpringContainer implements Container {
     public static final String DEFAULT_SPRING_CONFIG = "META-INF/spring/services.xml";
 
     public static List<ClassLoader> appClassLoaders = new ArrayList<>();
+    public static List<ClassLoader> pluginClassLoaders = new ArrayList<>();
 
     static Map<Object, Class<?>> contexts;
 
@@ -51,7 +52,7 @@ public class SpringContainer implements Container {
                     URL nextElement = resources.nextElement();
 
                     // not load isuwang-soa-transaction-impl
-                    if(!nextElement.getFile().matches(".*dapeng-transaction-impl.*"))
+                    if (!nextElement.getFile().matches(".*dapeng-transaction-impl.*"))
                         xmlPaths.add(nextElement.toString());
                 }
 

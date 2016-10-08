@@ -31,3 +31,4 @@ cd ${enginedir}
 mvn clean package -Pdev
 
 cp ${enginedir}/target/dapeng-bootstrap*.jar ${containerdir}/target/dapeng-container/bin/
+cp -rf ${soaparentdir}/dapeng-message/dapeng-message-kafka/target/dapeng-message-kafka ${containerdir}/target/dapeng-container/plugin/

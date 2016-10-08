@@ -12,4 +12,6 @@ public class LoggerUtil {
 
     public static final String SLOWTIME_LOG = "container.slowtime.log";
 
+    public static final String SCHEDULED_TASK = "container.scheduled.task";
+
 }

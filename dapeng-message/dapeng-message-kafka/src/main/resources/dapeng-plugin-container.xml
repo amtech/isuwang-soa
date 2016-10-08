@@ -1,0 +1,1 @@
+<dapeng-plugin-container name="kafkaMessageContainer" ref="com.isuwang.dapeng.message.consumer.container.KafkaMessageContainer" />
