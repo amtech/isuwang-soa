@@ -22,7 +22,7 @@ public class ConsumerExecutor {
 
     private static final Logger logger = LoggerFactory.getLogger(ConsumerExecutor.class);
 
-    private static ExecutorService executorService = Executors.newFixedThreadPool(10, new DefaultThreadFactory("MessageConsumerExecutor"));
+    private static ExecutorService executorService = Executors.newFixedThreadPool(1, new DefaultThreadFactory("MessageConsumerExecutor"));
 
     public static void doAction(ConsumerContext customer, byte[] message) {
         executorService.execute(() -> work(customer, message));
