@@ -47,8 +47,14 @@ public class KafkaMessageContainer {
 
                     Class<?> ifaceClass = (Class) (count > 0 ? processor.getIface().getClass().getMethod("getTargetClass").invoke(processor.getIface()) : processor.getIface().getClass());
 
-                    Class MessageConsumerClass = ifaceClass.getClassLoader().loadClass("com.isuwang.dapeng.message.consumer.api.annotation.MessageConsumer");
-                    Class MessageConsumerActionClass = ifaceClass.getClassLoader().loadClass("com.isuwang.dapeng.message.consumer.api.annotation.MessageConsumerAction");
+                    Class MessageConsumerClass = null;
+                    Class MessageConsumerActionClass = null;
+                    try {
+                        MessageConsumerClass = ifaceClass.getClassLoader().loadClass("com.isuwang.dapeng.message.consumer.api.annotation.MessageConsumer");
+                        MessageConsumerActionClass = ifaceClass.getClassLoader().loadClass("com.isuwang.dapeng.message.consumer.api.annotation.MessageConsumerAction");
+                    } catch (ClassNotFoundException e) {
+                        break;
+                    }
 
                     if (ifaceClass.isAnnotationPresent(MessageConsumerClass)) {
 
