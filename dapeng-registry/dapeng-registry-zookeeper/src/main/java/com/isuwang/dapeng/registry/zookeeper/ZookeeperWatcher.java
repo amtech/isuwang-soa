@@ -251,6 +251,10 @@ public class ZookeeperWatcher {
 
         String servicePath = serviceRoute + "/" + serviceName;
         try {
+
+            if (zk == null)
+                init();
+
             List<String> children = zk.getChildren(servicePath, watchedEvent -> {
                 if (watchedEvent.getType() == Watcher.Event.EventType.NodeChildrenChanged) {
                     LOGGER.info("{}子节点发生变化，重新获取信息", watchedEvent.getPath());
