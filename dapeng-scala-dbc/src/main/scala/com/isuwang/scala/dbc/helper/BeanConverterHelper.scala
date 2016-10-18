@@ -104,7 +104,7 @@ object BeanConverterHelper {
               case ClassOfSQLTimestamp => srcValue.asInstanceOf[java.sql.Timestamp].getTime.toInt
               case ClassOfTEnum => srcValue.asInstanceOf[TEnum].getValue
               case ClassOfOption => srcValue.asInstanceOf[scala.Option[Int]].get
-              case ClassOfJavaOption => srcValue.asInstanceOf[java.util.Optional[Int]].get
+              case ClassOfJavaOption => if (srcValue.asInstanceOf[java.util.Optional].isPresent) srcValue.asInstanceOf[java.util.Optional[Int]].get else if(setDefaultValForNull) java.lang.Integer.valueOf("0") else null
               case _ => if (ClassOfTEnum.isAssignableFrom(srcFieldType)) srcValue.asInstanceOf[TEnum].getValue
             }
           else if (setDefaultValForNull) java.lang.Integer.valueOf("0")
@@ -118,7 +118,7 @@ object BeanConverterHelper {
               case ClassOfSQLTime => srcValue.asInstanceOf[java.sql.Time].getTime
               case ClassOfSQLTimestamp => srcValue.asInstanceOf[java.sql.Timestamp].getTime
               case ClassOfOption => srcValue.asInstanceOf[scala.Option[Long]].get
-              case ClassOfJavaOption => srcValue.asInstanceOf[java.util.Optional[Long]].get
+              case ClassOfJavaOption => if (srcValue.asInstanceOf[java.util.Optional].isPresent) srcValue.asInstanceOf[java.util.Optional[Long]].get else if(setDefaultValForNull) java.lang.Long.valueOf("0") else null
               case _ => null
             }
           else if (setDefaultValForNull) java.lang.Long.valueOf("0")
