@@ -10,8 +10,8 @@ import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.TMessage;
 import com.isuwang.org.apache.thrift.protocol.TMessageType;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author craneding
  * @date 16/1/12
  */
-public class SoaServerHandler extends ChannelHandlerAdapter {
+public class SoaServerHandler extends ChannelInboundHandlerAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(SoaServerHandler.class);
     private static final Logger SIMPLE_LOGGER = LoggerFactory.getLogger(LoggerUtil.SIMPLE_LOG);
 

@@ -21,7 +21,7 @@ public class TSoaTransport extends TTransport {
     private final ByteBuf byteBuf;
 
     public TSoaTransport(ByteBuf byteBuf) {
-        this.byteBuf = byteBuf.order(ByteOrder.BIG_ENDIAN);
+        this.byteBuf = byteBuf;
 
         beginIndex = byteBuf.readerIndex();
     }

@@ -2,6 +2,7 @@ package com.isuwang.dapeng.remoting.netty;
 
 import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
@@ -10,7 +11,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by tangliu on 2016/1/14.
  */
-public class SoaIdleHandler extends ChannelHandlerAdapter {
+public class SoaIdleHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SoaIdleHandler.class);
 
