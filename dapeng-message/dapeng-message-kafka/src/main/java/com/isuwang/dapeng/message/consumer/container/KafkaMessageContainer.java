@@ -53,6 +53,7 @@ public class KafkaMessageContainer {
                         MessageConsumerClass = ifaceClass.getClassLoader().loadClass("com.isuwang.dapeng.message.consumer.api.annotation.MessageConsumer");
                         MessageConsumerActionClass = ifaceClass.getClassLoader().loadClass("com.isuwang.dapeng.message.consumer.api.annotation.MessageConsumerAction");
                     } catch (ClassNotFoundException e) {
+                        LOGGER.info("({})添加消息订阅失败:{}", ifaceClass.getName(), e.getMessage());
                         break;
                     }
 
