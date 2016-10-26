@@ -38,6 +38,7 @@ object Implicit {
         case s: String => s.isEmpty
         case map: java.util.Map[_, _] => map.isEmpty
         case opt: java.util.Optional[_] => !opt.isPresent
+        case l: java.util.List[_] => l.isEmpty
         case _ => false
       }
 
