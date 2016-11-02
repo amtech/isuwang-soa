@@ -1,6 +1,8 @@
 package com.isuwang.dapeng.message.consumer.kafka;
 
+import com.isuwang.dapeng.core.SoaProcessFunction;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
+import com.isuwang.dapeng.core.TBeanSerializer;
 import com.isuwang.dapeng.message.consumer.api.context.ConsumerContext;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
@@ -9,6 +11,8 @@ import kafka.javaapi.consumer.ConsumerConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
 import java.util.*;
 
 /**
@@ -57,7 +61,7 @@ public class KafkaConsumer extends Thread {
     public void run() {
 
         try {
-            logger.info("[KafkaConsumer] [run] ");
+            logger.info("[KafkaConsumer][{}][run] ", groupId + ":" + topic);
 
             Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
             topicCountMap.put(topic, new Integer(1));
@@ -71,7 +75,7 @@ public class KafkaConsumer extends Thread {
                 receive(it.next().message());
             }
         } catch (Exception e) {
-            logger.error("[KafkaConsumer] [run] " + e.getMessage(), e);
+            logger.error("[KafkaConsumer][{}][run] " + e.getMessage(), groupId + ":" + topic, e);
         }
     }
 
@@ -85,7 +89,7 @@ public class KafkaConsumer extends Thread {
 
         logger.info("KafkaConsumer groupId({}) topic({}) 收到消息", groupId, topic);
         for (ConsumerContext customer : customers) {
-            ConsumerExecutor.doAction(customer, message);
+           dealMessage(customer, message);
         }
     }
 
@@ -104,6 +108,42 @@ public class KafkaConsumer extends Thread {
 
     public void setCustomers(List<ConsumerContext> customers) {
         this.customers = customers;
+    }
+
+
+    private void dealMessage(ConsumerContext customer, byte[] message) {
+
+        SoaProcessFunction<Object, Object, Object, ? extends TBeanSerializer<Object>, ? extends TBeanSerializer<Object>> soaProcessFunction = customer.getSoaProcessFunction();
+        Object iface = customer.getIface();
+
+        long count = new ArrayList<>(Arrays.asList(iface.getClass().getInterfaces()))
+                .stream()
+                .filter(m -> m.getName().equals("org.springframework.aop.framework.Advised"))
+                .count();
+
+        Class<?> ifaceClass;
+        try {
+            ifaceClass = (Class) (count > 0 ? iface.getClass().getMethod("getTargetClass").invoke(iface) : iface.getClass());
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            ifaceClass = iface.getClass();
+        }
+
+        Object args = soaProcessFunction.getEmptyArgsInstance();
+        Field field = args.getClass().getDeclaredFields()[0];
+        field.setAccessible(true);//暴力访问，取消私有权限,让对象可以访问
+
+        ByteBuffer buf = ByteBuffer.wrap(message);
+        try {
+            field.set(args, buf);
+
+            logger.info("{}收到kafka消息，执行{}方法", ifaceClass.getName(), soaProcessFunction.getMethodName());
+            soaProcessFunction.getResult(iface, args);
+            logger.info("{}收到kafka消息，执行{}方法完成", ifaceClass.getName(), soaProcessFunction.getMethodName());
+        } catch (Exception e) {
+            logger.error("{}收到kafka消息，执行{}方法异常", ifaceClass.getName(), soaProcessFunction.getMethodName());
+            logger.error(e.getMessage(), e);
+        }
     }
 
 }
