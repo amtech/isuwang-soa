@@ -35,9 +35,9 @@ public class KafkaConsumer extends Thread {
     private String zookeeperConnect = SoaSystemEnvProperties.SOA_ZOOKEEPER_KAFKA_HOST;
 
     protected ConsumerConnector consumer;
-    protected final static String ZookeeperSessionTimeoutMs = "40000";
-    protected final static String ZookeeperSyncTimeMs = "200";
-    protected final static String AutoCommitIntervalMs = "1000";
+//    protected final static String ZookeeperSessionTimeoutMs = "40000";
+//    protected final static String ZookeeperSyncTimeMs = "200";
+//    protected final static String AutoCommitIntervalMs = "1000";
 
     public void init() {
 
@@ -50,9 +50,9 @@ public class KafkaConsumer extends Thread {
         props.put("zookeeper.connect", zookeeperConnect);
         props.put("group.id", groupId);
 
-        props.put("zookeeper.session.timeout.ms", ZookeeperSessionTimeoutMs);
-        props.put("zookeeper.sync.time.ms", ZookeeperSyncTimeMs);
-        props.put("auto.commit.interval.ms", AutoCommitIntervalMs);
+//        props.put("zookeeper.session.timeout.ms", ZookeeperSessionTimeoutMs);
+//        props.put("zookeeper.sync.time.ms", ZookeeperSyncTimeMs);
+//        props.put("auto.commit.interval.ms", AutoCommitIntervalMs);
 
         consumer = kafka.consumer.Consumer.createJavaConsumerConnector(new ConsumerConfig(props));
     }
