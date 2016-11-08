@@ -74,6 +74,8 @@ public class RequestHelper {
         header.setVersionName(versionName);
         header.setMethodName(methodName);
         header.setCallerFrom(Optional.of("dapeng-command"));
+        header.setOperatorId(Optional.of(1));
+        header.setOperatorName(Optional.of("快塑网"));
         return header;
     }
 
