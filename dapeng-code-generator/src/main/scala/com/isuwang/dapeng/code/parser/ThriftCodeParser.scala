@@ -33,6 +33,9 @@ class ThriftCodeParser {
   private val structCache = new util.ArrayList[metadata.Struct]()
   private val serviceCache = new util.ArrayList[metadata.Service]()
 
+  private val mapStructCache = new util.HashMap[String, metadata.Struct]()
+  private val mapEnumCache = new util.HashMap[String, metadata.TEnum]()
+
   /**
     * 生成文档
     *
@@ -364,17 +367,35 @@ class ThriftCodeParser {
       val generator = getGenerator(doc)
 
       enumCache.addAll(findEnums(doc, generator))
-
       structCache.addAll(findStructs(doc, generator))
-
       serviceCache.addAll(findServices(doc, generator))
+
+      for(enum <- enumCache)
+        mapEnumCache.put(enum.getNamespace + "." + enum.getName, enum)
+      for(struct <- structCache)
+        mapStructCache.put(struct.getNamespace + "." + struct.getName, struct)
     })
 
     for (index <- (0 until serviceCache.size())) {
       val service = serviceCache.get(index)
 
-      service.setEnumDefinitions(enumCache)
-      service.setStructDefinitions(structCache)
+      val structSet = new util.HashSet[metadata.Struct]()
+      val enumSet = new util.HashSet[TEnum]()
+      //递归将service中所有method的所有用到的struct加入列表
+      for(method <- service.getMethods){
+        for(field <- method.getRequest.getFields){
+          getAllStructs(field.getDataType, structSet)
+          getAllEnums(field.getDataType, enumSet)
+        }
+        for(field <- method.getResponse.getFields){
+          getAllStructs(field.getDataType, structSet)
+          getAllEnums(field.getDataType, enumSet)
+        }
+      }
+      service.setStructDefinitions(structSet.toList)
+      service.setEnumDefinitions(enumSet.toList)
+//      service.setEnumDefinitions(enumCache)
+//      service.setStructDefinitions(structCache)
       service.setMeta(new metadata.Service.ServiceMeta {
         if (serviceVersion != null && !serviceVersion.trim.equals(""))
           this.version = serviceVersion.trim
@@ -387,4 +408,52 @@ class ThriftCodeParser {
     return serviceCache;
   }
 
+  /**
+    * 递归添加所有struct
+    *
+    * @param dataType
+    * @param structSet
+    */
+  def getAllStructs(dataType: metadata.DataType, structSet: java.util.HashSet[metadata.Struct]): Unit = {
+
+    if(dataType.getKind == DataType.KIND.STRUCT){
+      val struct = mapStructCache.get(dataType.getQualifiedName)
+      structSet.add(struct)
+      for(tmpField <- struct.getFields){
+        getAllStructs(tmpField.getDataType, structSet)
+      }
+    }
+    else if(dataType.getKind == DataType.KIND.SET || dataType.getKind == DataType.KIND.LIST){
+      getAllStructs(dataType.getValueType, structSet)
+
+    }else if(dataType.getKind == DataType.KIND.MAP){
+      getAllStructs(dataType.getKeyType, structSet)
+      getAllStructs(dataType.getValueType, structSet)
+    }
+  }
+
+  /**
+    * 递归添加所有enum
+    *
+    * @param dataType
+    * @param enumSet
+    */
+  def getAllEnums(dataType: metadata.DataType, enumSet: util.HashSet[metadata.TEnum]): Unit = {
+
+    if(dataType.getKind == DataType.KIND.ENUM)
+      enumSet.add(mapEnumCache.get(dataType.getQualifiedName))
+
+    else if(dataType.getKind == DataType.KIND.STRUCT){
+      val struct =  mapStructCache.get(dataType.getQualifiedName)
+      for(field <- struct.getFields)
+        getAllEnums(field.getDataType, enumSet)
+    }
+    else if(dataType.getKind == DataType.KIND.SET || dataType.getKind == DataType.KIND.LIST){
+      getAllEnums(dataType.getValueType, enumSet)
+
+    }else if(dataType.getKind == DataType.KIND.MAP){
+      getAllEnums(dataType.getKeyType, enumSet)
+      getAllEnums(dataType.getValueType, enumSet)
+    }
+  }
 }
