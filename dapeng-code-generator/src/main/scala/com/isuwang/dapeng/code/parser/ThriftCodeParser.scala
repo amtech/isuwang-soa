@@ -356,6 +356,32 @@ class ThriftCodeParser {
     results
   }
 
+  def getAllStructs(resources: Array[String]):util.List[metadata.Struct] = {
+    resources.foreach(resource => {
+      val doc = generateDoc(resource)
+      docCache.put(resource.substring(resource.lastIndexOf(File.separator) + 1, resource.lastIndexOf(".")), doc)
+    })
+
+    docCache.values.foreach(doc => {
+      val generator = getGenerator(doc)
+      structCache.addAll(findStructs(doc, generator))
+    })
+    structCache.toList
+  }
+
+  def getAllEnums(resources: Array[String]):util.List[metadata.TEnum] = {
+    resources.foreach(resource => {
+      val doc = generateDoc(resource)
+      docCache.put(resource.substring(resource.lastIndexOf(File.separator) + 1, resource.lastIndexOf(".")), doc)
+    })
+
+    docCache.values.foreach(doc => {
+      val generator = getGenerator(doc)
+      enumCache.addAll(findEnums(doc, generator))
+    })
+    enumCache.toList
+  }
+
   def toServices(resources: Array[String], serviceVersion: String): util.List[metadata.Service] = {
     resources.foreach(resource => {
       val doc = generateDoc(resource)

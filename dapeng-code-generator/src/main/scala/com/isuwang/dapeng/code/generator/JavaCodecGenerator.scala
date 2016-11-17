@@ -15,6 +15,8 @@ import scala.xml.Elem
  */
 class JavaCodecGenerator extends CodeGenerator {
 
+  override def generate(services: util.List[Service], outDir: String, generateAll:Boolean , structs: util.List[Struct], enums:util.List[TEnum]): Unit = {}
+
   override def generate(services: util.List[Service], outDir: String): Unit = {
 
   }

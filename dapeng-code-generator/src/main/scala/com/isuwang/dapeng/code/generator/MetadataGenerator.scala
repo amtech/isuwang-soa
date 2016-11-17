@@ -4,7 +4,7 @@ import java.io._
 import java.util
 import javax.xml.bind.JAXB
 
-import com.isuwang.dapeng.core.metadata.Service
+import com.isuwang.dapeng.core.metadata.{Service, Struct, TEnum}
 
 /**
   * 源信息生成器
@@ -13,6 +13,8 @@ import com.isuwang.dapeng.core.metadata.Service
   * @date 15/5/10
   */
 class MetadataGenerator extends CodeGenerator {
+
+  override def generate(services: util.List[Service], outDir: String, generateAll:Boolean , structs: util.List[Struct], enums:util.List[TEnum]): Unit = {}
 
   override def generate(services: util.List[Service], outDir: String): Unit = {
     println()

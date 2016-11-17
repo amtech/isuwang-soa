@@ -22,6 +22,8 @@ abstract class CodeGenerator {
 
   def generate(services: util.List[Service], outDir: String);
 
+  def generate(services: util.List[Service], outDir: String, generateAll:Boolean, structs:util.List[Struct], enums:util.List[TEnum]);
+
   protected def toStructArrayBuffer(array: util.List[Struct]): ArrayBuffer[Struct] = {
     val newArray: ArrayBuffer[Struct] = ArrayBuffer()
 

@@ -41,6 +41,7 @@ object Scrooge {
     var resources: Array[String] = null
     var languages: String = ""
     var version: String = null
+    var generateAll : Boolean = false
 
     try {
       for (index <- 0 until args.length) {
@@ -72,6 +73,7 @@ object Scrooge {
             }
           case "-help" => println(help)
           case "-v" => if (index + 1 < args.length) version = args(index + 1)
+          case "-all" => generateAll= true
           case _ =>
         }
       }
@@ -99,6 +101,8 @@ object Scrooge {
 
       if (resources != null || languages == "") {
         val services = new ThriftCodeParser().toServices(resources, version)
+        val structs = if (generateAll)new ThriftCodeParser().getAllStructs(resources) else null
+        val enums = if (generateAll)new ThriftCodeParser().getAllEnums(resources) else null
 
         val languageArray = languages.split(",")
         languageArray.foreach { lang =>
@@ -106,7 +110,7 @@ object Scrooge {
             case "metadata" => new MetadataGenerator().generate(services, outDir)
             case "js" => new JavascriptGenerator().generate(services, outDir)
             case "json" => new JsonGenerator().generate(services, outDir)
-            case "java" => new JavaGenerator().generate(services, outDir)
+            case "java" => new JavaGenerator().generate(services, outDir, generateAll, structs, enums)
           }
         }
       } else {

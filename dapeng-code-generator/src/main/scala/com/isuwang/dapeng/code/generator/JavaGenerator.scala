@@ -16,6 +16,8 @@ import scala.xml.Elem
  */
 class JavaGenerator extends CodeGenerator {
 
+  override def generate(services: util.List[Service], outDir: String): Unit = {}
+
   private def rootDir(rootDir: String, packageName: String): File = {
     val dir = rootDir + "/java/" + packageName.replaceAll("[.]", "/")
 
@@ -39,7 +41,7 @@ class JavaGenerator extends CodeGenerator {
   }
 
 
-  override def generate(services: util.List[Service], outDir: String): Unit = {
+  override def generate(services: util.List[Service], outDir: String, generateAll:Boolean , structs: util.List[Struct], enums:util.List[TEnum]): Unit = {
 
     val namespaces:util.Set[String] = new util.HashSet[String]();
     for (index <- (0 until services.size())) {
@@ -59,6 +61,32 @@ class JavaGenerator extends CodeGenerator {
       }
     }
 
+    if(generateAll){
+      println("=========================================================")
+      toStructArrayBuffer(structs).map{(struct: Struct)=>{
+
+        println(s"生成struct:${struct.name}.java")
+        val domainTemplate = new StringTemplate(toDomainTemplate(struct))
+        val domainWriter = new PrintWriter(new File(rootDir(outDir, struct.getNamespace), s"${struct.name}.java"), "UTF-8")
+        domainWriter.write(domainTemplate.toString)
+        domainWriter.close()
+        println(s"生成struct:${struct.name}.java 完成")
+      }
+      }
+
+      toTEnumArrayBuffer(enums).map{(enum: TEnum)=>{
+
+        println(s"生成Enum:${enum.name}.java")
+        val enumTemplate = new StringTemplate(toEnumTemplate(enum))
+        val enumWriter = new PrintWriter(new File(rootDir(outDir, enum.getNamespace), s"${enum.name}.java"), "UTF-8")
+        enumWriter.write(enumTemplate.toString)
+        enumWriter.close()
+        println(s"生成Enum:${enum.name}.java 完成")
+      }
+      }
+      println("=========================================================")
+    }
+
     for (index <- (0 until services.size())) {
 
       val service = services.get(index)
@@ -73,30 +101,32 @@ class JavaGenerator extends CodeGenerator {
       writer.close()
       println(s"生成service:${service.name}.java 完成")
 
-      {
-        toStructArrayBuffer(service.structDefinitions).map{(struct: Struct)=>{
+      if(!generateAll){
+        {
+          toStructArrayBuffer(service.structDefinitions).map{(struct: Struct)=>{
 
-          println(s"生成struct:${struct.name}.java")
-          val domainTemplate = new StringTemplate(toDomainTemplate(struct))
-          val domainWriter = new PrintWriter(new File(rootDir(outDir, struct.getNamespace), s"${struct.name}.java"), "UTF-8")
-          domainWriter.write(domainTemplate.toString)
-          domainWriter.close()
-          println(s"生成struct:${struct.name}.java 完成")
+            println(s"生成struct:${struct.name}.java")
+            val domainTemplate = new StringTemplate(toDomainTemplate(struct))
+            val domainWriter = new PrintWriter(new File(rootDir(outDir, struct.getNamespace), s"${struct.name}.java"), "UTF-8")
+            domainWriter.write(domainTemplate.toString)
+            domainWriter.close()
+            println(s"生成struct:${struct.name}.java 完成")
+          }
+          }
         }
+
+        {
+          toTEnumArrayBuffer(service.enumDefinitions).map{(enum: TEnum)=>{
+
+            println(s"生成Enum:${enum.name}.java")
+            val enumTemplate = new StringTemplate(toEnumTemplate(enum))
+            val enumWriter = new PrintWriter(new File(rootDir(outDir, enum.getNamespace), s"${enum.name}.java"), "UTF-8")
+            enumWriter.write(enumTemplate.toString)
+            enumWriter.close()
+            println(s"生成Enum:${enum.name}.java 完成")
+          }
+          }
         }
-      }
-
-      {
-       toTEnumArrayBuffer(service.enumDefinitions).map{(enum: TEnum)=>{
-
-         println(s"生成Enum:${enum.name}.java")
-         val enumTemplate = new StringTemplate(toEnumTemplate(enum))
-         val enumWriter = new PrintWriter(new File(rootDir(outDir, enum.getNamespace), s"${enum.name}.java"), "UTF-8")
-         enumWriter.write(enumTemplate.toString)
-         enumWriter.close()
-         println(s"生成Enum:${enum.name}.java 完成")
-       }
-       }
       }
 
       println(s"生成client:${service.name}Client.java")
