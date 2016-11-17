@@ -13,12 +13,11 @@ import scala.xml.Elem
  * JAVA生成器
  *
  * @author tangliu
- * @date 15/9/8
  */
 class JavaGenerator extends CodeGenerator {
 
   private def rootDir(rootDir: String, packageName: String): File = {
-    val dir = rootDir + "/java-gen/" + packageName.replaceAll("[.]", "/")
+    val dir = rootDir + "/java/" + packageName.replaceAll("[.]", "/")
 
     val file = new File(dir)
 
@@ -27,6 +26,18 @@ class JavaGenerator extends CodeGenerator {
 
     return file
   }
+
+  private def resourceDir(rootDir: String, packageName: String): String = {
+    val dir = rootDir + "/resources/"
+
+    val file = new File(dir)
+
+    if(!file.exists()){}
+      file.mkdirs()
+
+    dir
+  }
+
 
   override def generate(services: util.List[Service], outDir: String): Unit = {
 
@@ -106,7 +117,7 @@ class JavaGenerator extends CodeGenerator {
 
 
       println(s"生成metadata:${service.namespace}.${service.name}.xml")
-      new MetadataGenerator().generateXmlFile(service, outDir);
+      new MetadataGenerator().generateXmlFile(service, resourceDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))));
       println(s"生成metadata:${service.namespace}.${service.name}.xml 完成")
 
       println("==========================================================")
