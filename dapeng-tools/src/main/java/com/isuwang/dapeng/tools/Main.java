@@ -12,6 +12,7 @@ public class Main {
     private static final String JSON = "json";
     private static final String XML = "xml";
     private static final String ROUT_INFO = "routeInfo";
+    private static final String RUNNING_SERVICE = "runningServices";
 
     private static String help = "-----------------------------------------------------------------------\n" +
             " |commands: runningInfo | routInfo | metadata | request | json | xml  \n" +
@@ -36,6 +37,7 @@ public class Main {
             " |    java -jar dapeng.jar routInfo\n" +
             " | 10.指定配置文件，设置路由信息: \n" +
             " |    java -jar dapeng.jar routInfo route.cfg \n" +
+            " | 11. 获取指定的zookeeper上所有运行的服务列表"+
             "-----------------------------------------------------------------------";
 
     public static void main(String[] args) {
@@ -63,6 +65,9 @@ public class Main {
                 break;
             case ROUT_INFO:
                 RouteInfoHelper.routeInfo(args);
+                break;
+            case RUNNING_SERVICE:
+                RunningServiceHelper.showRunningService();
                 break;
             default:
                 System.out.println(help);
