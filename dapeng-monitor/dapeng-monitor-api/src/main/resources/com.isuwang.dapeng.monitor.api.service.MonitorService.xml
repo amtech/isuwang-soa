@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<service namespace="com.isuwang.soa.monitor.api.service" name="MonitorService">
+<service namespace="com.isuwang.dapeng.monitor.api.service" name="MonitorService">
     <doc>
 
  监控服务
@@ -113,13 +113,13 @@
         </method>
     </methods>
     <structs>
-        <struct namespace="com.isuwang.soa.monitor.api.domain" name="QPSStat">
+        <struct namespace="com.isuwang.dapeng.monitor.api.domain" name="QPSStat">
             <doc>
 
  QPS Stat
 </doc>
             <fields>
-                <field tag="1" name="period" optional="false" privacy="true">
+                <field tag="1" name="period" optional="false" privacy="false">
                     <dataType>
                         <kind>INTEGER</kind>
                     </dataType>
@@ -128,7 +128,7 @@
  时间间隔:单位秒
 </doc>
                 </field>
-                <field tag="2" name="analysisTime" optional="false" privacy="true">
+                <field tag="2" name="analysisTime" optional="false" privacy="false">
                     <dataType>
                         <kind>LONG</kind>
                     </dataType>
@@ -137,7 +137,7 @@
  统计分析时间(时间戳)
 </doc>
                 </field>
-                <field tag="3" name="serverIP" optional="false" privacy="true">
+                <field tag="3" name="serverIP" optional="false" privacy="false">
                     <dataType>
                         <kind>STRING</kind>
                     </dataType>
@@ -146,7 +146,7 @@
  服务器IP
 </doc>
                 </field>
-                <field tag="4" name="serverPort" optional="false" privacy="true">
+                <field tag="4" name="serverPort" optional="false" privacy="false">
                     <dataType>
                         <kind>INTEGER</kind>
                     </dataType>
@@ -155,7 +155,7 @@
  服务器端口
 </doc>
                 </field>
-                <field tag="5" name="callCount" optional="false" privacy="true">
+                <field tag="5" name="callCount" optional="false" privacy="false">
                     <dataType>
                         <kind>INTEGER</kind>
                     </dataType>
@@ -164,7 +164,7 @@
  调用次数
 </doc>
                 </field>
-                <field tag="6" name="serviceName" optional="false" privacy="true">
+                <field tag="6" name="serviceName" optional="false" privacy="false">
                     <dataType>
                         <kind>STRING</kind>
                     </dataType>
@@ -173,7 +173,7 @@
  服务名称
 </doc>
                 </field>
-                <field tag="7" name="methodName" optional="false" privacy="true">
+                <field tag="7" name="methodName" optional="false" privacy="false">
                     <dataType>
                         <kind>STRING</kind>
                     </dataType>
@@ -182,7 +182,7 @@
  方法名称
 </doc>
                 </field>
-                <field tag="8" name="versionName" optional="false" privacy="true">
+                <field tag="8" name="versionName" optional="false" privacy="false">
                     <dataType>
                         <kind>STRING</kind>
                     </dataType>
@@ -193,201 +193,13 @@
                 </field>
             </fields>
         </struct>
-        <struct namespace="com.isuwang.soa.monitor.api.domain" name="PlatformProcessData">
-            <doc>
-
- 平台处理数据
-</doc>
-            <fields>
-                <field tag="1" name="period" optional="false" privacy="true">
-                    <dataType>
-                        <kind>INTEGER</kind>
-                    </dataType>
-                    <doc>
-
- 时间间隔:单位分钟
-</doc>
-                </field>
-                <field tag="2" name="analysisTime" optional="false" privacy="true">
-                    <dataType>
-                        <kind>LONG</kind>
-                    </dataType>
-                    <doc>
-
- 统计分析时间(时间戳)
-</doc>
-                </field>
-                <field tag="3" name="serviceName" optional="false" privacy="true">
-                    <dataType>
-                        <kind>STRING</kind>
-                    </dataType>
-                    <doc>
-
- 服务名称
-</doc>
-                </field>
-                <field tag="4" name="methodName" optional="false" privacy="true">
-                    <dataType>
-                        <kind>STRING</kind>
-                    </dataType>
-                    <doc>
-
- 方法名称
-</doc>
-                </field>
-                <field tag="5" name="versionName" optional="false" privacy="true">
-                    <dataType>
-                        <kind>STRING</kind>
-                    </dataType>
-                    <doc>
-
- 版本号
-</doc>
-                </field>
-                <field tag="6" name="serverIP" optional="false" privacy="true">
-                    <dataType>
-                        <kind>STRING</kind>
-                    </dataType>
-                    <doc>
-
- 服务器IP
-</doc>
-                </field>
-                <field tag="7" name="serverPort" optional="false" privacy="true">
-                    <dataType>
-                        <kind>INTEGER</kind>
-                    </dataType>
-                    <doc>
-
- 服务器端口
-</doc>
-                </field>
-                <field tag="8" name="pMinTime" optional="false" privacy="true">
-                    <dataType>
-                        <kind>LONG</kind>
-                    </dataType>
-                    <doc>
-
- 平台最小耗时(单位:毫秒)
-</doc>
-                </field>
-                <field tag="9" name="pMaxTime" optional="false" privacy="true">
-                    <dataType>
-                        <kind>LONG</kind>
-                    </dataType>
-                    <doc>
-
- 平台最大耗时(单位:毫秒)
-</doc>
-                </field>
-                <field tag="10" name="pAverageTime" optional="false" privacy="true">
-                    <dataType>
-                        <kind>LONG</kind>
-                    </dataType>
-                    <doc>
-
- 平台平均耗时(单位:毫秒)
-</doc>
-                </field>
-                <field tag="11" name="pTotalTime" optional="false" privacy="true">
-                    <dataType>
-                        <kind>LONG</kind>
-                    </dataType>
-                    <doc>
-
- 平台总耗时(单位:毫秒)
-</doc>
-                </field>
-                <field tag="12" name="iMinTime" optional="false" privacy="true">
-                    <dataType>
-                        <kind>LONG</kind>
-                    </dataType>
-                    <doc>
-
- 接口服务最小耗时(单位:毫秒)
-</doc>
-                </field>
-                <field tag="13" name="iMaxTime" optional="false" privacy="true">
-                    <dataType>
-                        <kind>LONG</kind>
-                    </dataType>
-                    <doc>
-
- 接口服务最大耗时(单位:毫秒)
-</doc>
-                </field>
-                <field tag="14" name="iAverageTime" optional="false" privacy="true">
-                    <dataType>
-                        <kind>LONG</kind>
-                    </dataType>
-                    <doc>
-
- 接口服务平均耗时(单位:毫秒)
-</doc>
-                </field>
-                <field tag="15" name="iTotalTime" optional="false" privacy="true">
-                    <dataType>
-                        <kind>LONG</kind>
-                    </dataType>
-                    <doc>
-
- 接口服务总耗时(单位:毫秒)
-</doc>
-                </field>
-                <field tag="16" name="totalCalls" optional="false" privacy="true">
-                    <dataType>
-                        <kind>INTEGER</kind>
-                    </dataType>
-                    <doc>
-
- 总调用次数
-</doc>
-                </field>
-                <field tag="17" name="succeedCalls" optional="false" privacy="true">
-                    <dataType>
-                        <kind>INTEGER</kind>
-                    </dataType>
-                    <doc>
-
- 成功调用次数
-</doc>
-                </field>
-                <field tag="18" name="failCalls" optional="false" privacy="true">
-                    <dataType>
-                        <kind>INTEGER</kind>
-                    </dataType>
-                    <doc>
-
- 失败调用次数
-</doc>
-                </field>
-                <field tag="19" name="requestFlow" optional="false" privacy="true">
-                    <dataType>
-                        <kind>INTEGER</kind>
-                    </dataType>
-                    <doc>
-
- 请求的流量(单位:字节)
-</doc>
-                </field>
-                <field tag="20" name="responseFlow" optional="false" privacy="true">
-                    <dataType>
-                        <kind>INTEGER</kind>
-                    </dataType>
-                    <doc>
-
- 响应的流量(单位:字节)
-</doc>
-                </field>
-            </fields>
-        </struct>
-        <struct namespace="com.isuwang.soa.monitor.api.domain" name="DataSourceStat">
+        <struct namespace="com.isuwang.dapeng.monitor.api.domain" name="DataSourceStat">
             <doc>
 
  DataSource Stat
 </doc>
             <fields>
-                <field tag="1" name="period" optional="false" privacy="true">
+                <field tag="1" name="period" optional="false" privacy="false">
                     <dataType>
                         <kind>INTEGER</kind>
                     </dataType>
@@ -396,7 +208,7 @@
  时间间隔:单位秒
 </doc>
                 </field>
-                <field tag="2" name="analysisTime" optional="false" privacy="true">
+                <field tag="2" name="analysisTime" optional="false" privacy="false">
                     <dataType>
                         <kind>LONG</kind>
                     </dataType>
@@ -405,7 +217,7 @@
  统计分析时间(时间戳)
 </doc>
                 </field>
-                <field tag="3" name="serverIP" optional="false" privacy="true">
+                <field tag="3" name="serverIP" optional="false" privacy="false">
                     <dataType>
                         <kind>STRING</kind>
                     </dataType>
@@ -414,7 +226,7 @@
  服务器IP
 </doc>
                 </field>
-                <field tag="4" name="serverPort" optional="false" privacy="true">
+                <field tag="4" name="serverPort" optional="false" privacy="false">
                     <dataType>
                         <kind>INTEGER</kind>
                     </dataType>
@@ -423,7 +235,7 @@
  服务器端口
 </doc>
                 </field>
-                <field tag="5" name="url" optional="false" privacy="true">
+                <field tag="5" name="url" optional="false" privacy="false">
                     <dataType>
                         <kind>STRING</kind>
                     </dataType>
@@ -432,7 +244,7 @@
  连接地址
 </doc>
                 </field>
-                <field tag="6" name="userName" optional="false" privacy="true">
+                <field tag="6" name="userName" optional="false" privacy="false">
                     <dataType>
                         <kind>STRING</kind>
                     </dataType>
@@ -441,7 +253,7 @@
  用户名
 </doc>
                 </field>
-                <field tag="7" name="identity" optional="false" privacy="true">
+                <field tag="7" name="identity" optional="false" privacy="false">
                     <dataType>
                         <kind>STRING</kind>
                     </dataType>
@@ -450,7 +262,7 @@
  编号
 </doc>
                 </field>
-                <field tag="8" name="dbType" optional="false" privacy="true">
+                <field tag="8" name="dbType" optional="false" privacy="false">
                     <dataType>
                         <kind>STRING</kind>
                     </dataType>
@@ -459,7 +271,7 @@
  数据库类型
 </doc>
                 </field>
-                <field tag="9" name="poolingCount" optional="false" privacy="true">
+                <field tag="9" name="poolingCount" optional="false" privacy="false">
                     <dataType>
                         <kind>INTEGER</kind>
                     </dataType>
@@ -468,7 +280,7 @@
  池中连接数
 </doc>
                 </field>
-                <field tag="10" name="poolingPeak" optional="true" privacy="true">
+                <field tag="10" name="poolingPeak" optional="true" privacy="false">
                     <dataType>
                         <kind>INTEGER</kind>
                     </dataType>
@@ -477,7 +289,7 @@
  池中连接数峰值
 </doc>
                 </field>
-                <field tag="11" name="poolingPeakTime" optional="true" privacy="true">
+                <field tag="11" name="poolingPeakTime" optional="true" privacy="false">
                     <dataType>
                         <kind>LONG</kind>
                     </dataType>
@@ -486,7 +298,7 @@
  池中连接数峰值时间
 </doc>
                 </field>
-                <field tag="13" name="activeCount" optional="false" privacy="true">
+                <field tag="13" name="activeCount" optional="false" privacy="false">
                     <dataType>
                         <kind>INTEGER</kind>
                     </dataType>
@@ -495,7 +307,7 @@
  活跃连接数
 </doc>
                 </field>
-                <field tag="14" name="activePeak" optional="true" privacy="true">
+                <field tag="14" name="activePeak" optional="true" privacy="false">
                     <dataType>
                         <kind>INTEGER</kind>
                     </dataType>
@@ -504,7 +316,7 @@
  活跃连接数峰值
 </doc>
                 </field>
-                <field tag="15" name="activePeakTime" optional="true" privacy="true">
+                <field tag="15" name="activePeakTime" optional="true" privacy="false">
                     <dataType>
                         <kind>LONG</kind>
                     </dataType>
@@ -513,7 +325,7 @@
  活跃连接数峰值时间
 </doc>
                 </field>
-                <field tag="16" name="executeCount" optional="false" privacy="true">
+                <field tag="16" name="executeCount" optional="false" privacy="false">
                     <dataType>
                         <kind>INTEGER</kind>
                     </dataType>
@@ -522,13 +334,201 @@
  执行数
 </doc>
                 </field>
-                <field tag="17" name="errorCount" optional="false" privacy="true">
+                <field tag="17" name="errorCount" optional="false" privacy="false">
                     <dataType>
                         <kind>INTEGER</kind>
                     </dataType>
                     <doc>
 
  错误数
+</doc>
+                </field>
+            </fields>
+        </struct>
+        <struct namespace="com.isuwang.dapeng.monitor.api.domain" name="PlatformProcessData">
+            <doc>
+
+ 平台处理数据
+</doc>
+            <fields>
+                <field tag="1" name="period" optional="false" privacy="false">
+                    <dataType>
+                        <kind>INTEGER</kind>
+                    </dataType>
+                    <doc>
+
+ 时间间隔:单位分钟
+</doc>
+                </field>
+                <field tag="2" name="analysisTime" optional="false" privacy="false">
+                    <dataType>
+                        <kind>LONG</kind>
+                    </dataType>
+                    <doc>
+
+ 统计分析时间(时间戳)
+</doc>
+                </field>
+                <field tag="3" name="serviceName" optional="false" privacy="false">
+                    <dataType>
+                        <kind>STRING</kind>
+                    </dataType>
+                    <doc>
+
+ 服务名称
+</doc>
+                </field>
+                <field tag="4" name="methodName" optional="false" privacy="false">
+                    <dataType>
+                        <kind>STRING</kind>
+                    </dataType>
+                    <doc>
+
+ 方法名称
+</doc>
+                </field>
+                <field tag="5" name="versionName" optional="false" privacy="false">
+                    <dataType>
+                        <kind>STRING</kind>
+                    </dataType>
+                    <doc>
+
+ 版本号
+</doc>
+                </field>
+                <field tag="6" name="serverIP" optional="false" privacy="false">
+                    <dataType>
+                        <kind>STRING</kind>
+                    </dataType>
+                    <doc>
+
+ 服务器IP
+</doc>
+                </field>
+                <field tag="7" name="serverPort" optional="false" privacy="false">
+                    <dataType>
+                        <kind>INTEGER</kind>
+                    </dataType>
+                    <doc>
+
+ 服务器端口
+</doc>
+                </field>
+                <field tag="8" name="pMinTime" optional="false" privacy="false">
+                    <dataType>
+                        <kind>LONG</kind>
+                    </dataType>
+                    <doc>
+
+ 平台最小耗时(单位:毫秒)
+</doc>
+                </field>
+                <field tag="9" name="pMaxTime" optional="false" privacy="false">
+                    <dataType>
+                        <kind>LONG</kind>
+                    </dataType>
+                    <doc>
+
+ 平台最大耗时(单位:毫秒)
+</doc>
+                </field>
+                <field tag="10" name="pAverageTime" optional="false" privacy="false">
+                    <dataType>
+                        <kind>LONG</kind>
+                    </dataType>
+                    <doc>
+
+ 平台平均耗时(单位:毫秒)
+</doc>
+                </field>
+                <field tag="11" name="pTotalTime" optional="false" privacy="false">
+                    <dataType>
+                        <kind>LONG</kind>
+                    </dataType>
+                    <doc>
+
+ 平台总耗时(单位:毫秒)
+</doc>
+                </field>
+                <field tag="12" name="iMinTime" optional="false" privacy="false">
+                    <dataType>
+                        <kind>LONG</kind>
+                    </dataType>
+                    <doc>
+
+ 接口服务最小耗时(单位:毫秒)
+</doc>
+                </field>
+                <field tag="13" name="iMaxTime" optional="false" privacy="false">
+                    <dataType>
+                        <kind>LONG</kind>
+                    </dataType>
+                    <doc>
+
+ 接口服务最大耗时(单位:毫秒)
+</doc>
+                </field>
+                <field tag="14" name="iAverageTime" optional="false" privacy="false">
+                    <dataType>
+                        <kind>LONG</kind>
+                    </dataType>
+                    <doc>
+
+ 接口服务平均耗时(单位:毫秒)
+</doc>
+                </field>
+                <field tag="15" name="iTotalTime" optional="false" privacy="false">
+                    <dataType>
+                        <kind>LONG</kind>
+                    </dataType>
+                    <doc>
+
+ 接口服务总耗时(单位:毫秒)
+</doc>
+                </field>
+                <field tag="16" name="totalCalls" optional="false" privacy="false">
+                    <dataType>
+                        <kind>INTEGER</kind>
+                    </dataType>
+                    <doc>
+
+ 总调用次数
+</doc>
+                </field>
+                <field tag="17" name="succeedCalls" optional="false" privacy="false">
+                    <dataType>
+                        <kind>INTEGER</kind>
+                    </dataType>
+                    <doc>
+
+ 成功调用次数
+</doc>
+                </field>
+                <field tag="18" name="failCalls" optional="false" privacy="false">
+                    <dataType>
+                        <kind>INTEGER</kind>
+                    </dataType>
+                    <doc>
+
+ 失败调用次数
+</doc>
+                </field>
+                <field tag="19" name="requestFlow" optional="false" privacy="false">
+                    <dataType>
+                        <kind>INTEGER</kind>
+                    </dataType>
+                    <doc>
+
+ 请求的流量(单位:字节)
+</doc>
+                </field>
+                <field tag="20" name="responseFlow" optional="false" privacy="false">
+                    <dataType>
+                        <kind>INTEGER</kind>
+                    </dataType>
+                    <doc>
+
+ 响应的流量(单位:字节)
 </doc>
                 </field>
             </fields>

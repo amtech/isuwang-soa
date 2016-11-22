@@ -1,9 +1,6 @@
 package com.isuwang.dapeng.monitor.api;
 
 import com.isuwang.dapeng.core.SoaException;
-import com.isuwang.dapeng.monitor.api.domain.DataSourceStat;
-import com.isuwang.dapeng.monitor.api.domain.PlatformProcessData;
-import com.isuwang.dapeng.monitor.api.domain.QPSStat;
 import com.isuwang.dapeng.monitor.api.MonitorServiceCodec.*;
 import com.isuwang.dapeng.remoting.BaseServiceClient;
 import com.isuwang.org.apache.thrift.TException;
@@ -23,7 +20,8 @@ public class MonitorServiceClient extends BaseServiceClient {
     /**
      * 上送QPS信息
      **/
-    public void uploadQPSStat(java.util.List<QPSStat> qpsStats) throws SoaException {
+
+    public void uploadQPSStat(java.util.List<com.isuwang.dapeng.monitor.api.domain.QPSStat> qpsStats) throws SoaException {
         initContext("uploadQPSStat");
 
         try {
@@ -43,10 +41,12 @@ public class MonitorServiceClient extends BaseServiceClient {
         }
     }
 
+
     /**
      * 上送平台处理数据
      **/
-    public void uploadPlatformProcessData(java.util.List<PlatformProcessData> platformProcessDatas) throws SoaException {
+
+    public void uploadPlatformProcessData(java.util.List<com.isuwang.dapeng.monitor.api.domain.PlatformProcessData> platformProcessDatas) throws SoaException {
         initContext("uploadPlatformProcessData");
 
         try {
@@ -66,10 +66,12 @@ public class MonitorServiceClient extends BaseServiceClient {
         }
     }
 
+
     /**
      * 上送DataSource信息
      **/
-    public void uploadDataSourceStat(java.util.List<DataSourceStat> dataSourceStat) throws SoaException {
+
+    public void uploadDataSourceStat(java.util.List<com.isuwang.dapeng.monitor.api.domain.DataSourceStat> dataSourceStat) throws SoaException {
         initContext("uploadDataSourceStat");
 
         try {
