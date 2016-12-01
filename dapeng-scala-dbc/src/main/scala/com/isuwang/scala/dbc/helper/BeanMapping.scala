@@ -42,7 +42,7 @@ object BeanMapping {
     * for a scala anonymous class, automate choose the parent
     */
   val annomous_regexp =
-    """anon\$\d+""".r
+    """[$]*anon\$\d+""".r
 
   def real_class(clazz: Class[_]): Class[_] = clazz.getSimpleName match {
     case annomous_regexp() => real_class(clazz.getSuperclass)
