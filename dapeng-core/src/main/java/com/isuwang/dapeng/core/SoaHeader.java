@@ -1,5 +1,7 @@
 package com.isuwang.dapeng.core;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -226,5 +228,56 @@ public class SoaHeader {
 
     public void setSessionId(Optional<String> sessionId) {
         this.sessionId = sessionId;
+    }
+
+    /**
+     * 添加备用字段，可以自定义传递消息
+     */
+    private Map<String, String> attachments;
+
+    public void setAttachment(String key, String value) {
+        if (attachments == null) {
+            attachments = new HashMap<String, String>();
+        }
+        attachments.put(key, value);
+    }
+
+    public void setAttachments(Map<String, String> attachments) {
+        this.attachments = attachments == null ? new HashMap<String, String>() : attachments;
+    }
+
+    public void addAttachments(Map<String, String> attachments) {
+        if (attachments == null) {
+            return;
+        }
+        if (this.attachments == null) {
+            this.attachments = new HashMap<String, String>();
+        }
+        this.attachments.putAll(attachments);
+    }
+
+    public String getAttachment(String key) {
+        if (attachments == null) {
+            return null;
+        }
+        return attachments.get(key);
+    }
+
+    public String getAttachment(String key, String defaultValue) {
+        if (attachments == null) {
+            return defaultValue;
+        }
+        String value = attachments.get(key);
+        if (value == null || value.length() == 0) {
+            return defaultValue;
+        }
+        return value;
+    }
+
+    public Map<String, String> getAttachments(){
+        if(attachments == null)
+            return new HashMap<>();
+        else
+            return attachments;
     }
 }

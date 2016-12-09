@@ -81,6 +81,9 @@ public class SoaBaseProcessor<I> implements TProcessor {
                 LOGGER.info("{} {} {} {} response header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid(), soaHeader.toString(), formatToString(soaProcessFunction.getResSerializer().toString(result)));
             } finally {
                 chain.setAttribute(ContainerFilterChain.ATTR_KEY_I_PROCESSTIME, System.currentTimeMillis() - startTime);
+
+                soaHeader.setAttachment("dapeng_args", args.toString());
+                soaHeader.setAttachment("dapeng_result", result.toString());
             }
             // write
             context.getHeader().setRespCode(Optional.of("0000"));

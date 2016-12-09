@@ -131,6 +131,21 @@ public class SoaHeaderSerializer implements TBeanSerializer<SoaHeader> {
                         TProtocolUtil.skip(iprot, schemeField.type);
                     }
                     break;
+                case 23:
+                    if (schemeField.type == com.isuwang.org.apache.thrift.protocol.TType.MAP) {
+                        com.isuwang.org.apache.thrift.protocol.TMap _map0 = iprot.readMapBegin();
+                        java.util.Map<String, String> elem0 = new java.util.HashMap<>(_map0.size);
+                        for (int _i0 = 0; _i0 < _map0.size; ++_i0) {
+                            String elem1 = iprot.readString();
+                            String elem2 = iprot.readString();
+                            elem0.put(elem1, elem2);
+                        }
+                        iprot.readMapEnd();
+                        bean.setAttachments(elem0);
+                    } else {
+                        com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+                    }
+                    break;
                 default:
                     TProtocolUtil.skip(iprot, schemeField.type);
             }
@@ -224,6 +239,19 @@ public class SoaHeaderSerializer implements TBeanSerializer<SoaHeader> {
             oprot.writeString(bean.getSessionId().get());
             oprot.writeFieldEnd();
         }
+
+        oprot.writeFieldBegin(new com.isuwang.org.apache.thrift.protocol.TField("attachments", com.isuwang.org.apache.thrift.protocol.TType.MAP, (short) 23));
+        java.util.Map<String, String> attachments = bean.getAttachments();
+        oprot.writeMapBegin(new com.isuwang.org.apache.thrift.protocol.TMap(TType.STRING, TType.STRING, attachments.size()));
+        for (java.util.Map.Entry<String, String> attachment : attachments.entrySet()) {
+
+            String key = attachment.getKey();
+            String value = attachment.getValue();
+            oprot.writeString(key);
+            oprot.writeString(value);
+        }
+        oprot.writeMapEnd();
+        oprot.writeFieldEnd();
 
         oprot.writeFieldStop();
         oprot.writeStructEnd();
