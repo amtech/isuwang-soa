@@ -376,6 +376,8 @@ class JavaGenerator extends CodeGenerator {
             public {if(field.isOptional) <div>Optional{lt}</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>{gt}</div>} get{field.name.charAt(0).toUpper + field.name.substring(1)}()<block> return this.{field.name}; </block>
             public void set{field.name.charAt(0).toUpper + field.name.substring(1)}({if(field.isOptional) <div>Optional{lt}</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>{gt}</div>} {field.name})<block> this.{field.name} = {field.name}; </block>
 
+            public {if(field.isOptional) <div>Optional{lt}</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>{gt}</div>} {field.name}()<block> return this.{field.name}; </block>
+            public {struct.name} {field.name}({if(field.isOptional) <div>Optional{lt}</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>{gt}</div>} {field.name})<block> this.{field.name} = {field.name}; return this; </block>
           </div>
         }
         }
