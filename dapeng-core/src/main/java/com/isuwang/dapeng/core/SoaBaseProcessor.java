@@ -67,7 +67,7 @@ public class SoaBaseProcessor<I> implements TProcessor {
             in.readMessageEnd();
 
             SoaHeader soaHeader = (SoaHeader) chain.getAttribute(ContainerFilterChain.ATTR_KEY_HEADER);
-            if(!soaHeader.getSessionId().isPresent()){
+            if (!soaHeader.getSessionId().isPresent()) {
                 soaHeader.setSessionId(Optional.of(UUID.randomUUID().toString()));
             }
 
@@ -83,7 +83,7 @@ public class SoaBaseProcessor<I> implements TProcessor {
                 chain.setAttribute(ContainerFilterChain.ATTR_KEY_I_PROCESSTIME, System.currentTimeMillis() - startTime);
 
                 soaHeader.setAttachment("dapeng_args", args.toString());
-                soaHeader.setAttachment("dapeng_result", result.toString());
+                soaHeader.setAttachment("dapeng_result", result == null ? "null" : result.toString());
             }
             // write
             context.getHeader().setRespCode(Optional.of("0000"));
