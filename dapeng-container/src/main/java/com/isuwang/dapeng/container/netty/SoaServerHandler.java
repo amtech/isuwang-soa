@@ -316,11 +316,11 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
 
-            String errMsg = e.getCause() != null ? e.getCause().toString() : (e.getMessage() != null ? e.getMessage().toString() : SoaBaseCode.UnKnown.getMsg());
+            String errMsg = e.getCause() != null ? e.getCause().toString() : (e.getMessage() != null ? e.getMessage().toString() : e.toString());
             writeErrorMessage(ctx, outputBuf, context, soaHeader, outputSoaTransport, outputProtocol, new SoaException(SoaBaseCode.UnKnown, errMsg));
 
             responseCode = SoaBaseCode.UnKnown.getCode();
-            responseMsg = SoaBaseCode.UnKnown.getMsg();
+            responseMsg = errMsg;
         } finally {
             if (inputSoaTransport != null)
                 inputSoaTransport.close();
