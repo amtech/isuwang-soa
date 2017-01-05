@@ -9,6 +9,7 @@ import com.navercorp.pinpoint.bootstrap.logging.PLogger;
 import com.navercorp.pinpoint.bootstrap.logging.PLoggerFactory;
 
 import static com.isuwang.dapeng.pinpoint.plugin.DapengConstants.DAPENG_MONITOR_SERVICE;
+import static com.isuwang.dapeng.pinpoint.plugin.interceptor.DapengProviderInterceptor.formatToString;
 
 /**
  * Created by tangliu on 16/12/6.
@@ -88,8 +89,8 @@ public class DapengConsumerInterceptor implements AroundInterceptor4 {
 
                 recorder.recordEndPoint(endPoint);
                 recorder.recordDestinationId(endPoint);
-                recorder.recordAttribute(DapengConstants.DAPENG_ARGS_ANNOTATION_KEY, o1);
-                recorder.recordAttribute(DapengConstants.DAPENG_RESULT_ANNOTATION_KEY, result);
+                recorder.recordAttribute(DapengConstants.DAPENG_ARGS_ANNOTATION_KEY, formatToString(o1.toString()));
+                recorder.recordAttribute(DapengConstants.DAPENG_RESULT_ANNOTATION_KEY, formatToString(result.toString()));
 
             } else {
                 recorder.recordException(throwable);

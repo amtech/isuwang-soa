@@ -90,12 +90,30 @@ public class DapengProviderInterceptor extends SpanSimpleAroundInterceptor {
         SoaHeader soaHeader = TransactionContext.Factory.getCurrentInstance().getHeader();
 
         //记录请求和返回结果
-        recorder.recordAttribute(DapengConstants.DAPENG_ARGS_ANNOTATION_KEY, soaHeader.getAttachment(DapengConstants.DAPENG_ARGS));
+        recorder.recordAttribute(DapengConstants.DAPENG_ARGS_ANNOTATION_KEY, formatToString(soaHeader.getAttachment(DapengConstants.DAPENG_ARGS)));
 
         if (throwable == null) {
-            recorder.recordAttribute(DapengConstants.DAPENG_RESULT_ANNOTATION_KEY, soaHeader.getAttachment(DapengConstants.DAPENG_RESULT));
+            recorder.recordAttribute(DapengConstants.DAPENG_RESULT_ANNOTATION_KEY, formatToString(soaHeader.getAttachment(DapengConstants.DAPENG_RESULT)));
         } else {
             recorder.recordException(throwable);
         }
     }
+
+
+    public static String formatToString(String msg) {
+        if (msg == null)
+            return msg;
+
+        msg = msg.indexOf("\r\n") != -1 ? msg.replaceAll("\r\n", "") : msg;
+
+        int len = msg.length();
+        int max_len = 128;
+
+        if (len > max_len)
+            msg = msg.substring(0, 128) + "...(" + len + ")";
+
+        return msg;
+    }
+
+
 }
