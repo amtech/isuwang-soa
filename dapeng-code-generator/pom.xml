@@ -14,8 +14,8 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java-version>1.8</java-version>
-        <scala.version>2.11.7</scala.version>
-        <scala.binary.version>2.11.7</scala.binary.version>
+        <scala.version>2.12.1</scala.version>
+        <scala.binary.version>2.12.1</scala.binary.version>
         <maven.deploy.skip>true</maven.deploy.skip>
         <maven.install.skip>true</maven.install.skip>
     </properties>
@@ -68,6 +68,14 @@
             <artifactId>scrooge-core_2.11</artifactId>
             <version>4.5.0</version>
             <exclusions>
+                <exclusion>
+                    <groupId>org.apache.thrift</groupId>
+                    <artifactId>libthrift</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.scala-lang</groupId>
+                    <artifactId>scala-library</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>org.apache.thrift</groupId>
                     <artifactId>libthrift</artifactId>

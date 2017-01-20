@@ -12,8 +12,8 @@
     <artifactId>dapeng-scala-dbc</artifactId>
 
     <properties>
-        <scala.version>2.11.7</scala.version>
-        <scala.binary.version>2.11.7</scala.binary.version>
+        <scala.version>2.12.1</scala.version>
+        <scala.binary.version>2.12.1</scala.binary.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java-version>1.8</java-version>
         <org.springframework-version>4.2.4.RELEASE</org.springframework-version>
@@ -47,7 +47,7 @@
 
         <dependency>
             <groupId>com.github.wangzaixiang</groupId>
-            <artifactId>scala-sql_2.11</artifactId>
+            <artifactId>scala-sql_2.12</artifactId>
             <version>1.0.6</version>
             <exclusions>
                 <exclusion>
@@ -82,7 +82,7 @@
             <plugin>
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.2.2</version>
                 <executions>
                     <execution>
                         <id>scala-compile-first</id>

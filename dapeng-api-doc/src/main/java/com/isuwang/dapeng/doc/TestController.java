@@ -58,6 +58,10 @@ public class TestController {
         header.setMethodName(methodName);
         header.setCallerFrom(Optional.of("TestController"));
 
+        header.setAttachment("userId","1");
+        header.setAttachment("userLevel","1");
+        header.setAttachment("userScore","50");
+
         String callerInfo = LoadBalanceFilter.getCallerInfo(serviceName, versionName, methodName);
 
         if (callerInfo == null && SoaSystemEnvProperties.SOA_REMOTING_MODE.equals("local")) {
