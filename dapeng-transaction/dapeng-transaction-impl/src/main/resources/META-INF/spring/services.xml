@@ -37,9 +37,9 @@
     <bean id="transaction_dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init"
           destroy-method="close">
         <!-- 基本属性 url、user、password -->
-        <property name="url" value="${DB_ORDERDB_URL}"/>
-        <property name="username" value="${DB_ORDERDB_USER}"/>
-        <property name="password" value="${DB_ORDERDB_PASSWD}"/>
+        <property name="url" value="${DB_GLOBAL_TX_URL}"/>
+        <property name="username" value="${DB_GLOBAL_TX_USER}"/>
+        <property name="password" value="${DB_GLOBAL_TX_PASSWD}"/>
 
         <!-- 配置初始化大小、最小、最大 -->
         <property name="initialSize" value="1"/>

@@ -23,6 +23,7 @@ object Scrooge {
       |               Keys and values are options passed to the generator.
       |   -v version  Set the version of the Service generated.
       |   -in dir     Set input location of all Thrift files.
+      |   -all        Generate all structs and enums
       |
       | Available generators (and options):
       |   metadata
@@ -36,12 +37,17 @@ object Scrooge {
 
     println(s"scrooge:${args.mkString(" ")}")
 
+    if (args.length <= 0) {
+      println(help);
+      return
+    }
+
     var outDir: String = null
     var inDir: String = null
     var resources: Array[String] = null
     var languages: String = ""
     var version: String = null
-    var generateAll : Boolean = false
+    var generateAll: Boolean = false
 
     try {
       for (index <- 0 until args.length) {
@@ -71,9 +77,9 @@ object Scrooge {
               file.delete()
               throw new FilerException(s"File[${inDir}] is not a directory")
             }
-          case "-help" => println(help)
+          case "-help" => println(help); return
           case "-v" => if (index + 1 < args.length) version = args(index + 1)
-          case "-all" => generateAll= true
+          case "-all" => generateAll = true
           case _ =>
         }
       }
@@ -101,8 +107,8 @@ object Scrooge {
 
       if (resources != null || languages == "") {
         val services = new ThriftCodeParser().toServices(resources, version)
-        val structs = if (generateAll)new ThriftCodeParser().getAllStructs(resources) else null
-        val enums = if (generateAll)new ThriftCodeParser().getAllEnums(resources) else null
+        val structs = if (generateAll) new ThriftCodeParser().getAllStructs(resources) else null
+        val enums = if (generateAll) new ThriftCodeParser().getAllEnums(resources) else null
 
         val languageArray = languages.split(",")
         languageArray.foreach { lang =>
