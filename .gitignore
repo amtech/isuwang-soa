@@ -3,6 +3,8 @@
 dapeng.iml
 **/target/
 /.idea/
+.DS_Store
+**/.DS_Store
 /datas/
 /dapeng-code-generator/target/
 /dapeng-container/target/
