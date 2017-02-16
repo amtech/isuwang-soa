@@ -7,9 +7,9 @@ import com.isuwang.dapeng.core.SoaException
 import com.isuwang.dapeng.transaction.TransactionDB._
 import com.isuwang.dapeng.transaction.TransactionSQL
 import com.isuwang.dapeng.transaction.api.domain.TGlobalTransactionsStatus
+import com.isuwang.dapeng.transaction.support.Action
+import com.isuwang.dapeng.transaction.support.Assert._
 import com.isuwang.dapeng.transaction.utils.ErrorCode
-import com.isuwang.scala.dbc.Action
-import com.isuwang.scala.dbc.Assert._
 import org.slf4j.{Logger, LoggerFactory}
 import wangzx.scala_commons.sql._
 

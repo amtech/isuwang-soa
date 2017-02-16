@@ -1,9 +1,10 @@
-package com.isuwang.scala.dbc
+package com.isuwang.dapeng.transaction.support
 
 import org.slf4j.{Logger, LoggerFactory}
 
 /**
   * Design by contract Handler
+ *
   * @author craneding
   * @date 15/12/4
   */
@@ -51,43 +52,3 @@ abstract class Action[Output] {
   def postCheck
 }
 
-/**
-  * Design by contract Entity Handler
-  *
-  * 一般的，实现类构造子为 OrderCancelAction(order, input1, input2)
-  * @author craneding
-  * @date 15/12/4
-  */
-abstract class EntityAction[Entity, Output] extends Action[Output] {
-
-  val entity: Entity
-
-  /**
-    * 不变量检查
-    */
-  def invariantCheck
-
-  override def execute: Output = {
-    try {
-      inputCheck
-
-      preCheck
-
-      val output: Output = action
-
-      postCheck
-
-      invariantCheck
-
-      output
-    } catch {
-      case e: Throwable =>
-        val logger: Logger = LoggerFactory.getLogger("com.isuwang.scala.dbc")
-
-        logger.error(e.getMessage, e)
-
-        throw e
-    }
-  }
-
-}

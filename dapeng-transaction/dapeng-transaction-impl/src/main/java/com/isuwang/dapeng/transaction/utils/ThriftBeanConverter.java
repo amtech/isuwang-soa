@@ -1,8 +1,7 @@
-package com.isuwang.scala.dbc.utils;
+package com.isuwang.dapeng.transaction.utils;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import com.isuwang.org.apache.thrift.TEnum;
+import org.apache.commons.lang.math.NumberUtils;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -183,10 +182,6 @@ public class ThriftBeanConverter {
         }
     }
 
-    public static <T> T copy(Object src, T dest) throws ThriftBeanConverterException {
-        return copy(src, dest, false);
-    }
-
     public static <T> List<T> copy(List<?> srcs, Class<T> destClass, boolean setDefaultValForNull) {
         if (srcs == null)
             return new ArrayList<T>();
@@ -199,9 +194,6 @@ public class ThriftBeanConverter {
         return dests;
     }
 
-    public static <T> List<T> copy(List<?> srcs, Class<T> destClass) {
-        return copy(srcs, destClass, false);
-    }
 
     public static <T> T copy(Object src, Class<T> destClass, boolean setDefaultValForNull) throws ThriftBeanConverterException {
         if (src == null)
@@ -218,43 +210,6 @@ public class ThriftBeanConverter {
 
     public static <T> T copy(Object src, Class<T> destClass) throws ThriftBeanConverterException {
         return copy(src, destClass, false);
-    }
-
-    /**
-     * 把对象值为0的包装类型属性转为null
-     *
-     * @param bean
-     * @param excludeFields 排除不处理的字段
-     * @throws ThriftBeanConverterException
-     */
-    public static void zeroWrapPropertiesToNull(Object bean, String... excludeFields) throws ThriftBeanConverterException {
-        try {
-            Map<String, PropertyDescriptor> srcDescriptors = getCachePropertyDescriptors(bean.getClass());
-            Set<String> keys = srcDescriptors.keySet();
-
-            List<String> excludeFieldsList = null;
-            if (excludeFields != null && excludeFields.length > 0 && StringUtils.isNotBlank(excludeFields[0])) {
-                excludeFieldsList = Arrays.asList(excludeFields);
-            }
-
-            for (String key : keys) {
-                PropertyDescriptor srcDescriptor = srcDescriptors.get(key);
-                if (srcDescriptor == null) continue;
-                if (excludeFieldsList != null && excludeFieldsList.contains(key)) continue;
-                Object value = srcDescriptor.getReadMethod().invoke(bean);
-
-                boolean isWrapType = srcDescriptor.getPropertyType() == Long.class || srcDescriptor.getPropertyType() == Integer.class || srcDescriptor.getPropertyType() == Short.class || srcDescriptor.getPropertyType() == Double.class || srcDescriptor.getPropertyType() == Float.class;
-                if (isWrapType && value != null && Integer.parseInt(value.toString()) == 0) {
-                    value = null;
-                    Method writeMethod = srcDescriptor.getWriteMethod();
-                    if (writeMethod != null) writeMethod.invoke(bean, value);
-                }
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ThriftBeanConverterException(e);
-        }
     }
 
     private static Object isOptionalGetValue(Object value) {
@@ -341,9 +296,9 @@ public class ThriftBeanConverter {
 
                         break;
                     }
-                } else if(realValue instanceof TEnum || realValue.getClass().isEnum()) {
+                } else if (realValue instanceof TEnum || realValue.getClass().isEnum()) {
                     Class<?> valueClass = realValue.getClass();
-                    if(valueClass == propertyType) {
+                    if (valueClass == propertyType) {
                         value = realValue;
 
                         break;
