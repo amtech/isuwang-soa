@@ -1,5 +1,6 @@
 package com.isuwang.dapeng.core;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -27,6 +28,8 @@ public class InvocationContext extends Context {
             Optional<String> operatorName();
 
             Optional<String> sessionId();
+
+            Map<String, String> attachments();
         }
 
         public static void setSoaHeaderProxy(ISoaHeaderProxy soaHeaderProxy) {

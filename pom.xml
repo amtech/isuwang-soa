@@ -7,7 +7,7 @@
     <groupId>com.isuwang</groupId>
     <artifactId>dapeng-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.1.0</version>
+    <version>1.1.1-SNAPSHOT</version>
 
     <name>dapeng</name>
     <description>一个简单、易用、多特性的SOA框架</description>
@@ -49,7 +49,7 @@
         <module>dapeng-monitor</module>
         <module>dapeng-transaction</module>
         <module>dapeng-route</module>
-        <module>dapeng-tools</module>
+        <!--<module>dapeng-tools</module>-->
         <module>dapeng-scala-dbc</module>
         <module>dapeng-message</module>
         <!--<module>dapeng-pinpoint-plugin</module>-->
@@ -60,6 +60,7 @@
         <java-version>1.8</java-version>
         <slf4j-version>1.7.13</slf4j-version>
         <logback-version>1.1.3</logback-version>
+        <dapeng-version>1.1.1-SNAPSHOT</dapeng-version>
     </properties>
 
     <profiles>
@@ -139,14 +140,17 @@
         <profile>
             <id>test</id>
             <distributionManagement>
-                <snapshotRepository>
-                    <id>soa</id>
-                    <url>http://nexus.oa.isuwang.com/content/repositories/soa</url>
-                </snapshotRepository>
                 <repository>
-                    <id>nexus-snapshots</id>
-                    <url>http://nexus.oa.isuwang.com/content/repositories/releases/</url>
+                    <id>nexus-releases</id>
+                    <name>Nexus Releases Repository</name>
+                    <url>http://maven.tuikor.com/content/repositories/releases/</url>
                 </repository>
+
+                <snapshotRepository>
+                    <id>nexus-snapshots</id>
+                    <name>Nexus Snapshots Repository</name>
+                    <url>http://maven.tuikor.com/content/repositories/snapshots/</url>
+                </snapshotRepository>
             </distributionManagement>
 
             <build>

@@ -4,6 +4,8 @@ import com.isuwang.dapeng.core.IPUtils;
 import com.isuwang.dapeng.core.InvocationContext;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -51,6 +53,11 @@ public class ContainerSoaHeader {
 
         @Override
         public Optional<String> sessionId() { return Optional.empty();}
+
+        @Override
+        public Map<String, String> attachments() {
+            return new HashMap<>();
+        }
     }
 
 }
