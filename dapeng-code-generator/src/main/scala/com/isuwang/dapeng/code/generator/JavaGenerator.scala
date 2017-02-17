@@ -375,7 +375,7 @@ class JavaGenerator extends CodeGenerator {
             /**
             *{field.doc}
             **/
-            {if(field.isPrivacy)  <div>private</div> else <div>public</div>} {if(field.isOptional) <div>Optional{lt}</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>{gt}</div>} {field.name} {if(field.isOptional) <div>= Optional.empty()</div> else {
+            {if(field.isPrivacy)  <div>private</div> else <div>public</div>} {if(field.isOptional) <div>Optional{lt}</div>}{toDataTypeTemplate(field.isOptional, field.getDataType)}{if(field.isOptional) <div>{gt}</div>} {field.name} {if(field.isOptional) <div>= Optional.empty()</div> else {
             field.dataType.kind match {
               case KIND.LIST => <div>= new java.util.ArrayList()</div>
               case KIND.SET => <div>= new java.util.HashSet{lt}{gt}()</div>
@@ -383,11 +383,11 @@ class JavaGenerator extends CodeGenerator {
               case _ => <div></div>
             }
           }};
-            public {if(field.isOptional) <div>Optional{lt}</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>{gt}</div>} get{field.name.charAt(0).toUpper + field.name.substring(1)}()<block> return this.{field.name}; </block>
-            public void set{field.name.charAt(0).toUpper + field.name.substring(1)}({if(field.isOptional) <div>Optional{lt}</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>{gt}</div>} {field.name})<block> this.{field.name} = {field.name}; </block>
+            public {if(field.isOptional) <div>Optional{lt}</div>}{toDataTypeTemplate(field.isOptional, field.getDataType)}{if(field.isOptional) <div>{gt}</div>} get{field.name.charAt(0).toUpper + field.name.substring(1)}()<block> return this.{field.name}; </block>
+            public void set{field.name.charAt(0).toUpper + field.name.substring(1)}({if(field.isOptional) <div>Optional{lt}</div>}{toDataTypeTemplate(field.isOptional, field.getDataType)}{if(field.isOptional) <div>{gt}</div>} {field.name})<block> this.{field.name} = {field.name}; </block>
 
-            public {if(field.isOptional) <div>Optional{lt}</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>{gt}</div>} {field.name}()<block> return this.{field.name}; </block>
-            public {struct.name} {field.name}({if(field.isOptional) <div>Optional{lt}</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>{gt}</div>} {field.name})<block> this.{field.name} = {field.name}; return this; </block>
+            public {if(field.isOptional) <div>Optional{lt}</div>}{toDataTypeTemplate(field.isOptional, field.getDataType)}{if(field.isOptional) <div>{gt}</div>} {field.name}()<block> return this.{field.name}; </block>
+            public {struct.name} {field.name}({if(field.isOptional) <div>Optional{lt}</div>}{toDataTypeTemplate(field.isOptional, field.getDataType)}{if(field.isOptional) <div>{gt}</div>} {field.name})<block> this.{field.name} = {field.name}; return this; </block>
           </div>
         }
         }
@@ -457,7 +457,20 @@ class JavaGenerator extends CodeGenerator {
     }
   }
 
+  def toDataTypeTemplate(optional: Boolean , dataType:DataType): Elem = {
 
+    if (optional)
+      toDataTypeTemplate(dataType)
+    else
+      dataType.kind match {
+        case KIND.BOOLEAN => <div>boolean</div>
+        case KIND.SHORT => <div>short</div>
+        case KIND.INTEGER => <div>int</div>
+        case KIND.LONG => <div>long</div>
+        case KIND.DOUBLE => <div>double</div>
+        case _ => toDataTypeTemplate(dataType)
+      }
+  }
 
   def toDataTypeTemplate(dataType:DataType): Elem = {
     dataType.kind match {

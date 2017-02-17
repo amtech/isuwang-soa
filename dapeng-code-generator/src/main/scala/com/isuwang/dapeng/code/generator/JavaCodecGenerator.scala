@@ -701,7 +701,7 @@ class JavaCodecGenerator extends CodeGenerator {
       {
       toFieldArrayBuffer(struct.fields).map{(field : Field) =>{
         <div>{
-          if(!field.isOptional && field.dataType.kind != DataType.KIND.VOID){
+          if(!field.isOptional && field.dataType.kind != DataType.KIND.VOID && checkIfNeedValidate(field.isOptional, field.dataType)){
             <div>
               if(bean.get{field.name.charAt(0).toUpper + field.name.substring(1)}() == null)
               throw new SoaException(SoaBaseCode.NotNull, "{field.name}字段不允许为空");
@@ -724,6 +724,25 @@ class JavaCodecGenerator extends CodeGenerator {
     </block>
     </div>
   }
+
+  def checkIfNeedValidate(optional: Boolean, dataType: DataType): Boolean = {
+
+    if(optional)
+      false
+    else
+      dataType.kind match {
+
+        case DataType.KIND.BOOLEAN => false
+        case KIND.SHORT => false
+        case KIND.INTEGER => false
+        case KIND.LONG => false
+        case KIND.DOUBLE => false
+        case _ => true
+      }
+
+  }
+
+
 
   def getToStringElement(field: Field): Elem = {
     <div>
