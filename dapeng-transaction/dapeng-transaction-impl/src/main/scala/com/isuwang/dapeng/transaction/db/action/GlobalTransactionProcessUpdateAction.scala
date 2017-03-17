@@ -5,11 +5,11 @@ import java.util.Date
 
 import com.isuwang.dapeng.core.SoaException
 import com.isuwang.dapeng.transaction.TransactionDB._
+import com.isuwang.dapeng.transaction.TransactionSQL
 import com.isuwang.dapeng.transaction.api.domain.{TGlobalTransactionProcessExpectedStatus, TGlobalTransactionProcessStatus}
+import com.isuwang.dapeng.transaction.support.Action
+import com.isuwang.dapeng.transaction.support.Assert._
 import com.isuwang.dapeng.transaction.utils.ErrorCode
-import com.isuwang.dapeng.transaction.{TransactionDB, TransactionSQL}
-import com.isuwang.scala.dbc.Action
-import com.isuwang.scala.dbc.Assert._
 import org.slf4j.{Logger, LoggerFactory}
 import wangzx.scala_commons.sql._
 
@@ -63,6 +63,7 @@ class GlobalTransactionProcessUpdateAction(processId: Int, responseJson: String,
 
 /**
   * 更新期望状态
+  *
   * @param processId
   * @param status
   */
@@ -111,6 +112,7 @@ class GlobalTransactionProcessExpectedStatusUpdateAction(processId: Int, status:
 
 /**
   * 更新重试次数和下次重试时间
+  *
   * @param processId
   */
 class GlobalTransactionProcessUpdateAfterRollbackFail(processId: Int) extends Action[Unit] {

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>dapeng-monitor</artifactId>
         <groupId>com.isuwang</groupId>
-        <version>1.1.1-SNAPSHOT</version>
+        <version>${dapeng-version}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

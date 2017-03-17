@@ -5,7 +5,7 @@
     <parent>
         <artifactId>dapeng-parent</artifactId>
         <groupId>com.isuwang</groupId>
-        <version>1.1.1-SNAPSHOT</version>
+        <version>${dapeng-version}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -30,7 +30,7 @@
         <dependency>
             <groupId>com.isuwang</groupId>
             <artifactId>dapeng-core</artifactId>
-            <version>1.1.1-SNAPSHOT</version>
+            <version>${dapeng-version}</version>
         </dependency>
     </dependencies>
 

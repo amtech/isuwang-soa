@@ -1,4 +1,4 @@
-package com.isuwang.scala.dbc
+package com.isuwang.dapeng.transaction.support
 
 import com.isuwang.dapeng.core.{SoaBaseCodeInterface, SoaException}
 

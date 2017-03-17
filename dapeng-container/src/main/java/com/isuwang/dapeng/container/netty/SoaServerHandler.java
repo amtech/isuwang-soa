@@ -379,8 +379,8 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
                 if (outputBuf.writerIndex() > 0)
                     outputBuf.writerIndex(Integer.BYTES);
 
-                soaHeader.setRespCode(Optional.of(e.getCode()));
-                soaHeader.setRespMessage(Optional.of(e.getMsg()));
+                soaHeader.setRespCode(Optional.ofNullable(e.getCode()));
+                soaHeader.setRespMessage(Optional.ofNullable(e.getMsg()));
                 outputProtocol.writeMessageBegin(new TMessage(soaHeader.getServiceName() + ":" + soaHeader.getMethodName(), TMessageType.REPLY, context.getSeqid()));
                 outputProtocol.writeMessageEnd();
 
