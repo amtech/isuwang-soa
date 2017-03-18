@@ -49,8 +49,8 @@
         <!--twitter-->
         <dependency>
             <groupId>com.twitter</groupId>
-            <artifactId>scrooge-generator_2.11</artifactId>
-            <version>4.5.0</version>
+            <artifactId>scrooge-generator_2.12</artifactId>
+            <version>4.15.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.scala-lang</groupId>
