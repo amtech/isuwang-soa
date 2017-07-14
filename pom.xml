@@ -138,14 +138,17 @@
         <profile>
             <id>test</id>
             <distributionManagement>
-                <snapshotRepository>
-                    <id>soa</id>
-                    <url>http://nexus.oa.isuwang.com/content/repositories/soa</url>
-                </snapshotRepository>
                 <repository>
-                    <id>nexus-snapshots</id>
-                    <url>http://nexus.oa.isuwang.com/content/repositories/releases/</url>
+                    <id>nexus-releases</id>
+                    <name>Nexus Releases Repository</name>
+                    <url>http://nexus.oa.isuwang.com/repository/maven-releases/</url>
                 </repository>
+
+                <snapshotRepository>
+                    <id>nexus-snapshots</id>
+                    <name>Nexus Snapshots Repository</name>
+                    <url>http://nexus.oa.isuwang.com/repository/maven-snapshots/</url>
+                </snapshotRepository>
             </distributionManagement>
 
             <build>
@@ -185,6 +188,30 @@
             </build>
         </profile>
     </profiles>
+
+    <repositories>
+        <repository>
+            <id>maven-isuwang-com</id>
+            <url>http://nexus.oa.isuwang.com/repository/maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>maven-net-cn</id>
+            <name>Maven China Mirror</name>
+            <url>http://repo1.maven.org/maven2/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <dependencyManagement>
         <dependencies>
