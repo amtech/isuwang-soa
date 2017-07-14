@@ -7,55 +7,67 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Struct {
 
-	@XmlAttribute
-	public String namespace;
-	@XmlAttribute
-	public String name;
-	
-	public String label;
-	public String doc;
-	
-	@XmlElementWrapper(name="fields")	@XmlElement(name="field")
-	public List<Field> fields;
+    @XmlAttribute
+    public String namespace;
+    @XmlAttribute
+    public String name;
 
-	public String getNamespace() {
-		return namespace;
-	}
+    public String label;
+    public String doc;
 
-	public void setNamespace(String namespace) {
-		this.namespace = namespace;
-	}
+    @XmlElementWrapper(name = "fields")
+    @XmlElement(name = "field")
+    public List<Field> fields;
 
-	public String getName() {
-		return name;
-	}
+    @XmlElementWrapper(name = "annotations")
+    @XmlElement(name = "annotation")
+    public List<Annotation> annotations;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getNamespace() {
+        return namespace;
+    }
 
-	public String getLabel() {
-		return label;
-	}
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
 
-	public void setLabel(String label) {
-		this.label = label;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public String getDoc() {
-		return doc;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setDoc(String doc) {
-		this.doc = doc;
-	}
+    public String getLabel() {
+        return label;
+    }
 
-	public List<Field> getFields() {
-		return fields;
-	}
+    public void setLabel(String label) {
+        this.label = label;
+    }
 
-	public void setFields(List<Field> fields) {
-		this.fields = fields;
-	}
-	
+    public String getDoc() {
+        return doc;
+    }
+
+    public void setDoc(String doc) {
+        this.doc = doc;
+    }
+
+    public List<Field> getFields() {
+        return fields;
+    }
+
+    public void setFields(List<Field> fields) {
+        this.fields = fields;
+    }
+
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(List<Annotation> annotations) {
+        this.annotations = annotations;
+    }
 }

@@ -1,9 +1,7 @@
 package com.isuwang.dapeng.core.metadata;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
+import java.util.List;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -16,6 +14,10 @@ public class Method {
 
     public Struct request;
     public Struct response;
+
+    @XmlElementWrapper(name = "annotations")
+    @XmlElement(name = "annotation")
+    public List<Annotation> annotations;
 
     public boolean isSoaTransactionProcess;
 
@@ -66,5 +68,13 @@ public class Method {
 
     public void setSoaTransactionProcess(boolean soaTransactionProcess) {
         isSoaTransactionProcess = soaTransactionProcess;
+    }
+
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(List<Annotation> annotations) {
+        this.annotations = annotations;
     }
 }

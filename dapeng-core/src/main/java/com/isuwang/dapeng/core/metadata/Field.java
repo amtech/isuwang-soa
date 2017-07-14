@@ -1,9 +1,7 @@
 package com.isuwang.dapeng.core.metadata;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
+import java.util.List;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -28,6 +26,10 @@ public class Field {
     public boolean privacy;
 
     public String sample_value;
+
+    @XmlElementWrapper(name = "annotations")
+    @XmlElement(name = "annotation")
+    public List<Annotation> annotations;
 
     public int getTag() {
         return tag;
@@ -93,4 +95,11 @@ public class Field {
         this.sample_value = sample_value;
     }
 
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(List<Annotation> annotations) {
+        this.annotations = annotations;
+    }
 }

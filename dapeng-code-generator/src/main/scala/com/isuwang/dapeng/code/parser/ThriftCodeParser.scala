@@ -8,7 +8,7 @@ import com.google.common.base.Charsets
 import com.google.common.io.CharStreams
 import com.isuwang.dapeng.core.metadata
 import com.isuwang.dapeng.core.metadata.TEnum.EnumItem
-import com.isuwang.dapeng.core.metadata.{DataType, Method, TEnum}
+import com.isuwang.dapeng.core.metadata.{Annotation, DataType, Method, TEnum}
 import com.twitter.scrooge.ast._
 import com.twitter.scrooge.frontend.{Importer, ResolvedDocument, ThriftParser, TypeResolver}
 import com.twitter.scrooge.java_generator._
@@ -63,7 +63,7 @@ class ThriftCodeParser {
   /**
     * 获取生成器
     *
-    * @param doc0 文档结构
+    * @param doc0        文档结构
     * @param genHashcode 是否生成HashCode
     * @return 生成器
     */
@@ -101,9 +101,9 @@ class ThriftCodeParser {
             line = line.substring("/**".length)
           }
 
-          if(line.endsWith("**/"))
+          if (line.endsWith("**/"))
             line = line.substring(0, line.lastIndexOf("**/"))
-          if(line.endsWith("*/"))
+          if (line.endsWith("*/"))
             line = line.substring(0, line.lastIndexOf("*/"))
 
           if (line.length > 0) {
@@ -204,6 +204,10 @@ class ThriftCodeParser {
       val tenum = new TEnum()
       if (controller.has_namespace)
         tenum.setNamespace(controller.namespace)
+
+      if (e.annotations.size > 0)
+        tenum.setAnnotations(e.annotations.map { case (key, value) => new Annotation(key, value) }.toList)
+
       tenum.setName(controller.name)
       tenum.setDoc(toDocString(e.docstring))
       tenum.setEnumItems(new util.ArrayList[EnumItem]())
@@ -219,6 +223,10 @@ class ThriftCodeParser {
         enumItem.setLabel(name)
         enumItem.setValue(value)
         enumItem.setDoc(docString)
+
+        val teItem = e.values.get(index)
+        if (teItem.annotations.size > 0)
+          enumItem.setAnnotations(teItem.annotations.map { case (key, value) => new Annotation(key, value) }.toList)
         tenum.getEnumItems.add(enumItem)
       }
 
@@ -238,6 +246,9 @@ class ThriftCodeParser {
         this.setName(controller.name)
         this.setDoc(toDocString(struct.docstring))
 
+        if (struct.annotations.size > 0)
+          this.setAnnotations(struct.annotations.map { case (key, value) => new Annotation(key, value) }.toList)
+
         val fields0 = controller.allFields.zip(controller.fields).toList.map { case (field, fieldController) =>
           val tag0 = field.index.toString.toInt
           val name0 = field.originalName
@@ -255,6 +266,10 @@ class ThriftCodeParser {
             this.setDoc(docSrting0)
             this.setDataType(dataType0)
             this.setPrivacy(false)
+
+            if (field.fieldAnnotations.size > 0)
+              this.setAnnotations(field.fieldAnnotations.map { case (key, value) => new Annotation(key, value) }.toList)
+
           }
         }
 
@@ -274,6 +289,8 @@ class ThriftCodeParser {
       service.setNamespace(if (controller.has_namespace) controller.namespace else null)
       service.setName(controller.name)
       service.setDoc(toDocString(s.docstring))
+      if (s.annotations.size > 0)
+        service.setAnnotations(s.annotations.map { case (key, value) => new Annotation(key, value) }.toList)
 
       val methods = new util.ArrayList[Method]()
       for (tmpIndex <- (0 until controller.functions.size)) {
@@ -291,6 +308,9 @@ class ThriftCodeParser {
         method.setResponse(response)
         method.setDoc(toDocString(s.functions(tmpIndex).docstring))
 
+        if (s.functions(tmpIndex).annotations.size > 0)
+          method.setAnnotations(s.functions(tmpIndex).annotations.map { case (k, v) => new Annotation(k, v) }.toList)
+
         if (method.getDoc != null && method.getDoc.contains("@IsSoaTransactionProcess"))
           method.setSoaTransactionProcess(true)
         else
@@ -302,12 +322,12 @@ class ThriftCodeParser {
         for (index <- (0 until functionField.fields.size)) {
           val field = functionField.fields(index)
 
+          val realField = s.functions.get(tmpIndex).args.get(index)
+
           val tag = index + 1
           val name = field.name
 
-          var docSrting = ""
-          if (s.functions.get(tmpIndex).args.get(index).docstring.isDefined)
-            docSrting = toDocString(s.functions.get(tmpIndex).args.get(index).docstring)
+          val docSrting = if (realField.docstring.isDefined) toDocString(realField.docstring) else ""
 
           val f = field.field_type.getClass.getDeclaredField("fieldType");
           f.setAccessible(true)
@@ -319,14 +339,14 @@ class ThriftCodeParser {
           tfiled.setDoc(docSrting)
           tfiled.setDataType(dataType)
           tfiled.setOptional(field.optional)
+          if (realField.fieldAnnotations.size > 0)
+            tfiled.setAnnotations(realField.fieldAnnotations.map { case (k, v) => new Annotation(k, v) }.toList)
           request.getFields.add(tfiled)
         }
 
-        var docSrting = ""
-        if (s.functions.get(tmpIndex).docstring.isDefined)
-          docSrting = toDocString(s.functions.get(tmpIndex).docstring)
+        val docSrting = if (s.functions.get(tmpIndex).docstring.isDefined) toDocString(s.functions.get(tmpIndex).docstring) else ""
 
-        val f = functionField.return_type.getClass.getDeclaredField("fieldType");
+        val f = functionField.return_type.getClass.getDeclaredField("fieldType")
         f.setAccessible(true)
 
         var dataType: DataType = null
@@ -356,7 +376,7 @@ class ThriftCodeParser {
     results
   }
 
-  def getAllStructs(resources: Array[String]):util.List[metadata.Struct] = {
+  def getAllStructs(resources: Array[String]): util.List[metadata.Struct] = {
     resources.foreach(resource => {
       val doc = generateDoc(resource)
       docCache.put(resource.substring(resource.lastIndexOf(File.separator) + 1, resource.lastIndexOf(".")), doc)
@@ -369,7 +389,7 @@ class ThriftCodeParser {
     structCache.toList
   }
 
-  def getAllEnums(resources: Array[String]):util.List[metadata.TEnum] = {
+  def getAllEnums(resources: Array[String]): util.List[metadata.TEnum] = {
     resources.foreach(resource => {
       val doc = generateDoc(resource)
       docCache.put(resource.substring(resource.lastIndexOf(File.separator) + 1, resource.lastIndexOf(".")), doc)
@@ -396,9 +416,9 @@ class ThriftCodeParser {
       structCache.addAll(findStructs(doc, generator))
       serviceCache.addAll(findServices(doc, generator))
 
-      for(enum <- enumCache)
+      for (enum <- enumCache)
         mapEnumCache.put(enum.getNamespace + "." + enum.getName, enum)
-      for(struct <- structCache)
+      for (struct <- structCache)
         mapStructCache.put(struct.getNamespace + "." + struct.getName, struct)
     })
 
@@ -408,20 +428,20 @@ class ThriftCodeParser {
       val structSet = new util.HashSet[metadata.Struct]()
       val enumSet = new util.HashSet[TEnum]()
       //递归将service中所有method的所有用到的struct加入列表
-      for(method <- service.getMethods){
-        for(field <- method.getRequest.getFields){
+      for (method <- service.getMethods) {
+        for (field <- method.getRequest.getFields) {
           getAllStructs(field.getDataType, structSet)
           getAllEnums(field.getDataType, enumSet)
         }
-        for(field <- method.getResponse.getFields){
+        for (field <- method.getResponse.getFields) {
           getAllStructs(field.getDataType, structSet)
           getAllEnums(field.getDataType, enumSet)
         }
       }
       service.setStructDefinitions(structSet.toList)
       service.setEnumDefinitions(enumSet.toList)
-//      service.setEnumDefinitions(enumCache)
-//      service.setStructDefinitions(structCache)
+      //      service.setEnumDefinitions(enumCache)
+      //      service.setStructDefinitions(structCache)
       service.setMeta(new metadata.Service.ServiceMeta {
         if (serviceVersion != null && !serviceVersion.trim.equals(""))
           this.version = serviceVersion.trim
@@ -442,17 +462,17 @@ class ThriftCodeParser {
     */
   def getAllStructs(dataType: metadata.DataType, structSet: java.util.HashSet[metadata.Struct]): Unit = {
 
-    if(dataType.getKind == DataType.KIND.STRUCT){
+    if (dataType.getKind == DataType.KIND.STRUCT) {
       val struct = mapStructCache.get(dataType.getQualifiedName)
       structSet.add(struct)
-      for(tmpField <- struct.getFields){
+      for (tmpField <- struct.getFields) {
         getAllStructs(tmpField.getDataType, structSet)
       }
     }
-    else if(dataType.getKind == DataType.KIND.SET || dataType.getKind == DataType.KIND.LIST){
+    else if (dataType.getKind == DataType.KIND.SET || dataType.getKind == DataType.KIND.LIST) {
       getAllStructs(dataType.getValueType, structSet)
 
-    }else if(dataType.getKind == DataType.KIND.MAP){
+    } else if (dataType.getKind == DataType.KIND.MAP) {
       getAllStructs(dataType.getKeyType, structSet)
       getAllStructs(dataType.getValueType, structSet)
     }
@@ -466,18 +486,18 @@ class ThriftCodeParser {
     */
   def getAllEnums(dataType: metadata.DataType, enumSet: util.HashSet[metadata.TEnum]): Unit = {
 
-    if(dataType.getKind == DataType.KIND.ENUM)
+    if (dataType.getKind == DataType.KIND.ENUM)
       enumSet.add(mapEnumCache.get(dataType.getQualifiedName))
 
-    else if(dataType.getKind == DataType.KIND.STRUCT){
-      val struct =  mapStructCache.get(dataType.getQualifiedName)
-      for(field <- struct.getFields)
+    else if (dataType.getKind == DataType.KIND.STRUCT) {
+      val struct = mapStructCache.get(dataType.getQualifiedName)
+      for (field <- struct.getFields)
         getAllEnums(field.getDataType, enumSet)
     }
-    else if(dataType.getKind == DataType.KIND.SET || dataType.getKind == DataType.KIND.LIST){
+    else if (dataType.getKind == DataType.KIND.SET || dataType.getKind == DataType.KIND.LIST) {
       getAllEnums(dataType.getValueType, enumSet)
 
-    }else if(dataType.getKind == DataType.KIND.MAP){
+    } else if (dataType.getKind == DataType.KIND.MAP) {
       getAllEnums(dataType.getKeyType, enumSet)
       getAllEnums(dataType.getValueType, enumSet)
     }
