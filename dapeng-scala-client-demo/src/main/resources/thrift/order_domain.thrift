@@ -1,4 +1,4 @@
-namespace scala com.isuwang.dapeng.demo.domain
+namespace java com.isuwang.dapeng.demo.domain
 
 include "order_enum.thrift"
 

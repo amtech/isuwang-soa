@@ -1,4 +1,4 @@
-namespace scala com.isuwang.dapeng.demo.service
+namespace java com.isuwang.dapeng.demo.service
 include "order_domain.thrift"
 
 /**

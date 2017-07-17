@@ -1,4 +1,4 @@
-namespace scala com.isuwang.dapeng.demo.enums
+namespace java com.isuwang.dapeng.demo.enums
 
 /**
 * 订单支付方式
