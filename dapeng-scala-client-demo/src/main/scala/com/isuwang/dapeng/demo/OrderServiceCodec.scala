@@ -28,7 +28,7 @@ class OrderServiceCodec {
       var payType: com.isuwang.dapeng.demo.enums.PayTypeEnum.PayTypeEnum = null
       var buyerId: Int = 0
       var sellerId: Int = 0
-      var remark: Option[String] = null
+      var remark: Option[String] = None
 
       while (schemeField == null || schemeField.`type` != com.isuwang.org.apache.thrift.protocol.TType.STOP) {
         schemeField = iproto.readFieldBegin
