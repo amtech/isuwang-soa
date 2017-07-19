@@ -31,3 +31,5 @@ dapeng.iml
 /dapeng-spring/dapeng-spring.iml
 /dapeng-zookeeper/target/
 /dapeng-zookeeper/dapeng-zookeeper.iml
+.DS_Store
+**/.DS_Store
