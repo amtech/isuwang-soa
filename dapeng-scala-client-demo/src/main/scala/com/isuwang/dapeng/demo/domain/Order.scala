@@ -21,5 +21,8 @@ case class Order(/** 订单id */
                  /** 卖家id */
                  sellerId: Int,
 
+                 /** 成交价格 */
+                 price: BigDecimal,
+
                  /** 备注信息 */
                  remark: Option[String])

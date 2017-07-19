@@ -17,8 +17,10 @@ struct Order {
     4: i32 buyerId,
     /**卖家id*/
     5: i32 sellerId,
+    /**成交价格*/
+    6: double price,
     /**备注信息*/
-    6: optional string remark,
+    7: optional string remark,
 }
 
 /**
@@ -26,7 +28,7 @@ struct Order {
 **/
 struct FindOrderRequest{
     /**支付方式*/
-    1: order_enum.PayTypeEnum payType,
+    1: order_enum.PayTypeEnum payType = AliPay,
     /**买家id*/
     2: i32 buyerId,
 }
