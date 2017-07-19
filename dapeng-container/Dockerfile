@@ -1,4 +1,4 @@
-FROM docker.oa.tuikor.com:5000/basic/openjdk:8-jre-alpine
+FROM docker.oa.51xinzhi.com:5000/basic/openjdk:8-jre-alpine
 MAINTAINER 439674061@qq.com 
 
 # Setting Envirnoment
