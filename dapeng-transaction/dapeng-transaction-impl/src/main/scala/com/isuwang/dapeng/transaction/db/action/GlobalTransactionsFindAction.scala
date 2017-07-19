@@ -1,13 +1,13 @@
 package com.isuwang.dapeng.transaction.db.action
 
 import com.isuwang.dapeng.transaction.TransactionDB._
+import com.isuwang.dapeng.transaction.TransactionSQL
 import com.isuwang.dapeng.transaction.api.domain.{TGlobalTransaction, TGlobalTransactionProcessStatus, TGlobalTransactionsStatus}
 import com.isuwang.dapeng.transaction.db.domain.GlobalTransaction
+import com.isuwang.dapeng.transaction.support.Action
+import com.isuwang.dapeng.transaction.support.Assert._
+import com.isuwang.dapeng.transaction.support.Implicit._
 import com.isuwang.dapeng.transaction.utils.ErrorCode
-import com.isuwang.dapeng.transaction.{TransactionDB, TransactionSQL}
-import com.isuwang.scala.dbc.Action
-import com.isuwang.scala.dbc.Assert._
-import com.isuwang.scala.dbc.Implicit._
 import wangzx.scala_commons.sql._
 
 import scala.collection.JavaConversions._

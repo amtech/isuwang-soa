@@ -6,9 +6,9 @@ import java.util.Date
 import com.isuwang.dapeng.transaction.TransactionSQL
 import com.isuwang.dapeng.transaction.api.domain.TGlobalTransactionProcess
 import com.isuwang.dapeng.transaction.db.domain.GlobalTransactionProcess
+import com.isuwang.dapeng.transaction.support.Action
+import com.isuwang.dapeng.transaction.support.Assert._
 import com.isuwang.dapeng.transaction.utils.ErrorCode
-import com.isuwang.scala.dbc.Action
-import com.isuwang.scala.dbc.Assert._
 import org.slf4j.{Logger, LoggerFactory}
 
 /**

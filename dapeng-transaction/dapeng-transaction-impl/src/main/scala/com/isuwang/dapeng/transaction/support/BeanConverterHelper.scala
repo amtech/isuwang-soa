@@ -1,7 +1,7 @@
-package com.isuwang.scala.dbc.helper
+package com.isuwang.dapeng.transaction.support
 
+import com.isuwang.dapeng.transaction.support.BeanMapping._
 import com.isuwang.org.apache.thrift.TEnum
-import com.isuwang.scala.dbc.helper.BeanMapping._
 import org.apache.commons.lang.math.NumberUtils
 import org.slf4j.{Logger, LoggerFactory}
 

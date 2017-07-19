@@ -1,10 +1,9 @@
-package com.isuwang.scala.dbc.helper
+package com.isuwang.dapeng.transaction.support
 
-import java.lang.reflect.{ParameterizedType, Method}
+import java.lang.reflect.{Method, ParameterizedType}
 
+import com.isuwang.dapeng.transaction.support.Implicit.StringImplicit
 import com.isuwang.org.apache.thrift.TEnum
-import com.isuwang.scala.dbc.Implicit
-import Implicit.StringImplicit
 import wangzx.scala_commons.sql.SoftMap
 
 /**

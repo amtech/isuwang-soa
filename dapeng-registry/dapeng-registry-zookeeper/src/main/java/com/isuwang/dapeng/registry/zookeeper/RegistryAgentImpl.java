@@ -85,9 +85,9 @@ public class RegistryAgentImpl implements RegistryAgent {
             zooKeeperHelper.addOrUpdateServerInfo(path, data);
 
             if (SoaSystemEnvProperties.SOA_ZOOKEEPER_MASTER_ISCONFIG)
-                zooKeeperMasterHelper.runForMaster(ZookeeperHelper.generateKey(serverName, versionName));
+                zooKeeperMasterHelper.createCurrentNode(ZookeeperHelper.generateKey(serverName, versionName));
             else
-                zooKeeperHelper.runForMaster(ZookeeperHelper.generateKey(serverName, versionName));
+                zooKeeperHelper.createCurrentNode(ZookeeperHelper.generateKey(serverName, versionName));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }

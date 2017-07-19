@@ -122,12 +122,12 @@ service HelloService {
 
 > 打包服务接口代码工程(`dapeng-code-generator`): `mvn clean package`
 >
-> 输出的可执行jar包目录: `dapeng-code-generator/target/dapeng-code-generator-1.0-SNAPSHOT-jar-with-dependencies.jar`
+> 输出的可执行jar包目录: `dapeng-code-generator/target/dapeng-code-generator-1.1.0-jar-with-dependencies.jar`
 
 打印帮助命令
 
 ```
-java -jar dapeng-code-generator-1.1-SNAPSHOT-jar-with-dependencies.jar
+java -jar dapeng-code-generator-1.1.0-jar-with-dependencies.jar
 
 -----------------------------------------------------------------------
  args: -gen metadata,js,json file
@@ -139,6 +139,7 @@ java -jar dapeng-code-generator-1.1-SNAPSHOT-jar-with-dependencies.jar
                Keys and values are options passed to the generator.
    -v version  Set the version of the Service generated.
    -in dir     Set input location of all Thrift files.
+   -all        Generate all structs and enums
 
  Available generators (and options):
    metadata
@@ -151,13 +152,14 @@ java -jar dapeng-code-generator-1.1-SNAPSHOT-jar-with-dependencies.jar
 生成thrift idl 定义服务接口代码
 
 ```
-java -jar dapeng-code-generator-1.1-SNAPSHOT-jar-with-dependencies.jar -gen java -out F:\hello F:\hello\hello_domain.thrift,F:\hello\hello_service.thrift
+java -jar dapeng-code-generator-1.1.0-jar-with-dependencies.jar -gen java -out F:\hello F:\hello\hello_domain.thrift,F:\hello\hello_service.thrift
 
 # 说明：
 # 1. `-gen java` 表示生成java代码； 
 # 2. `-out F:\hello`表示生成代码到`F:\hello`文件夹；
-# 3. 多个thrift文件使用`,`分隔； 
-# 4. 生成的xml文件在`F:\hello`文件夹，java类在`F:\hello\java-gen`文件夹。
+# 3. `-in /home/thrift/`表示thrift文件所在文件夹，可以省略一个个声明文件地址
+# 4. 多个thrift文件使用`,`分隔； 
+# 5. 生成的xml文件在`F:\hello`文件夹，java类在`F:\hello\java-gen`文件夹。
 ```
 
 #### 创建API工程
@@ -169,7 +171,7 @@ java -jar dapeng-code-generator-1.1-SNAPSHOT-jar-with-dependencies.jar -gen java
 <dependency>
     <groupId>com.isuwang</groupId>
     <artifactId>dapeng-remoting-api</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
@@ -194,7 +196,7 @@ java -jar dapeng-code-generator-1.1-SNAPSHOT-jar-with-dependencies.jar -gen java
 <dependency>
     <groupId>com.isuwang</groupId>
     <artifactId>dapeng-spring</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
@@ -290,7 +292,7 @@ mvn compile isuwangsoa:run -Dsoa.remoting.mode=local
 
 # 第二种
 cd hello-service
-mvn compile com.isuwang:dapeng-maven-plugin:1.1-SNAPSHOT:run -Dsoa.remoting.mode=local
+mvn compile com.isuwang:dapeng-maven-plugin:1.1.0:run -Dsoa.remoting.mode=local
 ```
 
 * 远程模式(需要启动zookeeper)
@@ -305,7 +307,7 @@ mvn compile isuwangsoa:run
 
 # 第二种
 cd hello-service
-mvn compile com.isuwang:dapeng-maven-plugin:1.1-SNAPSHOT:run
+mvn compile com.isuwang:dapeng-maven-plugin:1.1.0:run
 ```
 
 * 启动可选参数
@@ -330,12 +332,12 @@ mvn compile com.isuwang:dapeng-maven-plugin:1.1-SNAPSHOT:run
 <dependency>
     <groupId>com.isuwang</groupId>
     <artifactId>dapeng-registry-zookeeper</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1.0</version>
 </dependency>
 <dependency>
     <groupId>com.isuwang</groupId>
     <artifactId>dapeng-remoting-netty</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
