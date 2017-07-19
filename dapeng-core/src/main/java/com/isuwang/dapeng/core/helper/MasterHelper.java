@@ -23,11 +23,12 @@ public class MasterHelper {
     public static boolean isMaster(String servieName, String versionName) {
 
         String key = generateKey(servieName, versionName);
-        if (!isMaster.containsKey(key)) {
-            return true;
-        } else {
+
+        if (!isMaster.containsKey(key))
+            return false;
+        else
             return isMaster.get(key);
-        }
+
     }
 
     public static String generateKey(String serviceName, String versionName) {
