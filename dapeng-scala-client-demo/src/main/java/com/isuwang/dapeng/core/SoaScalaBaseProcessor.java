@@ -29,7 +29,7 @@ public class SoaScalaBaseProcessor<I> implements TProcessor {
     private Class<I> interfaceClass;
     private final Map<String, SoaProcessFunction<I, ?, ?, ? extends TScalaBeanSerializer<?>, ? extends TScalaBeanSerializer<?>>> processMap;
 
-    protected SoaScalaBaseProcessor(I iface, Map<String, SoaProcessFunction<I, ?, ?, ? extends TScalaBeanSerializer<?>, ? extends TScalaBeanSerializer<?>>> processMap) {
+    public SoaScalaBaseProcessor(I iface, Map<String, SoaProcessFunction<I, ?, ?, ? extends TScalaBeanSerializer<?>, ? extends TScalaBeanSerializer<?>>> processMap) {
         this.iface = iface;
         this.processMap = processMap;
     }

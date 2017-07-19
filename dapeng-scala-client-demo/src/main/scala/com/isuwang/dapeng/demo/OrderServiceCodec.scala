@@ -1,11 +1,12 @@
 package com.isuwang.dapeng.demo
 
+import java.util
+
 import com.isuwang.dapeng.core._
 import com.isuwang.org.apache.thrift._
 import com.isuwang.org.apache.thrift.protocol._
 
 import collection.JavaConverters._
-
 import scala.collection.immutable.Range
 
 /**
@@ -340,13 +341,16 @@ object OrderServiceCodec {
   }
 
 
-  class findOrder[I <: com.isuwang.dapeng.demo.OrderService] extends SoaProcessFunction[I, findOrder_args, findOrder_result, FindOrder_argsSerializer, FindOrder_resultSerializer]("findOrder", new FindOrder_argsSerializer(), new FindOrder_resultSerializer()) {
-    override def isOneway: Boolean = false
+  // class getServiceMetadata[I <: com.isuwang.dapeng.demo.OrderService]
+  // extends SoaProcessFunction[I, getServiceMetadata_args, getServiceMetadata_result, GetServiceMetadata_argsSerializer, GetServiceMetadata_resultSerializer]("getServiceMetadata", new GetServiceMetadata_argsSerializer(), new GetServiceMetadata_resultSerializer()) {
+  class findOrder extends SoaProcessFunction[ com.isuwang.dapeng.demo.OrderService, findOrder_args, findOrder_result, FindOrder_argsSerializer, FindOrder_resultSerializer](
+    "findOrder", new FindOrder_argsSerializer(), new FindOrder_resultSerializer()) {
+    def isOneway: Boolean = false
 
-    override def getEmptyArgsInstance: findOrder_args = findOrder_args(null)
+    def getEmptyArgsInstance: findOrder_args = findOrder_args(null)
 
     @throws[TException]
-    override def getResult(iface: I, args: findOrder_args): findOrder_result = {
+    def getResult(iface: com.isuwang.dapeng.demo.OrderService, args: findOrder_args): findOrder_result = {
       findOrder_result(iface.findOrder(args.request))
     }
   }
@@ -462,11 +466,18 @@ object OrderServiceCodec {
 //    override def getResult(iface: I, args: getServiceMetadata_args): getServiceMetadata_result = ???
 //  }
 
-  class Processor[I <: com.isuwang.dapeng.demo.OrderService](iface: I) extends SoaScalaBaseProcessor(iface, Processor.getProcessMap())
+  // Map<String, SoaProcessFunction<I, ?, ?, ? extends TScalaBeanSerializer<?>, ? extends TScalaBeanSerializer<?>>>
+  class Processor(iface: OrderService) extends SoaScalaBaseProcessor(iface, Processor.getProcessMap)
 
   object Processor {
-    def getProcessMap() = {
-      Map("findOrder"->new findOrder()).asJava
+
+    type PF = SoaProcessFunction[OrderService, _, _, _ <: TScalaBeanSerializer[_], _ <: TScalaBeanSerializer[_]]
+
+    def getProcessMap(): java.util.Map[String, PF ] =
+    {
+      val map = new util.HashMap[String, PF]()
+      map.put("findOrder", new findOrder)
+      map
     }
   }
 }
