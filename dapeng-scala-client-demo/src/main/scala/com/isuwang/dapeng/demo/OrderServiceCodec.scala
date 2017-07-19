@@ -1,12 +1,11 @@
 package com.isuwang.dapeng.demo
 
-import java.util
-
 import com.isuwang.dapeng.core._
 import com.isuwang.org.apache.thrift._
 import com.isuwang.org.apache.thrift.protocol._
 
 import collection.JavaConverters._
+
 import scala.collection.immutable.Range
 
 /**
