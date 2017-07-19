@@ -8,9 +8,6 @@ import java.util.Map;
  */
 public class MasterHelper {
 
-
-//    public static Map<String, String> masterServers = new HashMap<>();
-
     public static Map<String, Boolean> isMaster = new HashMap<>();
 
     /**

@@ -185,27 +185,6 @@ public class ZookeeperHelper {
 
     private static final String PATH = "/soa/master/services/";
 
-//    public ZookeeperHelper(String zk) {
-//
-//        this.zookeeperHost = zk;
-//    }
-//
-//    public static void main(String[] args) {
-//
-//        ZookeeperHelper zkh = new ZookeeperHelper("127.0.0.1:2181");
-//
-//        zkh.connect();
-//
-//        zkh.runForMaster("com.isuwang.soa.hello.service.HelloService:1.0.0");
-//
-//        try {
-//            Thread.sleep(Integer.MAX_VALUE);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//
-//    }
-
     /**
      * 竞选Master
      * <p>
