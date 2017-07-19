@@ -474,7 +474,7 @@ object OrderServiceCodec {
 
     def getProcessMap(): java.util.Map[String, PF ] =
     {
-      val map = new util.HashMap[String, PF]()
+      val map = new java.util.HashMap[String, PF]()
       map.put("findOrder", new findOrder)
       map
     }
