@@ -465,8 +465,9 @@ object OrderServiceCodec {
   class Processor[I <: com.isuwang.dapeng.demo.OrderService](iface: I) extends SoaScalaBaseProcessor(iface, Processor.getProcessMap())
 
   object Processor {
-    def getProcessMap() = {
-      Map("findOrder"->new findOrder()).asJava
+    def getProcessMap[I <: com.isuwang.dapeng.demo.OrderService]() = {
+      val pp: findOrder[I] = new findOrder[I]()
+      Map("findOrder"->new findOrder[I]).asJava
     }
   }
 }
