@@ -4,6 +4,8 @@ import com.isuwang.dapeng.core._
 import com.isuwang.org.apache.thrift._
 import com.isuwang.org.apache.thrift.protocol._
 
+import collection.JavaConverters._
+
 import scala.collection.immutable.Range
 
 /**
@@ -284,7 +286,7 @@ object OrderServiceCodec {
             schemeField.`type` match {
               case com.isuwang.org.apache.thrift.protocol.TType.LIST =>
                 val _list0: com.isuwang.org.apache.thrift.protocol.TList = iproto.readListBegin()
-                success = (0 until  _list0.size).map(_=>{
+                success = (0 until _list0.size).map(_ => {
                   new OrderSerializer().read(iproto)
                 }).toList
                 iproto.readListEnd
@@ -315,7 +317,7 @@ object OrderServiceCodec {
 
       oproto.writeListBegin(new com.isuwang.org.apache.thrift.protocol.TList(com.isuwang.org.apache.thrift.protocol.TType.STRUCT, elem0.size))
 
-      elem0.foreach(elem1=>{
+      elem0.foreach(elem1 => {
         new OrderSerializer().write(elem1, oproto)
       })
 
@@ -337,5 +339,135 @@ object OrderServiceCodec {
 
   }
 
+
+  class findOrder[I <: com.isuwang.dapeng.demo.OrderService] extends SoaProcessFunction[I, findOrder_args, findOrder_result, FindOrder_argsSerializer, FindOrder_resultSerializer]("findOrder", new FindOrder_argsSerializer(), new FindOrder_resultSerializer()) {
+    override def isOneway: Boolean = false
+
+    override def getEmptyArgsInstance: findOrder_args = findOrder_args(null)
+
+    @throws[TException]
+    override def getResult(iface: I, args: findOrder_args): findOrder_result = {
+      findOrder_result(iface.findOrder(args.request))
+    }
+  }
+
+//  case class getServiceMetadata_args()
+//
+//  case class getServiceMetadata_result(success: String)
+//
+//  class GetServiceMetadata_argsSerializer extends TScalaBeanSerializer[getServiceMetadata_args] {
+//    @throws[TException]
+//    override def read(iproto: TProtocol): getServiceMetadata_args = {
+//      iproto.readStructBegin
+//
+//      var schemeField: com.isuwang.org.apache.thrift.protocol.TField = null
+//
+//      while (schemeField == null || schemeField.`type` != com.isuwang.org.apache.thrift.protocol.TType.STOP) {
+//        schemeField = iproto.readFieldBegin
+//
+//        schemeField.id match {
+//          case _ => com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iproto, schemeField.`type`)
+//        }
+//
+//        iproto.readFieldEnd
+//      }
+//
+//      iproto.readStructEnd
+//
+//      val bean = getServiceMetadata_args()
+//      validate(bean)
+//
+//      bean
+//    }
+//
+//    @throws[TException]
+//    override def write(bean: getServiceMetadata_args, oproto: TProtocol): Unit = {
+//      validate(bean)
+//      oproto.writeStructBegin(new com.isuwang.org.apache.thrift.protocol.TStruct("getServiceMetadata_args"))
+//
+//      oproto.writeFieldStop
+//      oproto.writeStructEnd
+//    }
+//
+//    @throws[TException]
+//    override def validate(bean: getServiceMetadata_args): Unit = {}
+//
+//    override def toString(bean: getServiceMetadata_args): String = if (bean == null) "null" else bean.toString
+//  }
+//
+//  class GetServiceMetadata_resultSerializer extends TScalaBeanSerializer[getServiceMetadata_result] {
+//    @throws[TException]
+//    override def read(iproto: TProtocol): getServiceMetadata_result = {
+//      iproto.readStructBegin
+//
+//      var schemeField: com.isuwang.org.apache.thrift.protocol.TField = null
+//
+//      var success: String = null
+//
+//      while (schemeField == null || schemeField.`type` != com.isuwang.org.apache.thrift.protocol.TType.STOP) {
+//        schemeField = iproto.readFieldBegin
+//
+//        schemeField.id match {
+//          case 0 =>
+//            schemeField.`type` match {
+//              case com.isuwang.org.apache.thrift.protocol.TType.STRING =>
+//                val _list0: com.isuwang.org.apache.thrift.protocol.TList = iproto.readListBegin()
+//                success = iproto.readString
+//                iproto.readListEnd
+//              case _ => com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iproto, schemeField.`type`)
+//            }
+//          case _ => com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iproto, schemeField.`type`)
+//        }
+//
+//        iproto.readFieldEnd
+//      }
+//
+//      iproto.readStructEnd
+//
+//      val bean = getServiceMetadata_result(success)
+//      validate(bean)
+//
+//      bean
+//    }
+//
+//    @throws[TException]
+//    override def write(bean: getServiceMetadata_result, oproto: TProtocol): Unit = {
+//      validate(bean)
+//      oproto.writeStructBegin(new com.isuwang.org.apache.thrift.protocol.TStruct("getServiceMetadata_result"))
+//
+//      oproto.writeFieldBegin(new com.isuwang.org.apache.thrift.protocol.TField("success", com.isuwang.org.apache.thrift.protocol.TType.STRING, 0.asInstanceOf[Short]))
+//      oproto.writeString(bean.success)
+//      oproto.writeFieldEnd
+//
+//      oproto.writeFieldStop
+//      oproto.writeStructEnd
+//    }
+//
+//    @throws[TException]
+//    override def validate(bean: getServiceMetadata_result): Unit = {
+//      if (bean.success == null)
+//        throw new SoaException(SoaBaseCode.NotNull, "success字段不允许为空")
+//    }
+//
+//    override def toString(bean: getServiceMetadata_result): String = if (bean == null) "null" else bean.toString
+//
+//  }
+//
+//  class getServiceMetadata[I <: com.isuwang.dapeng.demo.OrderService] extends SoaProcessFunction[I, getServiceMetadata_args, getServiceMetadata_result, GetServiceMetadata_argsSerializer, GetServiceMetadata_resultSerializer]("getServiceMetadata", new GetServiceMetadata_argsSerializer(), new GetServiceMetadata_resultSerializer()) {
+//    override def isOneway: Boolean = false
+//
+//    override def getEmptyArgsInstance: getServiceMetadata_args = getServiceMetadata_args()
+//
+//    @throws[TException]
+//    override def getResult(iface: I, args: getServiceMetadata_args): getServiceMetadata_result = ???
+//  }
+
+  class Processor[I <: com.isuwang.dapeng.demo.OrderService](iface: I) extends SoaScalaBaseProcessor(iface, Processor.getProcessMap())
+
+  object Processor {
+    def getProcessMap() = {
+      Map("findOrder"->new findOrder()).asJava
+    }
+  }
 }
 

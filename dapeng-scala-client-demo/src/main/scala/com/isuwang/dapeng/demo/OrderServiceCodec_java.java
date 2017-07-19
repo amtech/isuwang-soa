@@ -665,7 +665,7 @@
 //    }
 //
 //    @SuppressWarnings("unchecked")
-//    public static class Processor<I extends com.isuwang.dapeng.demo.service.OrderService> extends SoaBaseProcessor {
+//    public static class Processor<I extends com.isuwang.dapeng.demo.service.OrderService> extends SoaScalaBaseProcessor {
 //        public Processor(I iface) {
 //            super(iface, getProcessMap(new java.util.HashMap<>()));
 //        }
