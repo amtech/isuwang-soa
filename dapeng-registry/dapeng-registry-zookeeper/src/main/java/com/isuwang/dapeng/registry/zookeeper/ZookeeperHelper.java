@@ -234,7 +234,7 @@ public class ZookeeperHelper {
     private void isMaster(String serviceKey, String currentId) {
 
         try {
-            List<String> children = zk.getChildren("/soa/master/services", false).stream().filter(s -> s.startsWith(serviceKey)).collect(Collectors.toList());
+            List<String> children = zk.getChildren("/soa/master/services", false).stream().filter(s -> s.startsWith(serviceKey + "-")).collect(Collectors.toList());
 
             if (children.size() <= 0) {
                 createCurrentNode(serviceKey);
