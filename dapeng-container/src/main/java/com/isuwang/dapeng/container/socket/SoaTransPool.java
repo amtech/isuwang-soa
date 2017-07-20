@@ -2,6 +2,7 @@ package com.isuwang.dapeng.container.socket;
 
 import com.isuwang.dapeng.core.*;
 import com.isuwang.dapeng.core.socket.TSoaTransport;
+import com.isuwang.org.apache.thrift.TProcessor;
 import com.isuwang.org.apache.thrift.protocol.TMessage;
 import com.isuwang.org.apache.thrift.protocol.TMessageType;
 import org.slf4j.Logger;
@@ -48,9 +49,9 @@ public class SoaTransPool {
 
     public static class SoaCodecTask implements Runnable {
         private Socket client;
-        private Map<ProcessorKey, SoaBaseProcessor<?>> soaProcessors;
+        private Map<ProcessorKey, TProcessor<?>> soaProcessors;
 
-        public SoaCodecTask(Socket client, Map<ProcessorKey, SoaBaseProcessor<?>> soaProcessors) {
+        public SoaCodecTask(Socket client, Map<ProcessorKey, TProcessor<?>> soaProcessors) {
             this.client = client;
             this.soaProcessors = soaProcessors;
         }
@@ -79,7 +80,7 @@ public class SoaTransPool {
 
                 context.setSeqid(tMessage.seqid);
 
-                SoaBaseProcessor<?> soaProcessor = soaProcessors.get(new ProcessorKey(soaHeader.getServiceName(), soaHeader.getVersionName()));
+                TProcessor<?> soaProcessor = soaProcessors.get(new ProcessorKey(soaHeader.getServiceName(), soaHeader.getVersionName()));
                 if (soaProcessor == null) {
                     throw new SoaException(SoaBaseCode.NotFoundServer);
                 }

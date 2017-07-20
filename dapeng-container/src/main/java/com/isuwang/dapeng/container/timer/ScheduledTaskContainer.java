@@ -8,6 +8,7 @@ import com.isuwang.dapeng.core.SoaProcessFunction;
 import com.isuwang.dapeng.core.TBeanSerializer;
 import com.isuwang.dapeng.core.timer.ScheduledTask;
 import com.isuwang.dapeng.core.timer.ScheduledTaskCron;
+import com.isuwang.org.apache.thrift.TProcessor;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.triggers.CronTriggerImpl;
@@ -45,11 +46,11 @@ public class ScheduledTaskContainer implements Container {
 
             try {
                 Method getBeansOfType = contextClass.getMethod("getBeansOfType", Class.class);
-                Map<String, SoaBaseProcessor<?>> processorMap = (Map<String, SoaBaseProcessor<?>>) getBeansOfType.invoke(ctx, contextClass.getClassLoader().loadClass(SoaBaseProcessor.class.getName()));
+                Map<String, TProcessor<?>> processorMap = (Map<String, TProcessor<?>>) getBeansOfType.invoke(ctx, contextClass.getClassLoader().loadClass(TProcessor.class.getName()));
 
                 Set<String> keys = processorMap.keySet();
                 for (String key : keys) {
-                    SoaBaseProcessor<?> processor = processorMap.get(key);
+                    TProcessor<?> processor = processorMap.get(key);
 
                     long count = new ArrayList<>(Arrays.asList(processor.getIface().getClass().getInterfaces()))
                             .stream()

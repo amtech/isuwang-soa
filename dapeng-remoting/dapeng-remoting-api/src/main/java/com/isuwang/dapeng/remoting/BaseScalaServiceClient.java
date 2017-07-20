@@ -1,24 +1,15 @@
 package com.isuwang.dapeng.remoting;
 
 import com.isuwang.dapeng.core.*;
-import com.isuwang.dapeng.core.filter.Filter;
 import com.isuwang.dapeng.registry.ConfigKey;
 import com.isuwang.dapeng.registry.RegistryAgent;
 import com.isuwang.dapeng.registry.RegistryAgentProxy;
-import com.isuwang.dapeng.registry.conf.SoaRegistry;
-import com.isuwang.dapeng.remoting.conf.SoaRemoting;
-import com.isuwang.dapeng.remoting.conf.SoaRemotingConnectionPool;
-import com.isuwang.dapeng.remoting.conf.SoaRemotingFilter;
-import com.isuwang.dapeng.remoting.conf.SoaRemotingFilters;
 import com.isuwang.dapeng.remoting.filter.SendMessageFilter;
 import com.isuwang.dapeng.remoting.filter.StubFilterChain;
 import com.isuwang.org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXB;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,64 +24,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class BaseScalaServiceClient {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(BaseServiceClient.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(BaseScalaServiceClient.class);
 
     public static final AtomicInteger seqid_ = new AtomicInteger(0);
-
-    protected static SoaConnectionPool connectionPool;
-
-    static {
-        final ClassLoader classLoader = BaseServiceClient.class.getClassLoader();
-
-        try (InputStream is = getInputStream("dapeng-remoting-conf.xml")) {
-            final SoaRemoting soaRemoting = JAXB.unmarshal(is, SoaRemoting.class);
-            final SoaRemotingFilters remotingFilters = soaRemoting.getSoaRemotingFilters();
-
-            // load filter
-            for (SoaRemotingFilter remotingFilter : remotingFilters.getSoaRemotingFilter()) {
-                Class<?> aClass = classLoader.loadClass(remotingFilter.getRef());
-
-                StubFilterChain.addFilter((Filter) aClass.newInstance());
-
-                LOGGER.info("client load filter {} with path {}", remotingFilter.getName(), remotingFilter.getRef());
-            }
-
-            // load connection pool
-            final SoaRemotingConnectionPool pool = soaRemoting.getSoaRemotingConnectionPool();
-            final Class<?> aClass = classLoader.loadClass(pool.getRef());
-            BaseServiceClient.connectionPool = (SoaConnectionPool) aClass.newInstance();
-        } catch (Exception e) {
-            LOGGER.error("client load filter error", e);
-        }
-
-        if (!SoaSystemEnvProperties.SOA_REMOTING_MODE.equals("local")) {
-            try (InputStream is = getInputStream("dapeng-registry-conf.xml")) {
-                final SoaRegistry soaRegistry = JAXB.unmarshal(is, SoaRegistry.class);
-
-                Class<?> aClass = classLoader.loadClass(soaRegistry.getRef());
-
-                RegistryAgentProxy.setCurrentInstance(RegistryAgentProxy.Type.Client, (RegistryAgent) aClass.newInstance());
-                RegistryAgentProxy.getCurrentInstance(RegistryAgentProxy.Type.Client).start();
-                LOGGER.info("client load registry {} with path {}", soaRegistry.getName(), soaRegistry.getRef());
-            } catch (Exception e) {
-                LOGGER.error("client load registry error", e);
-            }
-        } else {
-            LOGGER.info("soa remoting mode is {},client not load registry", SoaSystemEnvProperties.SOA_REMOTING_MODE);
-        }
-    }
-
-    static InputStream getInputStream(String name) throws FileNotFoundException {
-        InputStream stream = BaseServiceClient.class.getClassLoader().getResourceAsStream(name);
-
-        if (stream == null)
-            return BaseServiceClient.class.getResourceAsStream(name);
-
-        if (stream == null)
-            throw new FileNotFoundException("not found " + name);
-
-        return stream;
-    }
 
     protected String serviceName;
     protected String versionName;
@@ -99,6 +35,8 @@ public class BaseScalaServiceClient {
         this.serviceName = serviceName;
         this.versionName = versionName;
     }
+
+    public SoaConnectionPool connectionPool = BaseClient.connectionPool;
 
     protected void initContext(String methodName) {
         InvocationContext context = InvocationContext.Factory.getCurrentInstance();
@@ -139,7 +77,7 @@ public class BaseScalaServiceClient {
             soaHeader.setCallerFrom(Optional.of(SoaSystemEnvProperties.SOA_SERVICE_CALLERFROM));
 
 
-        if(!soaHeader.getSessionId().isPresent()){
+        if (!soaHeader.getSessionId().isPresent()) {
             soaHeader.setSessionId(Optional.of(UUID.randomUUID().toString()));
         }
 
@@ -171,6 +109,7 @@ public class BaseScalaServiceClient {
         stubFilterChain.setAttribute(StubFilterChain.ATTR_KEY_HEADER, soaHeader);
         stubFilterChain.setAttribute(StubFilterChain.ATTR_KEY_REQUEST, request);
         stubFilterChain.setAttribute(SendMessageFilter.ATTR_KEY_SENDMESSAGE, (SendMessageFilter.SendMessageAction) (chain) -> {
+
             SoaScalaConnection conn = connectionPool.getScalaConnection();
 
             try {
@@ -240,7 +179,7 @@ public class BaseScalaServiceClient {
         stubFilterChain.setAttribute(StubFilterChain.ATTR_KEY_HEADER, soaHeader);
         stubFilterChain.setAttribute(StubFilterChain.ATTR_KEY_REQUEST, request);
         stubFilterChain.setAttribute(SendMessageFilter.ATTR_KEY_SENDMESSAGE, (SendMessageFilter.SendMessageAction) (chain) -> {
-            SoaConnection conn = connectionPool.getConnection();
+            SoaScalaConnection conn = connectionPool.getScalaConnection();
             Future<RESP> resp = conn.sendAsync(request, response, requestSerializer, responseSerializer, timeout);
             chain.setAttribute(StubFilterChain.ATTR_KEY_RESPONSE, resp);
         });

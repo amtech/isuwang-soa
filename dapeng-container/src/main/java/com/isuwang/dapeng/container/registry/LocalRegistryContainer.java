@@ -8,6 +8,7 @@ import com.isuwang.dapeng.core.SoaBaseProcessor;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.registry.*;
 import com.isuwang.dapeng.route.Route;
+import com.isuwang.org.apache.thrift.TProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +73,7 @@ public class LocalRegistryContainer implements Container, RegistryAgent {
         Set<ProcessorKey> keys = ProcessorCache.getProcessorMap().keySet();
 
         for (ProcessorKey key : keys) {
-            SoaBaseProcessor<?> processor = ProcessorCache.getProcessorMap().get(key);
+            TProcessor<?> processor = ProcessorCache.getProcessorMap().get(key);
 
             if (null != processor.getInterfaceClass().getClass()) {
                 Service service = processor.getInterfaceClass().getAnnotation(Service.class);
@@ -83,11 +84,11 @@ public class LocalRegistryContainer implements Container, RegistryAgent {
     }
 
     @Override
-    public void setProcessorMap(Map<ProcessorKey, SoaBaseProcessor<?>> processorMap) {
+    public void setProcessorMap(Map<ProcessorKey, TProcessor<?>> processorMap) {
     }
 
     @Override
-    public Map<ProcessorKey, SoaBaseProcessor<?>> getProcessorMap() {
+    public Map<ProcessorKey, TProcessor<?>> getProcessorMap() {
         return ProcessorCache.getProcessorMap();
     }
 

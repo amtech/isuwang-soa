@@ -5,6 +5,7 @@ import com.isuwang.dapeng.core.SoaProcessFunction;
 import com.isuwang.dapeng.core.TBeanSerializer;
 import com.isuwang.dapeng.message.consumer.api.context.ConsumerContext;
 import com.isuwang.dapeng.message.consumer.api.service.MessageConsumerService;
+import com.isuwang.org.apache.thrift.TProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,11 +35,11 @@ public class KafkaMessageContainer {
             Class<?> contextClass = contexts.get(ctx);
             try {
                 Method getBeansOfType = contextClass.getMethod("getBeansOfType", Class.class);
-                Map<String, SoaBaseProcessor<?>> processorMap = (Map<String, SoaBaseProcessor<?>>) getBeansOfType.invoke(ctx, contextClass.getClassLoader().loadClass(SoaBaseProcessor.class.getName()));
+                Map<String, TProcessor<?>> processorMap = (Map<String, TProcessor<?>>) getBeansOfType.invoke(ctx, contextClass.getClassLoader().loadClass(TProcessor.class.getName()));
 
                 Set<String> keys = processorMap.keySet();
                 for (String key : keys) {
-                    SoaBaseProcessor<?> processor = processorMap.get(key);
+                    TProcessor<?> processor = processorMap.get(key);
 
                     long count = new ArrayList<>(Arrays.asList(processor.getIface().getClass().getInterfaces()))
                             .stream()

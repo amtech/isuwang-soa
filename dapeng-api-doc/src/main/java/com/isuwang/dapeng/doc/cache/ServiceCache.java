@@ -12,6 +12,7 @@ import com.isuwang.dapeng.core.metadata.TEnum;
 import com.isuwang.dapeng.registry.RegistryAgentProxy;
 import com.isuwang.dapeng.remoting.fake.metadata.MetadataClient;
 import com.isuwang.org.apache.thrift.TException;
+import com.isuwang.org.apache.thrift.TProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,11 +58,11 @@ public class ServiceCache {
         final Map<String, com.isuwang.dapeng.core.metadata.Service> services = new TreeMap<>();
         urlMappings.clear();
 
-        Map<ProcessorKey, SoaBaseProcessor<?>> processorMap = RegistryAgentProxy.getCurrentInstance(RegistryAgentProxy.Type.Server).getProcessorMap();
+        Map<ProcessorKey, TProcessor<?>> processorMap = RegistryAgentProxy.getCurrentInstance(RegistryAgentProxy.Type.Server).getProcessorMap();
 
         Set<ProcessorKey> keys = processorMap.keySet();
         for (ProcessorKey key : keys) {
-            SoaBaseProcessor<?> processor = processorMap.get(key);
+            TProcessor<?> processor = processorMap.get(key);
             if (processor.getInterfaceClass().getClass() != null) {
 
                 Service service = processor.getInterfaceClass().getAnnotation(Service.class);

@@ -23,10 +23,12 @@ import java.util.concurrent.CompletableFuture;
  * @date 15/9/18
  */
 public class SoaBaseProcessor<I> implements TProcessor {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SoaBaseProcessor.class);
 
     private final I iface;
     private Class<I> interfaceClass;
+
     private final Map<String, SoaProcessFunction<I, ?, ?, ? extends TBeanSerializer<?>, ? extends TBeanSerializer<?>>> processMap;
 
     protected SoaBaseProcessor(I iface, Map<String, SoaProcessFunction<I, ?, ?, ? extends TBeanSerializer<?>, ? extends TBeanSerializer<?>>> processMap) {
@@ -34,6 +36,7 @@ public class SoaBaseProcessor<I> implements TProcessor {
         this.processMap = processMap;
     }
 
+    @Override
     public I getIface() {
         return iface;
     }
@@ -203,16 +206,18 @@ public class SoaBaseProcessor<I> implements TProcessor {
         return msg;
     }
 
+    @Override
     public Map<String, SoaProcessFunction<I, ?, ?, ? extends TBeanSerializer<?>, ? extends TBeanSerializer<?>>> getProcessMapView() {
         return Collections.unmodifiableMap(processMap);
     }
 
+    @Override
     public Class<I> getInterfaceClass() {
         return interfaceClass;
     }
 
-    public void setInterfaceClass(Class<I> interfaceClass) {
+    @Override
+    public void setInterfaceClass(Class interfaceClass) {
         this.interfaceClass = interfaceClass;
     }
-
 }

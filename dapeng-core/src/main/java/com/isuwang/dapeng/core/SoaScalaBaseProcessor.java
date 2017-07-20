@@ -34,6 +34,7 @@ public class SoaScalaBaseProcessor<I> implements TProcessor {
         this.processMap = processMap;
     }
 
+    @Override
     public I getIface() {
         return iface;
     }
@@ -201,15 +202,18 @@ public class SoaScalaBaseProcessor<I> implements TProcessor {
         return msg;
     }
 
+    @Override
     public Map<String, SoaProcessFunction<I, ?, ?, ? extends TScalaBeanSerializer<?>, ? extends TScalaBeanSerializer<?>>> getProcessMapView() {
         return Collections.unmodifiableMap(processMap);
     }
 
+    @Override
     public Class<I> getInterfaceClass() {
         return interfaceClass;
     }
 
-    public void setInterfaceClass(Class<I> interfaceClass) {
+    @Override
+    public void setInterfaceClass(Class interfaceClass) {
         this.interfaceClass = interfaceClass;
     }
 

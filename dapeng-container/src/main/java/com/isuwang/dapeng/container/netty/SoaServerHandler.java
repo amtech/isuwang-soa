@@ -7,6 +7,7 @@ import com.isuwang.dapeng.monitor.api.domain.PlatformProcessData;
 import com.isuwang.dapeng.registry.ConfigKey;
 import com.isuwang.dapeng.registry.RegistryAgentProxy;
 import com.isuwang.org.apache.thrift.TException;
+import com.isuwang.org.apache.thrift.TProcessor;
 import com.isuwang.org.apache.thrift.protocol.TMessage;
 import com.isuwang.org.apache.thrift.protocol.TMessageType;
 import io.netty.buffer.ByteBuf;
@@ -33,7 +34,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(SoaServerHandler.class);
     private static final Logger SIMPLE_LOGGER = LoggerFactory.getLogger(LoggerUtil.SIMPLE_LOG);
 
-    private static Map<ProcessorKey, SoaBaseProcessor<?>> soaProcessors;
+    private static Map<ProcessorKey, TProcessor<?>> soaProcessors;
 
     private final Boolean useThreadPool = SoaSystemEnvProperties.SOA_CONTAINER_USETHREADPOOL;
 
@@ -62,7 +63,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
 
     private volatile static ExecutorService executorService = Executors.newFixedThreadPool(SoaSystemEnvProperties.SOA_CORE_POOL_SIZE, new ServerThreadFactory());
 
-    public SoaServerHandler(Map<ProcessorKey, SoaBaseProcessor<?>> soaProcessors) {
+    public SoaServerHandler(Map<ProcessorKey, TProcessor<?>> soaProcessors) {
         this.soaProcessors = soaProcessors;
     }
 
@@ -174,7 +175,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
         final TSoaServiceProtocol outputProtocol = new TSoaServiceProtocol(outputSoaTransport, false);
 
         try {
-            SoaBaseProcessor<?> soaProcessor = soaProcessors.get(new ProcessorKey(soaHeader.getServiceName(), soaHeader.getVersionName()));
+            TProcessor<?> soaProcessor = soaProcessors.get(new ProcessorKey(soaHeader.getServiceName(), soaHeader.getVersionName()));
             if (soaProcessor == null) {
                 throw new SoaException(SoaBaseCode.NotFoundServer);
             }
@@ -288,7 +289,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
         String responseCode = "-", responseMsg = "-";
         try {
             outputProtocol = new TSoaServiceProtocol(outputSoaTransport, false);
-            SoaBaseProcessor<?> soaProcessor = soaProcessors.get(new ProcessorKey(soaHeader.getServiceName(), soaHeader.getVersionName()));
+            TProcessor<?> soaProcessor = soaProcessors.get(new ProcessorKey(soaHeader.getServiceName(), soaHeader.getVersionName()));
 
             if (soaProcessor == null) {
                 throw new SoaException(SoaBaseCode.NotFoundServer);

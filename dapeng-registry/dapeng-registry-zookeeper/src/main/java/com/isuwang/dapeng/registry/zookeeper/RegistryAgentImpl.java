@@ -1,12 +1,16 @@
 package com.isuwang.dapeng.registry.zookeeper;
 
-import com.isuwang.dapeng.core.*;
+import com.isuwang.dapeng.core.InvocationContext;
+import com.isuwang.dapeng.core.ProcessorKey;
+import com.isuwang.dapeng.core.Service;
+import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.registry.ConfigKey;
 import com.isuwang.dapeng.registry.RegistryAgent;
 import com.isuwang.dapeng.registry.ServiceInfo;
 import com.isuwang.dapeng.registry.ServiceInfos;
 import com.isuwang.dapeng.route.Route;
 import com.isuwang.dapeng.route.RouteExecutor;
+import com.isuwang.org.apache.thrift.TProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +38,7 @@ public class RegistryAgentImpl implements RegistryAgent {
 
     private ZookeeperWatcher siw, zkfbw;
 
-    private Map<ProcessorKey, SoaBaseProcessor<?>> processorMap;
+    private Map<ProcessorKey, TProcessor<?>> processorMap;
 
     public RegistryAgentImpl() {
         this(true);
@@ -101,7 +105,7 @@ public class RegistryAgentImpl implements RegistryAgent {
         Set<ProcessorKey> keys = processorMap.keySet();
 
         for (ProcessorKey key : keys) {
-            SoaBaseProcessor<?> processor = processorMap.get(key);
+            TProcessor<?> processor = processorMap.get(key);
 
             if (processor.getInterfaceClass().getClass() != null) {
                 Service service = processor.getInterfaceClass().getAnnotation(Service.class);
@@ -117,12 +121,12 @@ public class RegistryAgentImpl implements RegistryAgent {
     }
 
     @Override
-    public void setProcessorMap(Map<ProcessorKey, SoaBaseProcessor<?>> processorMap) {
+    public void setProcessorMap(Map<ProcessorKey, TProcessor<?>> processorMap) {
         this.processorMap = processorMap;
     }
 
     @Override
-    public Map<ProcessorKey, SoaBaseProcessor<?>> getProcessorMap() {
+    public Map<ProcessorKey, TProcessor<?>> getProcessorMap() {
         return this.processorMap;
     }
 

@@ -19,14 +19,30 @@
 
 package com.isuwang.org.apache.thrift;
 
+import com.isuwang.dapeng.core.Context;
+import com.isuwang.dapeng.core.SoaProcessFunction;
+import com.isuwang.dapeng.core.TBeanSerializer;
 import com.isuwang.org.apache.thrift.protocol.TProtocol;
+
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A processor is a generic object which operates upon an input stream and
  * writes to some output stream.
- *
  */
-public interface TProcessor {
-  public boolean process(TProtocol in, TProtocol out)
-    throws TException;
+public interface TProcessor<I> {
+
+    I getIface();
+
+    Class<I> getInterfaceClass();
+
+    void setInterfaceClass(Class<I> interfaceClass);
+
+    boolean process(TProtocol in, TProtocol out)
+            throws TException;
+
+    CompletableFuture<Context> processAsync(TProtocol in, TProtocol out) throws TException;
+
+    public Map<String, SoaProcessFunction<I, ?, ?, ? extends TBeanSerializer<?>, ? extends TBeanSerializer<?>>> getProcessMapView();
 }

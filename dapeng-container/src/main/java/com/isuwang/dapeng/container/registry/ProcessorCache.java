@@ -1,7 +1,7 @@
 package com.isuwang.dapeng.container.registry;
 
 import com.isuwang.dapeng.core.ProcessorKey;
-import com.isuwang.dapeng.core.SoaBaseProcessor;
+import com.isuwang.org.apache.thrift.TProcessor;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,9 +12,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ProcessorCache {
 
-    private static final Map<ProcessorKey, SoaBaseProcessor<?>> processorMap = new ConcurrentHashMap<>();
+    private static final Map<ProcessorKey, TProcessor<?>> processorMap = new ConcurrentHashMap<>();
 
-    public static Map<ProcessorKey, SoaBaseProcessor<?>> getProcessorMap() {
+    public static Map<ProcessorKey, TProcessor<?>> getProcessorMap() {
         return processorMap;
     }
 

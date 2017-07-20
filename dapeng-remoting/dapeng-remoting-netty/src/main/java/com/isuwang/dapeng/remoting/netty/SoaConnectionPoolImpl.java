@@ -25,6 +25,8 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
 
     private Map<String, SoaConnectionImpl> connectionMap = new ConcurrentHashMap<>();
 
+    private Map<String, SoaScalaConnectionImpl> scalaConnectionMap = new ConcurrentHashMap<>();
+
     @Override
     public synchronized SoaConnection getConnection() throws SoaException {
         InvocationContext context = InvocationContext.Factory.getCurrentInstance();
@@ -47,7 +49,23 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
 
     @Override
     public SoaScalaConnection getScalaConnection() throws SoaException {
-        return null;
+
+        InvocationContext context = InvocationContext.Factory.getCurrentInstance();
+
+        if (context.getCalleeIp() == null || context.getCalleePort() <= 0)
+            throw new SoaException(SoaBaseCode.NotFoundServer);
+
+        String connectKey = context.getCalleeIp() + ":" + String.valueOf(context.getCalleePort());
+
+        if (scalaConnectionMap.containsKey(connectKey)) {
+            return scalaConnectionMap.get(connectKey);
+        }
+
+        SoaScalaConnectionImpl soaConnection = new SoaScalaConnectionImpl(context.getCalleeIp(), context.getCalleePort());
+
+        scalaConnectionMap.put(connectKey, soaConnection);
+
+        return soaConnection;
     }
 
     /**
@@ -65,9 +83,12 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
 
         String connectKey = context.getCalleeIp() + ":" + String.valueOf(context.getCalleePort());
 
-        if (connectionMap.containsKey(connectKey)) {
+        if (connectionMap.containsKey(connectKey))
             connectionMap.remove(connectKey);
-        }
+
+
+        if (scalaConnectionMap.containsKey(connectKey))
+            scalaConnectionMap.remove(connectKey);
     }
 
 }

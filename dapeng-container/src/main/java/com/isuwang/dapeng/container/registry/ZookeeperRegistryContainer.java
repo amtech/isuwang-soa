@@ -4,10 +4,10 @@ import com.isuwang.dapeng.container.Container;
 import com.isuwang.dapeng.container.spring.SpringContainer;
 import com.isuwang.dapeng.core.ProcessorKey;
 import com.isuwang.dapeng.core.Service;
-import com.isuwang.dapeng.core.SoaBaseProcessor;
 import com.isuwang.dapeng.registry.RegistryAgent;
 import com.isuwang.dapeng.registry.RegistryAgentProxy;
 import com.isuwang.dapeng.registry.zookeeper.RegistryAgentImpl;
+import com.isuwang.org.apache.thrift.TProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,11 +42,11 @@ public class ZookeeperRegistryContainer implements Container {
 
             try {
                 Method method = contextClass.getMethod("getBeansOfType", Class.class);
-                Map<String, SoaBaseProcessor<?>> processorMap = (Map<String, SoaBaseProcessor<?>>) method.invoke(ctx, contextClass.getClassLoader().loadClass(SoaBaseProcessor.class.getName()));
+                Map<String, TProcessor<?>> processorMap = (Map<String, TProcessor<?>>) method.invoke(ctx, contextClass.getClassLoader().loadClass(TProcessor.class.getName()));
 
                 Set<String> keys = processorMap.keySet();
                 for (String key : keys) {
-                    SoaBaseProcessor<?> processor = processorMap.get(key);
+                    TProcessor<?> processor = processorMap.get(key);
 
                     if (processor.getInterfaceClass().getClass() != null) {
                         Service service = processor.getInterfaceClass().getAnnotation(Service.class);
@@ -69,7 +69,7 @@ public class ZookeeperRegistryContainer implements Container {
         registryAgent.stop();
     }
 
-    public static Map<ProcessorKey, SoaBaseProcessor<?>> getProcessorMap() {
+    public static Map<ProcessorKey, TProcessor<?>> getProcessorMap() {
         return ProcessorCache.getProcessorMap();
     }
 
