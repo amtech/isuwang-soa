@@ -33,14 +33,21 @@ public class ZookeeperHelper {
         try {
             zk = new ZooKeeper(zookeeperHost, 15000, watchedEvent -> {
                 if (watchedEvent.getState() == Watcher.Event.KeeperState.Expired) {
-                    LOGGER.info("Registry {} Session过期,重连 [Zookeeper]", zookeeperHost);
+                    LOGGER.info("ZookeeperHelper session timeout to  {} [Zookeeper]", zookeeperHost);
                     destroy();
                     connect();
 
-                    registryAgent.registerAllServices();//重新注册服务
                 } else if (Watcher.Event.KeeperState.SyncConnected == watchedEvent.getState()) {
-                    LOGGER.info("Registry {} [Zookeeper]", zookeeperHost);
+                    LOGGER.info("ZookeeperHelper connected to  {} [Zookeeper]", zookeeperHost);
                     addMasterRoute();
+                    if (registryAgent != null)
+                        registryAgent.registerAllServices();//重新注册服务
+
+                } else if (Watcher.Event.KeeperState.Disconnected == watchedEvent.getState()) {
+                    //zookeeper重启或zookeeper实例重新创建
+                    LOGGER.error("Registry {} zookeeper 连接断开，可能是zookeeper重启或重建");
+                    destroy();
+                    connect();
                 }
             });
         } catch (Exception e) {
@@ -51,6 +58,7 @@ public class ZookeeperHelper {
     public void destroy() {
         if (zk != null) {
             try {
+                LOGGER.info("ZookeeperHelper closing connection to zookeeper {}", zookeeperHost);
                 zk.close();
                 zk = null;
             } catch (InterruptedException e) {
@@ -179,7 +187,6 @@ public class ZookeeperHelper {
         this.zookeeperHost = zookeeperHost;
     }
 
-
     //----------------------------竞选master-------------------------------------------------------------------------
     public static Map<String, Boolean> isMaster = MasterHelper.isMaster;
 
@@ -202,7 +209,7 @@ public class ZookeeperHelper {
                     if (stat == null) {
                         createCurrentNode((String) ctx);
                     } else {
-                        isMaster((String) ctx, name.replace(path, ""));
+                        checkIsMaster((String) ctx, name.replace(path, ""));
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -211,7 +218,7 @@ public class ZookeeperHelper {
             case OK:
                 LOGGER.info("节点({})添加成功，判断是否master", name);
                 String currentId = name.replace(path, "");
-                isMaster((String) ctx, currentId);
+                checkIsMaster((String) ctx, currentId);
                 break;
             case NODEEXISTS:
                 LOGGER.error("创建节点({})时发现已存在，这是不可能发生的!!!", name);
@@ -231,7 +238,7 @@ public class ZookeeperHelper {
      * @param serviceKey
      * @param currentId
      */
-    private void isMaster(String serviceKey, String currentId) {
+    private void checkIsMaster(String serviceKey, String currentId) {
 
         try {
             List<String> children = zk.getChildren("/soa/master/services", false).stream().filter(s -> s.startsWith(serviceKey + "-")).collect(Collectors.toList());
@@ -257,7 +264,7 @@ public class ZookeeperHelper {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                leastNodeExist(serviceKey, currentId, children.get(0).replace(serviceKey + "-", ""));
+                ifLeastNodeExist(serviceKey, currentId, children.get(0).replace(serviceKey + "-", ""));
             }
         } catch (KeeperException e) {
             e.printStackTrace();
@@ -269,34 +276,34 @@ public class ZookeeperHelper {
     /**
      * 监控最小节点是否存在，存在则保持监听，不存在则继续判断自己是否master
      */
-    private void leastNodeExist(String serviceKey, String currentId, String leastId) {
+    private void ifLeastNodeExist(String serviceKey, String currentId, String leastId) {
 
         zk.exists(PATH + serviceKey + "-" + leastId, event -> {
             if (event.getType() == Watcher.Event.EventType.NodeDeleted) {
                 LOGGER.info("最小节点({})被删除，当前节点({})竞选master", event.getPath(), serviceKey + "-" + currentId);
-                isMaster(serviceKey, currentId);
+                checkIsMaster(serviceKey, currentId);
             }
 
         }, (rc, path, ctx, stat) -> {
 
             switch (KeeperException.Code.get(rc)) {
                 case CONNECTIONLOSS:
-                    leastNodeExist(serviceKey, currentId, leastId);
+                    ifLeastNodeExist(serviceKey, currentId, leastId);
                     break;
                 case NONODE:
                     LOGGER.info("最小节点({})不存在，当前节点({})竞选master", serviceKey + "-" + leastId, serviceKey + "-" + currentId);
-                    isMaster(serviceKey, currentId);
+                    checkIsMaster(serviceKey, currentId);
                     break;
                 case OK:
                     if (stat == null) {
                         LOGGER.info("最小节点({})不存在，当前节点({})竞选master", serviceKey + "-" + leastId, serviceKey + "-" + currentId);
-                        isMaster(serviceKey, currentId);
+                        checkIsMaster(serviceKey, currentId);
                     } else
                         LOGGER.info("最小节点({})存在，当前节点({})保持对最小节点监听", serviceKey + "-" + leastId, serviceKey + "-" + currentId);
 
                     break;
                 default:
-                    isMaster(serviceKey, currentId);
+                    checkIsMaster(serviceKey, currentId);
             }
 
         }, serviceKey + "-" + currentId);
