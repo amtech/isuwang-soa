@@ -6,9 +6,6 @@ import com.isuwang.dapeng.registry.ConfigKey;
 import com.isuwang.dapeng.registry.RegistryAgent;
 import com.isuwang.dapeng.registry.RegistryAgentProxy;
 import com.isuwang.dapeng.registry.conf.SoaRegistry;
-import com.isuwang.dapeng.remoting.BaseServiceClient;
-import com.isuwang.dapeng.remoting.SoaConnection;
-import com.isuwang.dapeng.remoting.SoaConnectionPool;
 import com.isuwang.dapeng.remoting.conf.SoaRemoting;
 import com.isuwang.dapeng.remoting.conf.SoaRemotingConnectionPool;
 import com.isuwang.dapeng.remoting.conf.SoaRemotingFilter;
@@ -174,7 +171,7 @@ public class BaseScalaServiceClient {
         stubFilterChain.setAttribute(StubFilterChain.ATTR_KEY_HEADER, soaHeader);
         stubFilterChain.setAttribute(StubFilterChain.ATTR_KEY_REQUEST, request);
         stubFilterChain.setAttribute(SendMessageFilter.ATTR_KEY_SENDMESSAGE, (SendMessageFilter.SendMessageAction) (chain) -> {
-            SoaConnection conn = connectionPool.getConnection();
+            SoaScalaConnection conn = connectionPool.getScalaConnection();
 
             try {
                 RESP resp = conn.send(request, requestSerializer, responseSerializer);

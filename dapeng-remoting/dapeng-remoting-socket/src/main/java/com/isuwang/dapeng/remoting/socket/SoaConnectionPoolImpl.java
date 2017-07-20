@@ -3,6 +3,7 @@ package com.isuwang.dapeng.remoting.socket;
 import com.isuwang.dapeng.core.SoaException;
 import com.isuwang.dapeng.remoting.SoaConnection;
 import com.isuwang.dapeng.remoting.SoaConnectionPool;
+import com.isuwang.dapeng.remoting.SoaScalaConnection;
 
 /**
  * Soa连接池
@@ -21,6 +22,11 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
     @Override
     public SoaConnection getConnection() {
         return new SoaConnectionImpl();
+    }
+
+    @Override
+    public SoaScalaConnection getScalaConnection() throws SoaException {
+        return null;
     }
 
     @Override

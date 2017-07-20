@@ -10,5 +10,7 @@ public interface SoaConnectionPool {
 
     SoaConnection getConnection() throws SoaException;
 
+    SoaScalaConnection getScalaConnection() throws SoaException;
+
     void removeConnection() throws SoaException;
 }
