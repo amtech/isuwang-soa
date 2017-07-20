@@ -26,11 +26,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by tangliu on 17/7/20.
  */
-public class BaseClient {
+public abstract class BaseClient {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(BaseClient.class);
-
-    public static final AtomicInteger seqid_ = new AtomicInteger(0);
 
     protected String serviceName;
     protected String versionName;
@@ -103,7 +101,7 @@ public class BaseClient {
     protected void initContext(String methodName) {
         InvocationContext context = InvocationContext.Factory.getCurrentInstance();
 
-        context.setSeqid(seqid_.incrementAndGet());
+        context.setSeqid(getSeqId().incrementAndGet());
 
         SoaHeader soaHeader = context.getHeader() == null ? new SoaHeader() : context.getHeader();
 
@@ -150,6 +148,8 @@ public class BaseClient {
 
         context.setSoaTransactionProcess(isSoaTransactionalProcess());
     }
+
+    protected abstract AtomicInteger getSeqId();
 
     protected boolean isSoaTransactionalProcess() {
         return false;

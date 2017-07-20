@@ -26,8 +26,15 @@ public class BaseScalaServiceClient extends BaseClient {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(BaseScalaServiceClient.class);
 
+    public static final AtomicInteger seqid_ = new AtomicInteger(0);
+
     protected BaseScalaServiceClient(String serviceName, String versionName) {
         super(serviceName, versionName);
+    }
+
+    @Override
+    protected AtomicInteger getSeqId() {
+        return seqid_;
     }
 
     @SuppressWarnings("unchecked")
