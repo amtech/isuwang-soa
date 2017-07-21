@@ -1,7 +1,6 @@
 package com.isuwang.dapeng.remoting.netty;
 
 import com.isuwang.dapeng.core.*;
-import com.isuwang.dapeng.remoting.SoaConnection;
 import com.isuwang.dapeng.remoting.SoaScalaConnection;
 import com.isuwang.org.apache.thrift.TApplicationException;
 import com.isuwang.org.apache.thrift.TException;
@@ -30,70 +29,7 @@ public class SoaScalaConnectionImpl implements SoaScalaConnection {
     }
 
     public <REQ, RESP> RESP send(REQ request, RESP response, TBeanSerializer<REQ> requestSerializer, TBeanSerializer<RESP> responseSerializer) throws TException {
-        InvocationContext context = InvocationContext.Factory.getCurrentInstance();
-        SoaHeader soaHeader = context.getHeader();
-
-        final ByteBuf requestBuf = Unpooled.directBuffer(8192);
-        final TSoaTransport outputSoaTransport = new TSoaTransport(requestBuf);
-
-        TSoaServiceProtocol outputProtocol;
-        ByteBuf responseBuf = null;
-
-        try {
-            outputProtocol = new TSoaServiceProtocol(outputSoaTransport, true);
-            outputProtocol.writeMessageBegin(new TMessage(soaHeader.getServiceName() + ":" + soaHeader.getMethodName(), TMessageType.CALL, context.getSeqid()));
-            requestSerializer.write(request, outputProtocol);
-            outputProtocol.writeMessageEnd();
-
-            outputSoaTransport.flush();//在报文头部写入int,代表报文长度(不包括自己)
-            if (soaClient == null) {
-                throw new SoaException(SoaBaseCode.NotConnected);
-            }
-            responseBuf = soaClient.send(context.getSeqid(), requestBuf); //发送请求，返回结果
-
-            if (responseBuf == null) {
-                throw new SoaException(SoaBaseCode.TimeOut);
-//                throw new TException("request time out.");
-            } else {
-                final TSoaTransport inputSoaTransport = new TSoaTransport(responseBuf);
-                TSoaServiceProtocol inputProtocol = new TSoaServiceProtocol(inputSoaTransport, true);
-
-                TMessage msg = inputProtocol.readMessageBegin();
-                if (TMessageType.EXCEPTION == msg.type) {
-                    TApplicationException x = TApplicationException.read(inputProtocol);
-                    inputProtocol.readMessageEnd();
-                    throw x;
-                } else if (context.getSeqid() != msg.seqid) {
-                    throw new TApplicationException(4, soaHeader.getMethodName() + " failed: out of sequence response");
-                } else {
-                    if ("0000".equals(soaHeader.getRespCode().get())) {
-                        responseSerializer.read(response, inputProtocol);
-                        inputProtocol.readMessageEnd();
-                    } else {
-                        throw new SoaException(soaHeader.getRespCode().get(), soaHeader.getRespMessage().get());
-                    }
-
-                    return response;
-                }
-            }
-        } catch (SoaException e) {
-            LOGGER.error(e.getMessage(), e);
-            throw e;
-
-        } catch (Throwable e) {
-            LOGGER.error(e.getMessage(), e);
-
-            throw new SoaException(SoaBaseCode.UnKnown);
-        } finally {
-            outputSoaTransport.close();
-
-            if (requestBuf.refCnt() > 0)
-                requestBuf.release();
-
-            // to see SoaDecoder: ByteBuf msg = in.slice(readerIndex, length + Integer.BYTES).retain();
-            if (responseBuf != null)
-                responseBuf.release();
-        }
+        throw new SoaException("系统错误", "SoaScalaConnectionImpl不支持send(req,rsp,reqSerializer,rspSerializer),请使用send(req,reqSerializer,rspSerializer)");
     }
 
     @Override
@@ -123,7 +59,7 @@ public class SoaScalaConnectionImpl implements SoaScalaConnection {
 
             if (responseBuf == null) {
                 throw new SoaException(SoaBaseCode.TimeOut);
-//                throw new TException("request time out.");
+
             } else {
                 final TSoaTransport inputSoaTransport = new TSoaTransport(responseBuf);
                 TSoaServiceProtocol inputProtocol = new TSoaServiceProtocol(inputSoaTransport, true);

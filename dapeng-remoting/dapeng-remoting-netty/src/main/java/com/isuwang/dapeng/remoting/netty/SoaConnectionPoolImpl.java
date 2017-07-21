@@ -29,6 +29,7 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
 
     @Override
     public synchronized SoaConnection getConnection() throws SoaException {
+
         InvocationContext context = InvocationContext.Factory.getCurrentInstance();
 
         if (context.getCalleeIp() == null || context.getCalleePort() <= 0)
@@ -85,7 +86,6 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
 
         if (connectionMap.containsKey(connectKey))
             connectionMap.remove(connectKey);
-
 
         if (scalaConnectionMap.containsKey(connectKey))
             scalaConnectionMap.remove(connectKey);

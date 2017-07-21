@@ -21,7 +21,6 @@ package com.isuwang.org.apache.thrift;
 
 import com.isuwang.dapeng.core.Context;
 import com.isuwang.dapeng.core.SoaProcessFunction;
-import com.isuwang.dapeng.core.TBeanSerializer;
 import com.isuwang.org.apache.thrift.protocol.TProtocol;
 
 import java.util.Map;
@@ -39,10 +38,9 @@ public interface TProcessor<I> {
 
     void setInterfaceClass(Class<I> interfaceClass);
 
-    boolean process(TProtocol in, TProtocol out)
-            throws TException;
+    boolean process(TProtocol in, TProtocol out) throws TException;
 
     CompletableFuture<Context> processAsync(TProtocol in, TProtocol out) throws TException;
 
-    public Map<String, SoaProcessFunction<I, ?, ?, ? extends TBeanSerializer<?>, ? extends TBeanSerializer<?>>> getProcessMapView();
+    Map<String, SoaProcessFunction<I, ?, ?, ?, ?>> getProcessMapView();
 }
