@@ -19,8 +19,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 基础客户端工具
  *
- * @author craneding
- * @date 15/9/24
+ * @author ever
+ * @date 17/7/20
  */
 public class BaseScalaServiceClient extends BaseClient {
 

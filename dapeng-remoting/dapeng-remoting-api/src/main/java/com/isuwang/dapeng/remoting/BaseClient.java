@@ -87,10 +87,10 @@ public abstract class BaseClient {
     }
 
     static InputStream getInputStream(String name) throws FileNotFoundException {
-        InputStream stream = BaseServiceClient.class.getClassLoader().getResourceAsStream(name);
+        InputStream stream = BaseClient.class.getClassLoader().getResourceAsStream(name);
 
         if (stream == null)
-            return BaseServiceClient.class.getResourceAsStream(name);
+            stream = BaseClient.class.getResourceAsStream(name);
 
         if (stream == null)
             throw new FileNotFoundException("not found " + name);
