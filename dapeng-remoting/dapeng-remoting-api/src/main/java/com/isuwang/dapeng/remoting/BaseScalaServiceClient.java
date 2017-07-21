@@ -11,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -97,7 +95,6 @@ public class BaseScalaServiceClient extends BaseClient {
      * 发送异步请求
      *
      * @param request            请求实体
-     * @param response           返回实体
      * @param requestSerializer
      * @param responseSerializer
      * @param timeout            超时时间
@@ -106,7 +103,7 @@ public class BaseScalaServiceClient extends BaseClient {
      * @return
      * @throws TException
      */
-    protected <REQ, RESP> Future<RESP> sendBaseAsync(REQ request, RESP response, TBeanSerializer<REQ> requestSerializer, TBeanSerializer<RESP> responseSerializer, long timeout) throws TException {
+    protected <REQ, RESP> Future<RESP> sendBaseAsync(REQ request, TScalaBeanSerializer<REQ> requestSerializer, TScalaBeanSerializer<RESP> responseSerializer, long timeout) throws TException {
 
         InvocationContext context = InvocationContext.Factory.getCurrentInstance();
         SoaHeader soaHeader = context.getHeader();
@@ -120,7 +117,7 @@ public class BaseScalaServiceClient extends BaseClient {
         stubFilterChain.setAttribute(StubFilterChain.ATTR_KEY_REQUEST, request);
         stubFilterChain.setAttribute(SendMessageFilter.ATTR_KEY_SENDMESSAGE, (SendMessageFilter.SendMessageAction) (chain) -> {
             SoaScalaConnection conn = connectionPool.getScalaConnection();
-            Future<RESP> resp = conn.sendAsync(request, response, requestSerializer, responseSerializer, timeout);
+            Future<RESP> resp = conn.sendAsync(request, requestSerializer, responseSerializer, timeout);
             chain.setAttribute(StubFilterChain.ATTR_KEY_RESPONSE, resp);
         });
 

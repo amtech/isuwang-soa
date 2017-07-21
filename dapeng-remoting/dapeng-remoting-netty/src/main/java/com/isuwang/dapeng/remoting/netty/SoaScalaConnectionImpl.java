@@ -28,10 +28,6 @@ public class SoaScalaConnectionImpl implements SoaScalaConnection {
         }
     }
 
-    public <REQ, RESP> RESP send(REQ request, RESP response, TBeanSerializer<REQ> requestSerializer, TBeanSerializer<RESP> responseSerializer) throws TException {
-        throw new SoaException("系统错误", "SoaScalaConnectionImpl不支持send(req,rsp,reqSerializer,rspSerializer),请使用send(req,reqSerializer,rspSerializer)");
-    }
-
     @Override
     public <REQ, RESP> RESP send(REQ request, TScalaBeanSerializer<REQ> requestSerializer, TScalaBeanSerializer<RESP> responseSerializer) throws TException {
         InvocationContext context = InvocationContext.Factory.getCurrentInstance();
@@ -107,7 +103,6 @@ public class SoaScalaConnectionImpl implements SoaScalaConnection {
      * 异步调用，返回一个Future,等待该future完成或异常
      *
      * @param request
-     * @param response
      * @param requestSerializer
      * @param responseSerializer
      * @param <REQ>
@@ -115,7 +110,8 @@ public class SoaScalaConnectionImpl implements SoaScalaConnection {
      * @return
      * @throws TException
      */
-    public <REQ, RESP> Future<RESP> sendAsync(REQ request, RESP response, TBeanSerializer<REQ> requestSerializer, TBeanSerializer<RESP> responseSerializer, long timeout) throws TException {
+    @Override
+    public <REQ, RESP> Future<RESP> sendAsync(REQ request, TScalaBeanSerializer<REQ> requestSerializer, TScalaBeanSerializer<RESP> responseSerializer, long timeout) throws TException {
 
         InvocationContext context = InvocationContext.Factory.getCurrentInstance();
         SoaHeader soaHeader = context.getHeader();
@@ -159,7 +155,7 @@ public class SoaScalaConnectionImpl implements SoaScalaConnection {
                             throw new TApplicationException(4, soaHeader.getMethodName() + " failed: out of sequence response");
                         } else {
                             if ("0000".equals(soaHeader.getRespCode().get())) {
-                                responseSerializer.read(response, inputProtocol);
+                                RESP response = responseSerializer.read(inputProtocol);
                                 inputProtocol.readMessageEnd();
 
                                 finalResponseFuture.complete(response);
