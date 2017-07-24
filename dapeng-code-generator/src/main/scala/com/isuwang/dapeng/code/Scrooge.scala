@@ -3,6 +3,9 @@ package com.isuwang.dapeng.code
 import java.io.{File, FileNotFoundException, FilenameFilter}
 import javax.annotation.processing.FilerException
 
+import com.isuwang.dapeng.code.generator.ScalaGenerator
+
+//import com.isuwang.dapeng.code.generator.scala.ScalaGenerator
 import com.isuwang.dapeng.code.generator.{JavaGenerator, JavascriptGenerator, JsonGenerator, MetadataGenerator}
 import com.isuwang.dapeng.code.parser.ThriftCodeParser
 
@@ -27,8 +30,7 @@ object Scrooge {
       |
       | Available generators (and options):
       |   metadata
-      |   js
-      |   json
+      |   scala
       |   java
       |-----------------------------------------------------------------------
     """.stripMargin
@@ -117,6 +119,7 @@ object Scrooge {
             case "js" => new JavascriptGenerator().generate(services, outDir)
             case "json" => new JsonGenerator().generate(services, outDir)
             case "java" => new JavaGenerator().generate(services, outDir, generateAll, structs, enums)
+            case "scala" => new ScalaGenerator().generate(services, outDir, generateAll, structs, enums)
           }
         }
       } else {
