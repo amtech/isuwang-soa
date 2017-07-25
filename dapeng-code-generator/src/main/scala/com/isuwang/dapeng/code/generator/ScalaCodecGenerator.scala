@@ -452,7 +452,7 @@ class ScalaCodecGenerator extends CodeGenerator {
     if (struct.getNamespace == null) {
       return struct.getName()
     } else {
-      return struct.getNamespace + "." + struct.getName();
+      return struct.getNamespace + "." + struct.getName()
     }
   }
 
@@ -526,59 +526,40 @@ class ScalaCodecGenerator extends CodeGenerator {
   }
 
 
-  def getJavaReadElement(dataType: DataType, index: Int):Elem = {
+  def getScalaReadElement(dataType: DataType, index: Int):Elem = {
     dataType.kind match {
-      case KIND.BOOLEAN => <div>boolean elem{index} = iprot.readBool();</div>
-      case KIND.STRING => <div>String elem{index} = iprot.readString();</div>
-      case KIND.BYTE => <div>byte elem{index} = iprot.readByte();</div>
-      case KIND.SHORT =>  <div>short elem{index} = iprot.readI16();</div>
-      case KIND.INTEGER => <div> int elem{index} = iprot.readI32();</div>
-      case KIND.LONG => <div>long elem{index} = iprot.readI64();</div>
-      case KIND.DOUBLE => <div> double elem{index} = iprot.readDouble();</div>
-      case KIND.BINARY => <div>java.nio.ByteBuffer elem{index} = iprot.readBinary();</div>
-      case KIND.BIGDECIMAL => <div>java.math.BigDecimal elem{index} = new java.math.BigDecimal(iprot.readString());</div>
-      case KIND.DATE => <div>Long time = iprot.readI64(); java.util.Date elem{index} = new java.util.Date(time);</div>
-      case KIND.STRUCT => <div>{dataType.qualifiedName} elem{index} = new {dataType.qualifiedName}();
-        new {dataType.qualifiedName.substring(dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().read(elem{index}, iprot);</div>
-      case KIND.ENUM => <div>{dataType.qualifiedName} elem{index} = {dataType.qualifiedName}.findByValue(iprot.readI32());</div>
-      case KIND.MAP => <div>com.isuwang.org.apache.thrift.protocol.TMap _map{index} = iprot.readMapBegin();
-        java.util.Map{lt}{toJavaDataType(dataType.keyType)},{toJavaDataType(dataType.valueType)}{gt} elem{index} = new java.util.HashMap{lt}{gt}(_map{index}.size);
-        for(int _i{index} = 0; _i{index} {lt} _map{index}.size; ++ _i{index})<block>
-          {getJavaReadElement(dataType.keyType, index+1)}
-          {getJavaReadElement(dataType.valueType, index+2)}
-          elem{index}.put(elem{index+1}, elem{index+2});
-        </block>
-        iprot.readMapEnd();</div>
-      case KIND.LIST => <div> com.isuwang.org.apache.thrift.protocol.TList _list{index} = iprot.readListBegin();
-        java.util.List{lt}{toJavaDataType(dataType.valueType)}{gt} elem{index} = new java.util.ArrayList{lt}{gt}(_list{index}.size);
-        for(int _i{index} = 0; _i{index} {lt} _list{index}.size; ++ _i{index})<block>
-          {getJavaReadElement(dataType.valueType, index+1)}
-          elem{index}.add(elem{index+1});
-        </block>
-        iprot.readListEnd();</div>
-      case KIND.SET => <div>com.isuwang.org.apache.thrift.protocol.TSet _set{index} = iprot.readSetBegin();
-        java.util.Set{lt}{toJavaDataType(dataType.valueType)}{gt} elem{index} = new java.util.HashSet{lt}{gt}(_set{index}.size);
-        for(int _i{index} = 0; _i{index} {lt} _set{index}.size; ++ _i{index})<block>
-          {getJavaReadElement(dataType.valueType, index+1)}
-          elem{index}.add(elem{index+1});
-        </block>
-        iprot.readSetEnd();
-      </div>
+      case KIND.BOOLEAN => <div>iprot.readBool</div>
+      case KIND.STRING => <div>iprot.readString</div>
+      case KIND.BYTE => <div>iprot.readByte</div>
+      case KIND.SHORT =>  <div>iprot.readI16</div>
+      case KIND.INTEGER => <div>iprot.readI32</div>
+      case KIND.LONG => <div>iprot.readI64</div>
+      case KIND.DOUBLE => <div>iprot.readDouble</div>
+      case KIND.BINARY => <div>iprot.readBinary</div>
+      case KIND.BIGDECIMAL => <div>BigDecimal(iprot.readString)</div>
+      case KIND.DATE => <div>new java.util.Date(iprot.readI64)</div>
+      case KIND.STRUCT => <div>new {dataType.qualifiedName.substring(dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().read(iprot)</div>
+      case KIND.ENUM => <div>{dataType.qualifiedName}.findByValue(iprot.readI32)</div>
+      case KIND.MAP => <div><block>
+        val _map{index} : com.isuwang.org.apache.thrift.protocol.TMap = iproto.readMapBegin
+        val _result{index} = (0 until _map{index}.size).map(_ => <block>( {getScalaReadElement(dataType.keyType, index+1)} -> {getScalaReadElement(dataType.valueType, index+2)} )</block>).toMap
+        iprot.readMapEnd
+        _result{index}
+      </block></div>
+      case KIND.LIST => <div><block>
+        val _list{index} : com.isuwang.org.apache.thrift.protocol.TList = iproto.readListBegin
+        val _result{index} = (0 until _list{index}.size).map(_ => <block>{getScalaReadElement(dataType.valueType, index+1)}</block>).toList
+        iprot.readListEnd
+        _result{index}
+        </block></div>
+      case KIND.SET => <div><block>
+        val _set{index} : com.isuwang.org.apache.thrift.protocol.TSet = iproto.readSetBegin
+        val _result{index} = (0 until _set{index}.size).map(_ => <block>{getScalaReadElement(dataType.valueType, index+1)}</block>).toSet
+        iprot.readSetEnd
+        _result{index}
+      </block></div>
       case _ => <div></div>
     }
-  }
-
-  def getJavaSetElement(field: Field): Elem = {
-    field.dataType.kind match {
-      case KIND.VOID => <div>com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);</div>
-      case _ => <div> bean.set{field.name.charAt(0).toUpper + field.name.substring(1)}({if(field.optional) <div>Optional.of(</div>}elem0{if(field.optional) <div>)</div>});</div>
-    }
-
-  }
-
-  def getJavaReadAndSetElement(field: Field):Elem = {
-    <div>{getJavaReadElement(field.getDataType, 0)}
-         {getJavaSetElement(field)}</div>
   }
 
   def getReadMethod(struct: Struct): Elem = {
@@ -589,51 +570,36 @@ class ScalaCodecGenerator extends CodeGenerator {
         var schemeField: com.isuwang.org.apache.thrift.protocol.TField = null
         iprot.readStructBegin()
 
-      {
-      toFieldArrayBuffer(struct.getFields).map{(field : Field) =>{
-        <div>
-          var {field.name}: {if(field.isOptional) <div>Option[</div>}{toScalaDataType(field.dataType)}{if(field.isOptional) <div>]</div>} = {if(field.isOptional) <div>None</div> else getDefaultValueWithType(field.dataType)}
-
-          case {field.tag}:
-          if(schemeField.type == {toThriftDateType(field.dataType)})<block>
-          {getJavaReadAndSetElement(field)}
-        </block>else<block>
-          com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
-        </block>
-          break;
+      {toFieldArrayBuffer(struct.getFields).map{(field : Field) =>{
+        <div>var {field.name}: {if(field.isOptional) <div>Option[</div>}{toScalaDataType(field.dataType)}{if(field.isOptional) <div>]</div>} = {if(field.isOptional) <div>None</div> else getDefaultValueWithType(field.dataType)}
         </div>
-      }}
-      }
+      }}}
 
+      while (schemeField == null || schemeField.`type` != com.isuwang.org.apache.thrift.protocol.TType.STOP) <block>
 
-        while(true)<block>
-          schemeField = iprot.readFieldBegin();
-          if(schemeField.type == com.isuwang.org.apache.thrift.protocol.TType.STOP)<block> break;</block>
+        schemeField = iprot.readFieldBegin
 
-          switch(schemeField.id)<block>
-          {
-            toFieldArrayBuffer(struct.getFields).map{(field : Field) =>{
-              <div>
-              case {field.tag}:
-                if(schemeField.type == {toThriftDateType(field.dataType)})<block>
-                {getJavaReadAndSetElement(field)}
-                </block>else<block>
-                     com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
-                </block>
-                break;
-              </div>
-            }}
-          }
+        schemeField.id match <block>
+          {toFieldArrayBuffer(struct.getFields).map{(field : Field) =>{
             <div>
-                default:
-                  com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              case {field.tag} =>
+                  schemeField.`type` match <block>
+                    case {toThriftDateType(field.dataType)} => {field.name} = {getScalaReadElement(field.dataType, 0)}
+                    case _ => com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.`type`)
+            </block>
             </div>
-          </block>
-          iprot.readFieldEnd();
+          }}}
         </block>
-        iprot.readStructEnd();
+        case _ => com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.`type`)
+      </block>
 
-        validate(bean);
+      iprot.readFieldEnd
+      iprot.readStructEnd
+
+      val bean = {toStructName(struct)}({toFieldArrayBuffer(struct.getFields).map{(field : Field) =>{<div>{field.name} = {field.name}{if(field != struct.getFields.get(struct.getFields.size-1)) <span>,</span>}</div>}}})
+      validate(bean)
+
+      bean
       </block>
     </div>
   }
@@ -693,15 +659,15 @@ class ScalaCodecGenerator extends CodeGenerator {
 
     var index = 0
     <div>
-      @Override
-      public void write({toStructName(struct)} bean, TProtocol oprot) throws TException<block>
+      @throws[TException]
+      override def write(bean: {toStructName(struct)}, oprot: TProtocol): Unit = <block>
 
-      validate(bean);
-      oprot.writeStructBegin(new com.isuwang.org.apache.thrift.protocol.TStruct("{struct.name}"));
+      validate(bean)
+      oprot.writeStructBegin(new com.isuwang.org.apache.thrift.protocol.TStruct("{struct.name}"))
 
       {toFieldArrayBuffer(struct.fields).map{(field : Field) =>{
-        if(field.dataType.getKind() == DataType.KIND.VOID) {
-        } else {
+        if(field.dataType.getKind() == DataType.KIND.VOID) {}
+        else {
           if(field.isOptional){
             <div>if(bean.get{field.name.charAt(0).toUpper + field.name.substring(1)}().isPresent())<block>
               oprot.writeFieldBegin(new com.isuwang.org.apache.thrift.protocol.TField("{field.name}", {toThriftDateType(field.dataType)}, (short) {field.tag}));
@@ -710,7 +676,8 @@ class ScalaCodecGenerator extends CodeGenerator {
               {index = index + 1}
             </block>
             </div>
-          }else{<div>
+          }else {
+            <div>
             oprot.writeFieldBegin(new com.isuwang.org.apache.thrift.protocol.TField("{field.name}", {toThriftDateType(field.dataType)}, (short) {field.tag}));
             {toJavaDataType(field.dataType)} elem{index} = bean.get{field.name.charAt(0).toUpper + field.name.substring(1)}();
             {toJavaWriteElement(field.dataType, index)}
