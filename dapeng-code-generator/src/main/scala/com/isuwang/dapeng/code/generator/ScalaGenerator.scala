@@ -137,8 +137,8 @@ class ScalaGenerator extends CodeGenerator {
 
 
       println(s"生成Codec:${service.name}Codec.scala")
-      val codecTemplate = new StringTemplate(new JavaCodecGenerator().toCodecTemplate(service, namespaces))
-      val codecWriter = new PrintWriter(new File(rootDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))), s"${service.name}Codec.java"), "UTF-8")
+      val codecTemplate = new StringTemplate(new ScalaCodecGenerator().toCodecTemplate(service, namespaces))
+      val codecWriter = new PrintWriter(new File(rootDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))), s"${service.name}Codec.scala"), "UTF-8")
       codecWriter.write(codecTemplate.toString())
       codecWriter.close()
       println(s"生成Codec:${service.name}Codec.scala 完成")
