@@ -112,7 +112,7 @@ class ScalaCodecGenerator extends CodeGenerator {
 
             @throws[TException]
             def getResult(iface: {service.namespace}.{service.name}, args: {method.name}_args):{method.name}_result = <block>
-              {method.response.name}(iface.{method.name}({toFieldArrayBuffer(method.request.fields)} ))
+              {method.response.name}(iface.{method.name}({toFieldArrayBuffer(method.request.getFields).map{(field: Field)=>{<div>args.{field.name}{if(field != method.request.getFields.get(method.request.getFields.size-1)) <span>,</span>}</div>}}}))
             </block>
           </block>
           </div>
