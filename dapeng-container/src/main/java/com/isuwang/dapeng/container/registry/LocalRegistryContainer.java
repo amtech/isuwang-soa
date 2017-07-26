@@ -35,11 +35,11 @@ public class LocalRegistryContainer implements Container, RegistryAgent {
             try {
                 Method method = contextClass.getMethod("getBeansOfType", Class.class);
                 @SuppressWarnings("unchecked")
-                Map<String, SoaBaseProcessor<?>> processorMap = (Map<String, SoaBaseProcessor<?>>) method.invoke(ctx, contextClass.getClassLoader().loadClass(SoaBaseProcessor.class.getName()));
+                Map<String, TProcessor<?>> processorMap = (Map<String, TProcessor<?>>) method.invoke(ctx, contextClass.getClassLoader().loadClass(TProcessor.class.getName()));
 
                 Set<String> keys = processorMap.keySet();
                 for (String key : keys) {
-                    SoaBaseProcessor<?> processor = processorMap.get(key);
+                    TProcessor<?> processor = processorMap.get(key);
 
                     if (processor.getInterfaceClass().getClass() != null) {
                         Service service = processor.getInterfaceClass().getAnnotation(Service.class);
