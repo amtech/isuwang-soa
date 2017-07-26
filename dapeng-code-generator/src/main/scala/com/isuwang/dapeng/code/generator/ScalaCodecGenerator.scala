@@ -471,15 +471,13 @@ class ScalaCodecGenerator extends CodeGenerator {
         if(field.dataType.getKind() == DataType.KIND.VOID) {}
         else {
           <div>
-            {if(field.isOptional) <div>if(bean.{field.name}.isDefined)</div>}
-            <block>
+            {if(field.isOptional) <div>if(bean.{field.name}.isDefined)</div>}<block>
             val elem{index} = bean.{field.name} {if(field.isOptional) <div>.get</div>}
             oprot.writeFieldBegin(new com.isuwang.org.apache.thrift.protocol.TField("{field.name}", {toThriftDateType(field.dataType)}, {field.tag}.asInstanceOf[Short]))
             {toScalaWriteElement(field.dataType, index)}
-            {index = index + 1}
             oprot.writeFieldEnd
-            </block>
-        </div>
+            {index = index + 1}
+            </block></div>
         }
       }
       }

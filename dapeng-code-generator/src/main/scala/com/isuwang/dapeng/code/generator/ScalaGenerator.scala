@@ -135,6 +135,13 @@ class ScalaGenerator extends CodeGenerator {
       clientWriter.close()
       println(s"生成client:${service.name}Client.scala 完成")
 
+      println(s"生成client:${service.name}AsyncClient.scala")
+      val asyncClientTemplate = new StringTemplate(toAsyncClientTemplate(service, namespaces))
+      val asyncClientWriter = new PrintWriter(new File(rootDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))), s"${service.name}AsyncClient.scala"), "UTF-8")
+      asyncClientWriter.write(asyncClientTemplate.toString())
+      asyncClientWriter.close()
+      println(s"生成client:${service.name}AsyncClient.scala 完成")
+
 
       println(s"生成Codec:${service.name}Codec.scala")
       val codecTemplate = new StringTemplate(new ScalaCodecGenerator().toCodecTemplate(service, namespaces))
@@ -243,6 +250,81 @@ class ScalaGenerator extends CodeGenerator {
   }
 
 
+  private def toAsyncClientTemplate(service: Service, namespaces:util.Set[String]): Elem = {
+    return {
+      <div>package {service.namespace.substring(0, service.namespace.lastIndexOf("."))}
+
+        import com.isuwang.dapeng.core._
+        import com.isuwang.org.apache.thrift._
+        import com.isuwang.dapeng.remoting.BaseScalaServiceClient
+        import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + "." + service.name + "Codec._"}
+        import scala.concurrent.<block>Future, Promise</block>
+        import java.util.function.BiConsumer
+
+        /**
+        {notice}
+        **/
+        object {service.name}AsyncClient extends BaseScalaServiceClient("{service.namespace}.{service.name}", "{service.meta.version}")<block>
+
+        override def isSoaTransactionalProcess: Boolean = <block>
+
+          var isSoaTransactionalProcess = false
+          {toMethodArrayBuffer(service.methods).map{(method:Method)=>{
+            if(method.doc != null && method.doc.contains("@IsSoaTransactionProcess"))
+              <div>if(InvocationContext.Factory.getCurrentInstance().getHeader().getMethodName().equals("{method.name}"))
+                isSoaTransactionalProcess = true</div>
+          }}}
+          isSoaTransactionalProcess
+        </block>
+
+        {
+        toMethodArrayBuffer(service.methods).map{(method:Method)=>{
+          <div>
+            /**
+            * {method.doc}
+            **/
+            def {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+            <div>{field.name}:{toDataTypeTemplate(field.getDataType())} ,</div>}}} timeout: Long) : scala.concurrent.Future[{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}] = <block>
+
+            initContext("{method.name}");
+
+            try <block>
+              val _responseFuture = sendBaseAsync({method.request.name}({
+              toFieldArrayBuffer(method.getRequest.getFields).map{(field: Field)=>{
+                <div>{field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>
+              }
+              }
+              }), new {method.request.name.charAt(0).toUpper + method.request.name.substring(1)}Serializer(), new {method.response.name.charAt(0).toUpper + method.response.name.substring(1)}Serializer(), timeout).asInstanceOf[java.util.concurrent.CompletableFuture[{method.response.name}]]
+
+              val promise = Promise[{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}]()
+
+              _responseFuture.whenComplete(new BiConsumer[{method.response.name}, Throwable]<block>
+
+              override def accept(r: {method.response.name}, e: Throwable): Unit = <block>
+                if(e != null)
+                  promise.failure(e)
+                else
+                  promise.success(r.success)
+                </block>
+              </block>)
+              promise.future
+            </block>catch<block>
+              case e: SoaException => throw e
+              case e: TException => throw new SoaException(e)
+            </block>finally <block>
+              destoryContext()
+            </block>
+          </block>
+          </div>
+        }
+        }
+        }
+
+      </block>
+      </div>
+    }
+  }
+
   private def toEnumTemplate(enum: TEnum): Elem = {
     return {
       <div>package {enum.namespace};
@@ -344,7 +426,7 @@ class ScalaGenerator extends CodeGenerator {
     */
   def toDataTypeTemplate(dataType:DataType): Elem = {
     dataType.kind match {
-      case KIND.VOID => <div>void</div>
+      case KIND.VOID => <div>Unit</div>
       case KIND.BOOLEAN => <div>Boolean</div>
       case KIND.BYTE => <div>Byte</div>
       case KIND.SHORT => <div>Short</div>
