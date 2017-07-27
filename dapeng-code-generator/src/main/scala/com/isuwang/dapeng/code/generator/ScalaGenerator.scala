@@ -374,7 +374,7 @@ class ScalaGenerator extends CodeGenerator {
         {toFieldArrayBuffer(struct.getFields).map{(field : Field) =>{<div> /**
         *{field.doc}
         **/
-        {field.name} : {if(field.isOptional) <div>Option[</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>]</div>}{if(field != struct.getFields.get(struct.getFields.size-1)) <span>,</span>}</div>}}}
+        {field.name} : {if(field.isOptional) <div>Option[</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>] = None</div>}{if(field != struct.getFields.get(struct.getFields.size-1)) <span>,</span>}</div>}}}
         )
       </div>
     }
