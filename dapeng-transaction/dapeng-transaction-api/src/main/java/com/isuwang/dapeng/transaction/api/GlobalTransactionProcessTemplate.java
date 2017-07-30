@@ -54,7 +54,7 @@ public class GlobalTransactionProcessTemplate<REQ> {
             transactionProcess.setVersionName(invocationContext.getHeader().getVersionName());
             transactionProcess.setRollbackMethodName(invocationContext.getHeader().getMethodName() + "_rollback");
 
-            transactionProcess.setRequestJson(req == null ? null : new Gson().toJson(req));
+            transactionProcess.setRequestJson(req == null ? "" : new Gson().toJson(req));
             transactionProcess.setResponseJson("");
 
             transactionProcess.setStatus(TGlobalTransactionProcessStatus.New);

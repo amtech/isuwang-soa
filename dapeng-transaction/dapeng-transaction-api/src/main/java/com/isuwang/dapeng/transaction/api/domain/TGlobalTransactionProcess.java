@@ -1,9 +1,11 @@
 package com.isuwang.dapeng.transaction.api.domain;
 
+import java.io.Serializable;
+
 /**
  *
  **/
-public class TGlobalTransactionProcess {
+public class TGlobalTransactionProcess implements Serializable{
 
     /**
      *

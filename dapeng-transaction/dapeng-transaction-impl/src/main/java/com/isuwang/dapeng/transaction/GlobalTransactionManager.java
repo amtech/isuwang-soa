@@ -1,5 +1,6 @@
 package com.isuwang.dapeng.transaction;
 
+import com.isuwang.dapeng.core.SoaException;
 import com.isuwang.dapeng.core.SoaHeader;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.core.helper.MasterHelper;
@@ -8,9 +9,11 @@ import com.isuwang.dapeng.remoting.fake.json.JSONPost;
 import com.isuwang.dapeng.remoting.fake.metadata.MetadataClient;
 import com.isuwang.dapeng.remoting.filter.LoadBalanceFilter;
 import com.isuwang.dapeng.transaction.api.domain.*;
-import com.isuwang.dapeng.transaction.db.action.*;
+import com.isuwang.dapeng.transaction.api.service.GlobalTransactionProcessService;
+import com.isuwang.dapeng.transaction.dao.ITransactionDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.bind.JAXB;
@@ -34,6 +37,12 @@ public class GlobalTransactionManager {
 
     private AtomicBoolean working = new AtomicBoolean(false);
 
+    @Autowired
+    ITransactionDao transactionDao;
+
+    @Autowired
+    GlobalTransactionProcessService processService;
+
     @Transactional(value = "globalTransaction", rollbackFor = Exception.class)
     public void doJob() {
 
@@ -52,23 +61,23 @@ public class GlobalTransactionManager {
             /**
              * 处理全局事务状态为失败或者部分回滚的记录，这些全局事务下的成功的子事务过程应该回滚
              */
-            List<TGlobalTransaction> globalTransactionList = new GlobalTransactionsFindAction().execute();
+            List<TGlobalTransaction> globalTransactionList = transactionDao.findFailedGlobals();
 
             LOGGER.info("需回滚全局事务数量:{} 编号集合:{}", globalTransactionList.size(), globalTransactionList.stream().map(gt -> gt.getId()).collect(toList()));
 
             for (TGlobalTransaction globalTransaction : globalTransactionList) {
 
-                globalTransaction = new GlobalTransactionFindByIdAction(globalTransaction.getId()).execute();
+                globalTransaction = transactionDao.getGlobalByIdForUpdate(globalTransaction.getId());
                 if (globalTransaction.getStatus() != TGlobalTransactionsStatus.Fail && globalTransaction.getStatus() != TGlobalTransactionsStatus.PartiallyRollback)
                     continue;
 
-                List<TGlobalTransactionProcess> transactionProcessList = new GlobalTransactionProcessFindAction(globalTransaction.getId()).execute();
+                List<TGlobalTransactionProcess> transactionProcessList = transactionDao.findSucceedProcess(globalTransaction.getId());
 
                 LOGGER.info("需回滚全局事务编号:{} 事务过程数量:{} 事务过程编号集合:{}", globalTransaction.getId(), transactionProcessList.size(), transactionProcessList.stream().map(gt -> gt.getId()).collect(toList()));
 
                 if (transactionProcessList.isEmpty()) {
                     //如果事务过程为空，则说明该全局事务不需要再做处理，直接修改状态
-                    new GlobalTransactionUpdateAction(globalTransaction.getId(), 0, TGlobalTransactionsStatus.HasRollback).execute();
+                    transactionDao.updateGlobalTransactionStatusAndCurrSeq(TGlobalTransactionsStatus.HasRollback.getValue(), 0, globalTransaction.getId());
                     continue;
                 }
 
@@ -87,7 +96,12 @@ public class GlobalTransactionManager {
 
                     //更新process的期望状态为“已回滚”
                     if (process.getExpectedStatus() != TGlobalTransactionProcessExpectedStatus.HasRollback)
-                        new GlobalTransactionProcessExpectedStatusUpdateAction(process.getId(), TGlobalTransactionProcessExpectedStatus.HasRollback).execute();
+                        try {
+                            processService.updateExpectedStatus(process.getId(), TGlobalTransactionProcessExpectedStatus.HasRollback);
+                        } catch (SoaException e) {
+                            LOGGER.error(e.getMessage(), e);
+                            break;
+                        }
 
                     String responseJson;
                     //call roll back method
@@ -95,7 +109,7 @@ public class GlobalTransactionManager {
                         responseJson = callServiceMethod(process, true);
 
                         //更新事务过程表为已回滚
-                        new GlobalTransactionProcessUpdateAction(process.getId(), responseJson, TGlobalTransactionProcessStatus.HasRollback).execute();
+                        transactionDao.updateProcess(process.getId(), TGlobalTransactionProcessStatus.HasRollback.getValue(), responseJson);
 
                         LOGGER.info("需回滚全局事务编号:{} 事务过程编号:{} 事务过程序号:{} 事务过程原状态:{} 事务过程期望状态:{} 动作:已完成",
                                 globalTransaction.getId(), process.getId(), process.getTransactionSequence(),
@@ -106,7 +120,11 @@ public class GlobalTransactionManager {
                                 process.getStatus().name(), TGlobalTransactionProcessExpectedStatus.HasRollback.name(), e.getMessage());
 
                         //更新事务过程表的重试次数和下次重试时间
-                        new GlobalTransactionProcessUpdateAfterRollbackFail(process.getId()).execute();
+                        try {
+                            processService.updateRedoTimes(process.getId());
+                        } catch (SoaException e1) {
+                            LOGGER.error(e.getMessage(), e1);
+                        }
 
                         LOGGER.error(e.getMessage(), e);
                         break;
@@ -119,13 +137,11 @@ public class GlobalTransactionManager {
                     continue;
                 } else if (i == transactionProcessList.size()) {
                     //已回滚
-                    new GlobalTransactionUpdateAction(globalTransaction.getId(), i > 0 ? transactionProcessList.get(i - 1).getTransactionSequence() : 0, TGlobalTransactionsStatus.HasRollback).execute();
-
+                    transactionDao.updateGlobalTransactionStatusAndCurrSeq(TGlobalTransactionsStatus.HasRollback.getValue(), i > 0 ? transactionProcessList.get(i - 1).getTransactionSequence() : 0, globalTransaction.getId());
                     LOGGER.info("需回滚全局事务编号:{} 已完成", globalTransaction.getId());
                 } else {
                     //部分回滚
-                    new GlobalTransactionUpdateAction(globalTransaction.getId(), i >= 0 ? transactionProcessList.get(i).getTransactionSequence() : 0, TGlobalTransactionsStatus.PartiallyRollback).execute();
-
+                    transactionDao.updateGlobalTransactionStatusAndCurrSeq(TGlobalTransactionsStatus.PartiallyRollback.getValue(), i >= 0 ? transactionProcessList.get(i).getTransactionSequence() : 0, globalTransaction.getId());
                     LOGGER.info("需回滚全局事务编号:{} 部分完成", globalTransaction.getId());
                 }
             }
@@ -134,17 +150,17 @@ public class GlobalTransactionManager {
             /**
              * 处理所有全局事务状态为成功，但对应子过程中存在失败状态的记录，这种情况下，应该对子过程顺序做向前处理
              */
-            globalTransactionList = new GlobalSucTransactionWithFailProcessFindAction().execute();
+            globalTransactionList = transactionDao.findSuccessWithFailedProcessGlobals();
 
             LOGGER.info("需向前全局事务数量:{} 编号集合:{}", globalTransactionList.size(), globalTransactionList.stream().map(gt -> gt.getId()).collect(toList()));
 
             for (TGlobalTransaction globalTransaction : globalTransactionList) {
 
-                globalTransaction = new GlobalTransactionFindByIdAction(globalTransaction.getId()).execute();
+                globalTransaction = transactionDao.getGlobalByIdForUpdate(globalTransaction.getId());
                 if (globalTransaction.getStatus() != TGlobalTransactionsStatus.Success)
                     continue;
 
-                List<TGlobalTransactionProcess> transactionProcessList = new FailedTransactionProcessFindAction(globalTransaction.getId()).execute();
+                List<TGlobalTransactionProcess> transactionProcessList = transactionDao.findFailedProcess(globalTransaction.getId());
 
                 LOGGER.info("需向前全局事务编号:{} 事务过程数量:{} 事务过程编号集合:{}", globalTransaction.getId(), transactionProcessList.size(), transactionProcessList.stream().map(gt -> gt.getId()).collect(toList()));
 
@@ -166,7 +182,12 @@ public class GlobalTransactionManager {
 
                     //更新process的期望状态为“成功”
                     if (process.getExpectedStatus() != TGlobalTransactionProcessExpectedStatus.Success)
-                        new GlobalTransactionProcessExpectedStatusUpdateAction(process.getId(), TGlobalTransactionProcessExpectedStatus.Success).execute();
+                        try {
+                            processService.updateExpectedStatus(process.getId(), TGlobalTransactionProcessExpectedStatus.Success);
+                        } catch (SoaException e) {
+                            LOGGER.error(e.getMessage(), e);
+                            break;
+                        }
 
                     String responseJson;
                     //call method
@@ -174,7 +195,7 @@ public class GlobalTransactionManager {
                         responseJson = callServiceMethod(process, false);
 
                         //更新事务过程表为成功
-                        new GlobalTransactionProcessUpdateAction(process.getId(), responseJson, TGlobalTransactionProcessStatus.Success).execute();
+                        transactionDao.updateProcess(process.getId(), TGlobalTransactionProcessStatus.Success.getValue(), responseJson);
 
                         LOGGER.info("需向前全局事务编号:{} 事务过程编号:{} 事务过程序号:{} 事务过程原状态:{} 事务过程期望状态:{} 动作:已完成",
                                 globalTransaction.getId(), process.getId(), process.getTransactionSequence(),
@@ -185,7 +206,11 @@ public class GlobalTransactionManager {
                                 process.getStatus().name(), TGlobalTransactionProcessExpectedStatus.Success.name(), e.getMessage());
 
                         //更新事务过程表的重试次数和下次重试时间
-                        new GlobalTransactionProcessUpdateAfterRollbackFail(process.getId()).execute();
+                        try {
+                            processService.updateRedoTimes(process.getId());
+                        } catch (SoaException e1) {
+                            LOGGER.error(e.getMessage(), e1);
+                        }
 
                         LOGGER.error(e.getMessage(), e);
                         break;
