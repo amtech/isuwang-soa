@@ -109,7 +109,7 @@ public class GlobalTransactionProcessServiceImpl implements GlobalTransactionPro
 
         transactionDao.updateProcessRollbackTime(processId, process.getRedoTimes(), process.getNextRedoTime());
 
-        LOGGER.info("更新事务过程({})前,重试次数({}),下次重试时间({})", process.getId(), process.getRedoTimes(), new Date(process.getNextRedoTime().getTime()));
+        LOGGER.info("更新事务过程({})后,重试次数({}),下次重试时间({})", process.getId(), process.getRedoTimes(), new Date(process.getNextRedoTime().getTime()));
     }
 
 }
