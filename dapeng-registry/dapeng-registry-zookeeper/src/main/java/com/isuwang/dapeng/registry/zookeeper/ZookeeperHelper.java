@@ -46,6 +46,9 @@ public class ZookeeperHelper {
                 } else if (Watcher.Event.KeeperState.Disconnected == watchedEvent.getState()) {
                     //zookeeper重启或zookeeper实例重新创建
                     LOGGER.error("Registry {} zookeeper 连接断开，可能是zookeeper重启或重建");
+
+                    isMaster.clear(); //断开连接后，认为，master应该失效，避免某个孤岛一直以为自己是master
+
                     destroy();
                     connect();
                 }
