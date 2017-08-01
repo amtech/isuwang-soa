@@ -35,13 +35,18 @@ abstract class CodeGenerator {
   }
 
   protected def toFieldArrayBuffer(array: util.List[Field]): ArrayBuffer[Field] = {
-    val newArray: ArrayBuffer[Field] = ArrayBuffer()
+    val newArray, optionalArray: ArrayBuffer[Field] = ArrayBuffer()
 
     for (index <- (0 until array.size())) {
-      newArray += array.get(index)
-    }
 
-    return newArray
+      val field = array.get(index)
+      if(field.isOptional)
+        optionalArray += field
+      else
+        newArray += field
+    }
+    newArray.appendAll(optionalArray)
+    newArray
   }
 
   protected def toTEnumArrayBuffer(array: util.List[TEnum]): ArrayBuffer[TEnum] = {
