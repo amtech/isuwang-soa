@@ -7,6 +7,7 @@ import com.isuwang.dapeng.core.metadata.DataType.KIND
 import com.isuwang.dapeng.core.metadata.TEnum.EnumItem
 import com.isuwang.dapeng.core.metadata._
 
+import scala.collection.mutable.ArrayBuffer
 import scala.xml.Elem
 
 /**
@@ -27,6 +28,21 @@ class ScalaGenerator extends CodeGenerator {
       file.mkdirs()
 
     return file
+  }
+
+  protected def toFieldArrayBufferWithOptionBack(array: util.List[Field]): ArrayBuffer[Field] = {
+    val newArray, optionalArray: ArrayBuffer[Field] = ArrayBuffer()
+
+    for (index <- (0 until array.size())) {
+
+      val field = array.get(index)
+      if(field.isOptional)
+        optionalArray += field
+      else
+        newArray += field
+    }
+    newArray.appendAll(optionalArray)
+    newArray
   }
 
   private def resourceDir(rootDir: String, packageName: String): String = {
@@ -371,7 +387,7 @@ class ScalaGenerator extends CodeGenerator {
         **/
         case class {struct.name}(
 
-        {toFieldArrayBuffer(struct.getFields).map{(field : Field) =>{<div> /**
+        {toFieldArrayBufferWithOptionBack(struct.getFields).map{(field : Field) =>{<div> /**
         *{field.doc}
         **/
         {field.name} : {if(field.isOptional) <div>Option[</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>] = None</div>}{if(field != struct.getFields.get(struct.getFields.size-1)) <span>,</span>}</div>}}}
