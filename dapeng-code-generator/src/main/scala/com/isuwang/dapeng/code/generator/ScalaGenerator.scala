@@ -379,6 +379,9 @@ class ScalaGenerator extends CodeGenerator {
 
   private def toDomainTemplate(struct: Struct): Elem = {
     return {
+
+      var index = 0
+
       <div>package {struct.namespace}
 
         /**
@@ -390,7 +393,8 @@ class ScalaGenerator extends CodeGenerator {
         {toFieldArrayBufferWithOptionBack(struct.getFields).map{(field : Field) =>{<div> /**
         *{field.doc}
         **/
-        {field.name} : {if(field.isOptional) <div>Option[</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>] = None</div>}{if(field != struct.getFields.get(struct.getFields.size-1)) <span>,</span>}</div>}}}
+        {index = index + 1}
+        {field.name} : {if(field.isOptional) <div>Option[</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>] = None</div>}{if(index < struct.getFields.size) <span>,</span>}</div>}}}
         )
       </div>
     }
