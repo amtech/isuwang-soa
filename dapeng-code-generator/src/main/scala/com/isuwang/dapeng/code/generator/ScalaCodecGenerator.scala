@@ -56,7 +56,7 @@ class ScalaCodecGenerator extends CodeGenerator {
           <div>
             case class {method.name}_args({toFieldArrayBuffer(method.request.getFields).map{(field: Field)=>{<div>{field.name}:{toScalaDataType(field.dataType)}{if(field != method.request.getFields.get(method.request.getFields.size-1)) <span>,</span>}</div>}}})
 
-            case class {method.name}_result({toFieldArrayBuffer(method.response.getFields).map{(field: Field)=>{<div>{field.name}:{toScalaDataType(field.dataType)}{if(field != method.response.getFields.get(method.response.getFields.size-1)) <span>,</span>}</div>}}})
+            case class {method.name}_result({toFieldArrayBuffer(method.response.getFields).map{(field: Field)=>{<div>{caseClassFiledCombile(field)}{if(field != method.response.getFields.get(method.response.getFields.size-1)) <span>,</span>}</div>}}})
 
             class {method.name.charAt(0).toUpper + method.name.substring(1)}_argsSerializer extends TScalaBeanSerializer[{method.name}_args]<block>
             {getReadMethod(method.getRequest)}{getWriteMethod(method.getRequest)}{getValidateMethod(method.getRequest)}
@@ -72,7 +72,7 @@ class ScalaCodecGenerator extends CodeGenerator {
               var schemeField: com.isuwang.org.apache.thrift.protocol.TField = null
               iprot.readStructBegin
 
-              var success : {toScalaDataType(method.response.fields.get(0).dataType)} = {getDefaultValueWithType(method.response.fields.get(0).dataType)}
+              {if(method.response.fields.get(0).dataType.kind != KIND.VOID) <div>var success : {toScalaDataType(method.response.fields.get(0).dataType)} = {getDefaultValueWithType(method.response.fields.get(0).dataType)}</div>}
 
               while (schemeField == null || schemeField.`type` != com.isuwang.org.apache.thrift.protocol.TType.STOP) <block>
 
@@ -81,7 +81,7 @@ class ScalaCodecGenerator extends CodeGenerator {
                 schemeField.id match <block>
                     case 0 =>
                        schemeField.`type` match <block>
-                          case {toThriftDateType(method.response.fields.get(0).dataType)} => success = {getScalaReadElement(method.response.fields.get(0).dataType, 0)}
+                          case {toThriftDateType(method.response.fields.get(0).dataType)} =>  {if(method.response.fields.get(0).dataType.kind != KIND.VOID) <div>success = {getScalaReadElement(method.response.fields.get(0).dataType, 0)}</div> else <div>com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.`type`)</div>}
                           case _ => com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.`type`)
                   </block>
                     case _ => com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.`type`)
@@ -91,7 +91,7 @@ class ScalaCodecGenerator extends CodeGenerator {
               </block>
 
               iprot.readStructEnd
-              val bean = {method.name}_result(success)
+              val bean = {method.name}_result({if(method.response.fields.get(0).dataType.kind != KIND.VOID) <div>success</div>})
               validate(bean)
 
               bean
@@ -107,12 +107,14 @@ class ScalaCodecGenerator extends CodeGenerator {
 
             override def isOneway: Boolean = false
 
-            override def getEmptyArgsInstance: {method.name}_args = {method.name}_args(null)
+            override def getEmptyArgsInstance: {method.name}_args = null
 
 
             @throws[TException]
             def getResult(iface: {service.namespace}.{service.name}, args: {method.name}_args):{method.name}_result = <block>
-              {method.response.name}(iface.{method.name}({toFieldArrayBuffer(method.request.getFields).map{(field: Field)=>{<div>args.{field.name}{if(field != method.request.getFields.get(method.request.getFields.size-1)) <span>,</span>}</div>}}}))
+
+              val _result = iface.{method.name}({toFieldArrayBuffer(method.request.getFields).map{(field: Field)=>{<div>args.{field.name}{if(field != method.request.getFields.get(method.request.getFields.size-1)) <span>,</span>}</div>}}})
+              {method.response.name}({if(method.response.fields.get(0).dataType.kind != KIND.VOID) <div>_result</div>} )
             </block>
           </block>
           </div>
@@ -289,7 +291,7 @@ class ScalaCodecGenerator extends CodeGenerator {
 
   def toScalaDataType(dataType:DataType): Elem = {
     dataType.kind match {
-      case KIND.VOID => <div>void</div>
+      case KIND.VOID => <div></div>
       case KIND.BOOLEAN => <div>Boolean</div>
       case KIND.BYTE => <div>Byte</div>
       case KIND.SHORT => <div>Short</div>
@@ -370,6 +372,7 @@ class ScalaCodecGenerator extends CodeGenerator {
         iprot.readSetEnd
         _result{index}
       </block></div>
+      case KIND.VOID => <div>com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.`type`)</div>
       case _ => <div></div>
     }
   }
@@ -440,7 +443,7 @@ class ScalaCodecGenerator extends CodeGenerator {
       case KIND.MAP => <div>
         oprot.writeMapBegin(new com.isuwang.org.apache.thrift.protocol.TMap({toThriftDateType(dataType.keyType)}, {toThriftDateType(dataType.valueType)}, elem{index}.size))
 
-        elem{index}.map<block>case(key{index+1}, value{index+2}) => <block>
+        elem{index}.map<block>case(elem{index+1}, elem{index+2}) => <block>
           {toScalaWriteElement(dataType.keyType, index+1)}
           {toScalaWriteElement(dataType.valueType, index+2)}
         </block>
@@ -535,6 +538,13 @@ class ScalaCodecGenerator extends CodeGenerator {
       }
 
   }
+
+
+  def caseClassFiledCombile(field: Field): Elem ={
+    <div>{if(field.dataType.kind != KIND.VOID) <div>{field.name}:{toScalaDataType(field.dataType)}</div>}</div>
+
+  }
+
 
 
 

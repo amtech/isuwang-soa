@@ -226,7 +226,7 @@ class ScalaGenerator extends CodeGenerator {
               }
               }), new {method.request.name.charAt(0).toUpper + method.request.name.substring(1)}Serializer(), new {method.response.name.charAt(0).toUpper + method.response.name.substring(1)}Serializer())
 
-              {if(method.getResponse.getFields.get(0).getDataType != DataType.KIND.VOID) <div>response.success</div>}
+              {if(method.getResponse.getFields.get(0).getDataType.kind != DataType.KIND.VOID) <div>response.success</div>}
 
             </block>catch<block>
               case e: SoaException => throw e
@@ -320,7 +320,7 @@ class ScalaGenerator extends CodeGenerator {
                 if(e != null)
                   promise.failure(e)
                 else
-                  promise.success(r.success)
+                  promise.success({if(method.getResponse.getFields.get(0).getDataType.kind != DataType.KIND.VOID) <div>r.success</div>})
                 </block>
               </block>)
               promise.future
