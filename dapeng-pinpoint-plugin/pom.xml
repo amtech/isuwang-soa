@@ -5,7 +5,7 @@
     <parent>
         <artifactId>dapeng-parent</artifactId>
         <groupId>com.isuwang</groupId>
-        <version>1.1.0</version>
+        <version>1.1.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -31,7 +31,7 @@
         <dependency>
             <groupId>com.isuwang</groupId>
             <artifactId>dapeng-remoting-api</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.2</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
