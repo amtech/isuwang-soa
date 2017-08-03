@@ -47,7 +47,7 @@ object Scrooge {
     var outDir: String = null
     var inDir: String = null
     var resources: Array[String] = null
-    var languages: String = ""
+    var language: String = ""
     var version: String = null
     var generateAll: Boolean = false
 
@@ -57,7 +57,7 @@ object Scrooge {
         args(index) match {
           case "-gen" =>
             //获取languages
-            if (index + 1 < args.length) languages = args(index + 1)
+            if (index + 1 < args.length) language = args(index + 1)
           case "-out" =>
             //获取到outDir
             if (index + 1 < args.length) outDir = args(index + 1)
@@ -107,21 +107,21 @@ object Scrooge {
       if (outDir == null) // 如果输出路径为空,则默认为当前目录
         outDir = System.getProperty("user.dir")
 
-      if (resources != null || languages == "") {
-        val services = new ThriftCodeParser().toServices(resources, version)
-        val structs = if (generateAll) new ThriftCodeParser().getAllStructs(resources) else null
-        val enums = if (generateAll) new ThriftCodeParser().getAllEnums(resources) else null
+      if (resources != null && language != "") {
 
-        val languageArray = languages.split(",")
-        languageArray.foreach { lang =>
-          lang match {
-            case "metadata" => new MetadataGenerator().generate(services, outDir)
-            case "js" => new JavascriptGenerator().generate(services, outDir)
-            case "json" => new JsonGenerator().generate(services, outDir)
-            case "java" => new JavaGenerator().generate(services, outDir, generateAll, structs, enums)
-            case "scala" => new ScalaGenerator().generate(services, outDir, generateAll, structs, enums)
-          }
+        val parserLanguage = if(language == "scala") "scala" else "java"
+        val services = new ThriftCodeParser(parserLanguage).toServices(resources, version)
+        val structs = if (generateAll) new ThriftCodeParser(parserLanguage).getAllStructs(resources) else null
+        val enums = if (generateAll) new ThriftCodeParser(parserLanguage).getAllEnums(resources) else null
+
+        language match {
+          case "metadata" => new MetadataGenerator().generate(services, outDir)
+          case "js" => new JavascriptGenerator().generate(services, outDir)
+          case "json" => new JsonGenerator().generate(services, outDir)
+          case "java" => new JavaGenerator().generate(services, outDir, generateAll, structs, enums)
+          case "scala" => new ScalaGenerator().generate(services, outDir, generateAll, structs, enums)
         }
+
       } else {
         throw new RuntimeException("resources is null or language is null")
       }
