@@ -268,9 +268,9 @@ mvn clean install
 >
 > 可在无开发ide环境下或在ide开发环境下运行
 > 
-> 可以使用`isuwangsoa`的插件简称,需要在本地maven进行配置
+> 可以使用`dapeng`的插件简称,需要在本地maven进行配置
 
-* isuwangsoa插件简称配置(不使用不用配置)
+* dapeng插件简称配置(不使用不用配置)
 
 修改maven的主配置文件（${MAVEN_HOME}/conf/settings.xml文件或者 ~/.m2/settings.xml文件）
 
@@ -288,7 +288,7 @@ mvn clean install
 ```
 # 第一种(简称)
 cd hello-service
-mvn compile isuwangsoa:run -Dsoa.remoting.mode=local
+mvn compile dapeng:run -Dsoa.remoting.mode=local
 
 # 第二种
 cd hello-service
@@ -303,7 +303,7 @@ mvn compile com.isuwang:dapeng-maven-plugin:1.1.0:run -Dsoa.remoting.mode=local
 ```
 # 第一种(简称)
 cd hello-service
-mvn compile isuwangsoa:run
+mvn compile dapeng:run
 
 # 第二种
 cd hello-service
