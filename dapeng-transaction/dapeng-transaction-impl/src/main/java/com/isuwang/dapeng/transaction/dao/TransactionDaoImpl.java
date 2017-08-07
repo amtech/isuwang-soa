@@ -35,7 +35,7 @@ public class TransactionDaoImpl extends JdbcDaoSupport implements ITransactionDa
             ps.setInt(++i, g.getCurrSequence());
             ps.setTimestamp(++i, new Timestamp(g.getCreatedAt() == null ? new java.util.Date().getTime() : g.getCreatedAt().getTime()));
             ps.setInt(++i, g.getCreatedBy());
-            ps.setInt(++i, g.getUpdatedBy());
+            ps.setInt(++i, g.getCreatedBy());
             return ps;
         }, keyHolder);
 
