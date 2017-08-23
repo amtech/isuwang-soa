@@ -14,6 +14,10 @@ public class TEnum {
         public int value;
         public String doc;
 
+        @XmlElementWrapper(name = "annotations")
+        @XmlElement(name = "annotation")
+        public List<Annotation> annotations;
+
         public String getLabel() {
             return label;
         }
@@ -37,6 +41,14 @@ public class TEnum {
         public void setDoc(String doc) {
             this.doc = doc;
         }
+
+        public List<Annotation> getAnnotations() {
+            return annotations;
+        }
+
+        public void setAnnotations(List<Annotation> annotations) {
+            this.annotations = annotations;
+        }
     }
 
     @XmlAttribute
@@ -50,6 +62,10 @@ public class TEnum {
     @XmlElementWrapper(name = "items")
     @XmlElement(name = "item")
     public List<EnumItem> enumItems;
+
+    @XmlElementWrapper(name = "annotations")
+    @XmlElement(name = "annotation")
+    public List<Annotation> annotations;
 
     public String getNamespace() {
         return namespace;
@@ -91,4 +107,11 @@ public class TEnum {
         this.enumItems = enumItems;
     }
 
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(List<Annotation> annotations) {
+        this.annotations = annotations;
+    }
 }
