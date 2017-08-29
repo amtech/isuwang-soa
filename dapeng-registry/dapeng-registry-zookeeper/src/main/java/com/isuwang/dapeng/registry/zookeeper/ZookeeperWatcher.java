@@ -203,18 +203,13 @@ public class ZookeeperWatcher {
     public void destroy() {
         if (zk != null) {
             try {
+                LOGGER.info("{} 关闭到zookeeper的连接", isClient ? "Client's" : "Server's");
                 zk.close();
                 zk = null;
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-
-        caches.clear();
-        config.clear();
-        routes.clear();
-
-        LOGGER.info("关闭连接，清空service info caches");
     }
 
     public List<ServiceInfo> getServiceInfo(String serviceName, String versionName, boolean compatible) {
@@ -288,6 +283,14 @@ public class ZookeeperWatcher {
                     LOGGER.info("{} Zookeeper Watcher 已连接 zookeeper Server", isClient ? "Client's" : "Server's");
                     tryCreateNode(serviceRoute);
                     tryCreateNode(configRoute);
+
+                    caches.clear();
+                    config.clear();
+
+                } else if (e.getState() == Watcher.Event.KeeperState.Disconnected) {
+                    LOGGER.error("{}到zookeeper的连接被断开", isClient ? "Client's" : "Server's");
+                    destroy();
+                    init();
                 }
             });
         } catch (Exception e) {
