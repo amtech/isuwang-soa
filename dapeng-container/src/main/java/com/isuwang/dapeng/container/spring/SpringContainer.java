@@ -26,9 +26,14 @@ public class SpringContainer implements Container {
     public static List<ClassLoader> pluginClassLoaders = new ArrayList<>();
 
     static Map<Object, Class<?>> contexts;
+    static Map<Object, ClassLoader> classLoaderMap;
 
     public static Map<Object, Class<?>> getContexts() {
         return contexts;
+    }
+
+    public static Map<Object, ClassLoader> getClassLoaderMap() {
+        return classLoaderMap;
     }
 
     @Override
@@ -39,6 +44,7 @@ public class SpringContainer implements Container {
         }
 
         contexts = new HashMap<>();
+        classLoaderMap = new HashMap<>();
 
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 
@@ -71,6 +77,7 @@ public class SpringContainer implements Container {
                 startMethod.invoke(context);
 
                 contexts.put(context, appClass);
+                classLoaderMap.put(context,appClassLoader);
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             }

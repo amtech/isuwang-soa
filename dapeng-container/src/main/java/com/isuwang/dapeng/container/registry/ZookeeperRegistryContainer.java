@@ -4,6 +4,7 @@ import com.isuwang.dapeng.container.Container;
 import com.isuwang.dapeng.container.spring.SpringContainer;
 import com.isuwang.dapeng.core.ProcessorKey;
 import com.isuwang.dapeng.core.Service;
+import com.isuwang.dapeng.core.log.SoaAppClassLoaderCache;
 import com.isuwang.dapeng.registry.RegistryAgent;
 import com.isuwang.dapeng.registry.RegistryAgentProxy;
 import com.isuwang.dapeng.registry.zookeeper.RegistryAgentImpl;
@@ -35,6 +36,7 @@ public class ZookeeperRegistryContainer implements Container {
         registryAgent.start();
 
         Map<Object, Class<?>> contexts = SpringContainer.getContexts();
+        Map<Object,ClassLoader>appClassLoaderMap = SpringContainer.getClassLoaderMap();
         Set<Object> ctxs = contexts.keySet();
 
         for (Object ctx : ctxs) {
@@ -54,6 +56,7 @@ public class ZookeeperRegistryContainer implements Container {
                         ProcessorKey processorKey = new ProcessorKey(processor.getInterfaceClass().getName(), service.version());
                         ProcessorCache.getProcessorMap().put(processorKey, processor);
                         registryAgent.registerService(processor.getInterfaceClass().getName(), service.version());
+                        SoaAppClassLoaderCache.getAppClassLoaderMap().put(processorKey,appClassLoaderMap.get(ctx));
                     }
                 }
             } catch (Exception e) {
