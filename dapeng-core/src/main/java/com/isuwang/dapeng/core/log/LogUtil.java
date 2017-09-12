@@ -23,48 +23,27 @@ public class LogUtil {
 
 
 
-//    public static void logInfo(Class<?>logClass,SoaHeader soaHeader,String format,Object ...args){
-//        try {
-//            ProcessorKey key = new ProcessorKey(soaHeader.getServiceName(),soaHeader.getVersionName());
-//            ClassLoader appClassLoader = SoaAppClassLoaderCache.getAppClassLoaderMap().get(key);
-//            if (appClassLoader!=null) {
-//                Object logger=null;
-//                String methonName="info";
-//                Method infoMethod=getMethod(appClassLoader,methonName,logClass,logger);
-//                infoMethod.invoke(logger,format,args);
-//            }else{
-//                Logger logger = LoggerFactory.getLogger(logClass);
-//                logger.info(format,args);
-//            }
-//        } catch (Exception e) {
-//            LOGGER.error(e.getMessage());
-//            Logger logger = LoggerFactory.getLogger(logClass);
-//            logger.info(format,args);
-//        }
-//
-//    }
-    public static void logInfo(Class<?>targetClass,SoaHeader soaHeader,String format,String ...args){
+    public static void logInfo(Class<?>logClass,SoaHeader soaHeader,String format,Object ...args){
         try {
             ProcessorKey key = new ProcessorKey(soaHeader.getServiceName(),soaHeader.getVersionName());
             ClassLoader appClassLoader = SoaAppClassLoaderCache.getAppClassLoaderMap().get(key);
             if (appClassLoader!=null) {
-                Class<?> logFactoryClass = appClassLoader.loadClass("org.slf4j.LoggerFactory");
-                Method getILoggerFactory = logFactoryClass.getMethod("getLogger",Class.class);
-                getILoggerFactory.setAccessible(true);
-                Object obj = getILoggerFactory.invoke(null,targetClass); // Logger
-                Object[] parameters= new Object[args.length];
-                for (int i=0;i<args.length;i++) {
-                    parameters[i]=args[i];
-                }
-                Method info = obj.getClass().getMethod("info",String.class,Object[].class);
-                info.invoke(obj,format,parameters);
+                Object logger=null;
+                String methonName="info";
+                Method infoMethod=getMethod(appClassLoader,methonName,logClass,logger);
+                infoMethod.invoke(logger,format,args);
+            }else{
+                Logger logger = LoggerFactory.getLogger(logClass);
+                logger.info(format,args);
             }
         } catch (Exception e) {
-            e.printStackTrace();
             LOGGER.error(e.getMessage());
+            Logger logger = LoggerFactory.getLogger(logClass);
+            logger.info(format,args);
         }
 
     }
+
 
 
     public static void logError(Class<?>logClass, SoaHeader soaHeader,String errMsg,Throwable exception){
