@@ -75,8 +75,8 @@ public class SoaBaseProcessor<I> implements TProcessor {
                 soaHeader.setSessionId(Optional.of(UUID.randomUUID().toString()));
             }
 
-            LOGGER.info("{} {} {} {} request header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid(), soaHeader.toString(), formatToString(soaProcessFunction.getReqSerializer().toString(args)));
-            //LogUtil.logInfo(SoaBaseProcessor.class,soaHeader,"{} {} {} {} request header:{} body:{}",soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid().toString(), soaHeader.toString(), formatToString(soaProcessFunction.getReqSerializer().toString(args)));
+            //LOGGER.info("{} {} {} {} request header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid(), soaHeader.toString(), formatToString(soaProcessFunction.getReqSerializer().toString(args)));
+            LogUtil.logInfo(SoaBaseProcessor.class,soaHeader,"{} {} {} {} request header:{} body:{}",soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid().toString(), soaHeader.toString(), formatToString(soaProcessFunction.getReqSerializer().toString(args)));
             long startTime = System.currentTimeMillis();
 
 
