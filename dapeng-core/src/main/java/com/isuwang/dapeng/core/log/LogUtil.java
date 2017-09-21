@@ -99,14 +99,15 @@ public class LogUtil {
      */
     public static Object getLogger(ClassLoader appClassLoader,Class<?>logClass,int classLoaderHex) throws Exception{
         Object logger;
-        if (loggerMap.containsKey(logClass.getName())){
-            logger=loggerMap.get(logClass.getName());
+        String logMethodKey= classLoaderHex+"."+logClass.getName();
+        if (loggerMap.containsKey(logMethodKey)){
+            logger=loggerMap.get(logMethodKey);
         }else{
             Class<?> logFactoryClass = appClassLoader.loadClass("org.slf4j.LoggerFactory");
             Method getILoggerFactory = logFactoryClass.getMethod("getLogger", Class.class);
             getILoggerFactory.setAccessible(true);
             logger=getILoggerFactory.invoke(null, logClass);
-            loggerMap.put(classLoaderHex+"."+logClass.getName(),logger);
+            loggerMap.put(logMethodKey,logger);
         }
         return logger;
     }
