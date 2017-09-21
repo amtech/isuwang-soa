@@ -28,17 +28,19 @@ public class LogUtil {
 
             ProcessorKey key = new ProcessorKey(soaHeader.getServiceName(),soaHeader.getVersionName());
             ClassLoader appClassLoader = SoaAppClassLoaderCache.getAppClassLoaderMap().get(key);
-            int classLoaderHex=appClassLoader.hashCode();
+            String methodName="info";
+
             if (appClassLoader!=null) {
+                int classLoaderHex=appClassLoader.hashCode();
                 Object logger=getLogger(appClassLoader,logClass,classLoaderHex);
-                String methonName="info";
-                Method infoMethod=getMethod(methonName,logClass,logger,classLoaderHex);
+                Method infoMethod=getMethod(methodName,logClass,logger,classLoaderHex);
                 infoMethod.invoke(logger,format,args);
             }else{
                 Logger logger = LoggerFactory.getLogger(logClass);
                 logger.info(format,args);
             }
         } catch (Exception e) {
+            //有异常用容器的logger打日志
             LOGGER.error(e.getMessage());
             Logger logger = LoggerFactory.getLogger(logClass);
             logger.info(format,args);
@@ -52,11 +54,11 @@ public class LogUtil {
         try {
             ProcessorKey key = new ProcessorKey(soaHeader.getServiceName(), soaHeader.getVersionName());
             ClassLoader appClassLoader = SoaAppClassLoaderCache.getAppClassLoaderMap().get(key);
+            String methodName="error";
 
             if (appClassLoader!=null) {
                 Object logger=null;
-                String methonName="error";
-                Method infoMethod=getMethod(methonName,logClass,logger,appClassLoader.hashCode());
+                Method infoMethod=getMethod(methodName,logClass,logger,appClassLoader.hashCode());
                 infoMethod.invoke(logger,errMsg,exception);
             }else{
                 Logger logger = LoggerFactory.getLogger(logClass);
@@ -64,6 +66,7 @@ public class LogUtil {
             }
 
         }catch (Exception e){
+            //有异常用容器的logger打日志
             LOGGER.error(e.getMessage());
             Logger logger = LoggerFactory.getLogger(logClass);
             logger.error(errMsg,exception);
@@ -71,17 +74,19 @@ public class LogUtil {
     }
 
 
-
-    public static Method getMethod(String methonName,Class<?>logClass,Object logger,int classLoaderHex)throws Exception{
+    /**
+     *先从logMethodMap查，没有再利用反射获取Method
+     */
+    public static Method getMethod(String methodName,Class<?>logClass,Object logger,int classLoaderHex)throws Exception{
         Method method;
-        String logMethodKey= classLoaderHex+"."+logClass.getName()+methonName;
+        String logMethodKey= classLoaderHex+"."+logClass.getName()+methodName;
         if (logMethodMap.containsKey(logMethodKey)){
             method=logMethodMap.get(logMethodKey);
         }else{
-            if (methonName.equals("error")){
-                method=logger.getClass().getMethod(methonName,String.class,Throwable.class);
+            if (methodName.equals("error")){
+                method=logger.getClass().getMethod(methodName,String.class,Throwable.class);
             }else{
-                method=logger.getClass().getMethod(methonName,String.class,Object[].class);
+                method=logger.getClass().getMethod(methodName,String.class,Object[].class);
             }
 
             logMethodMap.put(logMethodKey,method);
@@ -89,6 +94,9 @@ public class LogUtil {
         return method;
     }
 
+    /**
+     *先从loggerMap查，没有再利用反射获取logger
+     */
     public static Object getLogger(ClassLoader appClassLoader,Class<?>logClass,int classLoaderHex) throws Exception{
         Object logger;
         if (loggerMap.containsKey(logClass.getName())){
