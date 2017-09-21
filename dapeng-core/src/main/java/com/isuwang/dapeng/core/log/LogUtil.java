@@ -57,7 +57,7 @@ public class LogUtil {
             String methodName="error";
 
             if (appClassLoader!=null) {
-                Object logger=null;
+                Object logger=getLogger(appClassLoader,logClass,appClassLoader.hashCode());
                 Method infoMethod=getMethod(methodName,logClass,logger,appClassLoader.hashCode());
                 infoMethod.invoke(logger,errMsg,exception);
             }else{
