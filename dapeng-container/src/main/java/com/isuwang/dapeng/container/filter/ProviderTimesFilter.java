@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * @author craneding
  * @date 16/1/21
  */
-public class ProviderTimesFilter implements Filter {
+public class ProviderTimesFilter implements ContainerFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProviderTimesFilter.class);
 

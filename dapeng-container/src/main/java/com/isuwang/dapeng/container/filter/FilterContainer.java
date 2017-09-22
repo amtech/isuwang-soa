@@ -1,6 +1,5 @@
 package com.isuwang.dapeng.container.filter;
 
-import com.isuwang.dapeng.container.conf.SoaServerFilter;
 import com.isuwang.dapeng.container.Container;
 import com.isuwang.dapeng.container.ContainerStartup;
 import com.isuwang.dapeng.core.filter.Filter;
@@ -26,18 +25,15 @@ public class FilterContainer implements Container {
     public void start() {
         try {
             for (Filter filter : ContainerStartup.filters) {
-                if (filter.getClass().getName().contains("container")) {
-                    ContainerFilterChain.addFilter(filter);
-                    filters.add(filter);
-                    LOGGER.info("service load filter {} ", filter.getClass().getName());
-                }
+                ContainerFilterChain.addFilter(filter);
+                filters.add(filter);
+                LOGGER.info("service load filter {} ", filter.getClass().getName());
             }
             filters.stream()
                     .filter(soaFilter -> soaFilter instanceof StatusFilter)
                     .forEach(soaFilter -> {
                         ((StatusFilter) soaFilter).init();
                     });
-            System.out.println(filters.size());
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
         }

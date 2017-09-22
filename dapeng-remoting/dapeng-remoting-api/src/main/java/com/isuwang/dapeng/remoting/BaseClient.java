@@ -4,9 +4,9 @@ import com.isuwang.dapeng.core.InvocationContext;
 import com.isuwang.dapeng.core.SoaHeader;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.core.TransactionContext;
-import com.isuwang.dapeng.core.filter.Filter;
 import com.isuwang.dapeng.registry.RegistryAgent;
 import com.isuwang.dapeng.registry.RegistryAgentProxy;
+import com.isuwang.dapeng.remoting.filter.RemoteApiFilter;
 import com.isuwang.dapeng.remoting.filter.StubFilterChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,13 +35,13 @@ public abstract class BaseClient {
 
     static {
         try  {
-            ServiceLoader<Filter> filterLoader = ServiceLoader.load(Filter.class);
+            ServiceLoader<RemoteApiFilter> filterLoader = ServiceLoader.load(RemoteApiFilter.class,BaseClient.class.getClassLoader());
             // load filter
-            for (Filter filter : filterLoader) {
+            for (RemoteApiFilter filter : filterLoader) {
                 StubFilterChain.addFilter(filter);
             }
             // load connection pool
-            ServiceLoader<SoaConnectionPool>soaConnectionPoolServiceLoader = ServiceLoader.load(SoaConnectionPool.class);
+            ServiceLoader<SoaConnectionPool>soaConnectionPoolServiceLoader = ServiceLoader.load(SoaConnectionPool.class,BaseClient.class.getClassLoader());
             for(SoaConnectionPool soaConnectionPool : soaConnectionPoolServiceLoader){
                 BaseClient.connectionPool = soaConnectionPool;
             }
@@ -53,7 +53,7 @@ public abstract class BaseClient {
         if (!SoaSystemEnvProperties.SOA_REMOTING_MODE.equals("local")) {
             try  {
 
-                ServiceLoader<RegistryAgent>registryAgentLoader = ServiceLoader.load(RegistryAgent.class);
+                ServiceLoader<RegistryAgent>registryAgentLoader = ServiceLoader.load(RegistryAgent.class,BaseClient.class.getClassLoader());
                 for (RegistryAgent registryAgent : registryAgentLoader) {
                     RegistryAgentProxy.setCurrentInstance(RegistryAgentProxy.Type.Client,registryAgent);
                     RegistryAgentProxy.getCurrentInstance(RegistryAgentProxy.Type.Client).start();

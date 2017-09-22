@@ -1,7 +1,7 @@
 package com.isuwang.dapeng.container;
 
 import com.isuwang.dapeng.container.apidoc.ApidocContainer;
-import com.isuwang.dapeng.container.conf.SoaServer;
+import com.isuwang.dapeng.container.filter.ContainerFilter;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.core.filter.Filter;
 import org.slf4j.Logger;
@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * ContainerStartup
  *
@@ -26,25 +28,25 @@ public class ContainerStartup {
     private static volatile boolean running = true;
     public static final String SOA_BASE = System.getProperty("soa.base");
     public static final String SOA_RUN_MODE = System.getProperty("soa.run.mode", "maven");
-    public static SoaServer soaServer = null;
     public static List<Filter> filters = new ArrayList<>();
 
     public static void startup() {
         final long startTime = System.currentTimeMillis();
 
         final List<Container> containers = new ArrayList<>();
-        ServiceLoader<Filter> filterServiceLoader = ServiceLoader.load(Filter.class);
+        ServiceLoader<ContainerFilter> filterServiceLoader = ServiceLoader.load(ContainerFilter.class);
         ServiceLoader<Container> containerServiceLoader = ServiceLoader.load(Container.class);
 
-        for (Filter filter : filterServiceLoader) {
-            filters.add(filter);
-        }
 
         // 本地模式
         final boolean localMode = SoaSystemEnvProperties.SOA_REMOTING_MODE.equals("local");
 
+        // 剔除Registry的容器
         for (Container container : containerServiceLoader) {
-            if (localMode && (container.getClass().getName().equals("com.isuwang.dapeng.container.registry.ZookeeperRegistryContainer"))) {
+            if (localMode && (container.getClass().getName().contains("ZookeeperRegistryContainer"))) {
+                continue;
+            }
+            if (!localMode && (container.getClass().getName().contains("LocalRegistryContainer"))) {
                 continue;
             }
             containers.add(container);
@@ -53,6 +55,20 @@ public class ContainerStartup {
 
         if ("maven".equals(SOA_RUN_MODE)) {
             containers.add(new ApidocContainer());
+        }
+
+        for (ContainerFilter filter : filterServiceLoader) {
+            filters.add(filter);
+        }
+
+        if (!SoaSystemEnvProperties.SOA_MONITOR_ENABLE) {
+            List<Filter> collect = filters
+                    .stream()
+                    .filter(filter -> filter.getClass().getName().equals("com.isuwang.dapeng.container.filter.QPSStatFilter") || filter.getClass().getName().equals("com.isuwang.dapeng.container.filter.PlatformProcessDataFilter"))
+                    .collect(toList());
+
+            if (collect.size() > 0)
+                filters.removeAll(collect);
         }
 
         try {
