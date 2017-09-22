@@ -31,6 +31,10 @@ public class LogUtil {
         methodInvoke(logClass, soaHeader, "error", logger -> logger.error(errMsg, exception), new Object[]{errMsg, exception});
     }
 
+    public static void logDebug(Class<?> logClass, SoaHeader soaHeader, String formattedMsg, Object... args){
+        methodInvoke(logClass,soaHeader,"debug",logger -> logger.debug(formattedMsg,args),new Object[]{formattedMsg, args});
+    }
+
     private static void methodInvoke(Class<?> logClass, SoaHeader soaHeader, String methodName, Consumer<Logger> loggerConsumer, Object... args) {
         try {
             ProcessorKey key = new ProcessorKey(soaHeader.getServiceName(), soaHeader.getVersionName());
