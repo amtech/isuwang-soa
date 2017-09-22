@@ -17,15 +17,6 @@ import java.util.function.Consumer;
  */
 public class LogUtil {
 
-    private static SoaHeader getSoaHeader() {
-        return SoaHeaderHelper.getSoaHeader(false);
-    }
-
-    public static void main(String[] args) {
-        SoaHeader soaHeader = getSoaHeader();
-        logInfo(SoaBaseProcessor.class, getSoaHeader(), "request header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName());
-    }
-
     private final static Logger LOGGER = LoggerFactory.getLogger(LogUtil.class);
 
     private static final Map<String, Object> loggerMap = new ConcurrentHashMap<>();
