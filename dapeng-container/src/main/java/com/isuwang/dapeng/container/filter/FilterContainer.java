@@ -25,22 +25,19 @@ public class FilterContainer implements Container {
     @Override
     public void start() {
         try {
-            for (SoaServerFilter soaFilter : ContainerStartup.soaServer.getSoaFilters().getSoaServerFilter()) {
-                Class filterClass = FilterContainer.class.getClassLoader().loadClass(soaFilter.getRef());
-                Filter filter = (Filter) filterClass.newInstance();
-
-                ContainerFilterChain.addFilter(filter);
-
-                LOGGER.info("service load filter {} with path {}", soaFilter.getName(), soaFilter.getRef());
-
-                filters.add(filter);
+            for (Filter filter : ContainerStartup.filters) {
+                if (filter.getClass().getName().contains("container")) {
+                    ContainerFilterChain.addFilter(filter);
+                    filters.add(filter);
+                    LOGGER.info("service load filter {} ", filter.getClass().getName());
+                }
             }
-
             filters.stream()
                     .filter(soaFilter -> soaFilter instanceof StatusFilter)
                     .forEach(soaFilter -> {
                         ((StatusFilter) soaFilter).init();
                     });
+            System.out.println(filters.size());
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
         }

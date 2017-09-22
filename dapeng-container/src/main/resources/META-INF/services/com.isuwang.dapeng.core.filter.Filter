@@ -1,0 +1,3 @@
+com.isuwang.dapeng.container.filter.SoaGlobalTransactionalFilter
+com.isuwang.dapeng.container.filter.ProviderTimesFilter
+com.isuwang.dapeng.container.filter.SlowTimeServiceFilter
