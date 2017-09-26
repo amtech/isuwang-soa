@@ -22,6 +22,7 @@ import java.util.concurrent.CompletableFuture;
  * @author craneding
  * @date 15/9/18
  */
+@Deprecated
 public class SoaBaseProcessor<I> implements TProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SoaBaseProcessor.class);

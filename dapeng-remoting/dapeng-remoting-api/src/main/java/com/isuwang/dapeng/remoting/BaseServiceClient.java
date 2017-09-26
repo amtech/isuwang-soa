@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author craneding
  * @date 15/9/24
  */
+@Deprecated
 public class BaseServiceClient extends BaseClient {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(BaseServiceClient.class);
