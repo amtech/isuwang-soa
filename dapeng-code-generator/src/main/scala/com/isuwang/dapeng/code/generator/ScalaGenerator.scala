@@ -187,13 +187,13 @@ class ScalaGenerator extends CodeGenerator {
 
         import com.isuwang.dapeng.core._
         import com.isuwang.org.apache.thrift._
-        import com.isuwang.dapeng.remoting.BaseScalaServiceClient
+        import com.isuwang.dapeng.remoting.BaseCommonServiceClient
         import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + "." + service.name + "Codec._"}
 
         /**
         {notice}
         **/
-        object {service.name}Client extends BaseScalaServiceClient("{service.namespace}.{service.name}", "{service.meta.version}")<block>
+        object {service.name}Client extends BaseCommonServiceClient("{service.namespace}.{service.name}", "{service.meta.version}")<block>
 
         override def isSoaTransactionalProcess: Boolean = <block>
 
@@ -272,7 +272,7 @@ class ScalaGenerator extends CodeGenerator {
 
         import com.isuwang.dapeng.core._
         import com.isuwang.org.apache.thrift._
-        import com.isuwang.dapeng.remoting.BaseScalaServiceClient
+        import com.isuwang.dapeng.remoting.BaseCommonServiceClient
         import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + "." + service.name + "Codec._"}
         import scala.concurrent.<block>Future, Promise</block>
         import java.util.function.BiConsumer
@@ -280,7 +280,7 @@ class ScalaGenerator extends CodeGenerator {
         /**
         {notice}
         **/
-        object {service.name}AsyncClient extends BaseScalaServiceClient("{service.namespace}.{service.name}", "{service.meta.version}")<block>
+        object {service.name}AsyncClient extends BaseCommonServiceClient("{service.namespace}.{service.name}", "{service.meta.version}")<block>
 
         override def isSoaTransactionalProcess: Boolean = <block>
 

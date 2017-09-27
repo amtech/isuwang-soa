@@ -2,7 +2,7 @@ package com.isuwang.dapeng.spring;
 
 import com.isuwang.dapeng.core.Processor;
 import com.isuwang.dapeng.core.Service;
-import com.isuwang.dapeng.core.SoaBaseProcessor;
+import com.isuwang.dapeng.core.SoaCommonBaseProcessor;
 import com.isuwang.org.apache.thrift.TProcessor;
 import org.springframework.beans.factory.FactoryBean;
 
@@ -57,7 +57,7 @@ public class SoaProcessorFactory implements FactoryBean<TProcessor<?>> {
 
     @Override
     public Class<?> getObjectType() {
-        return SoaBaseProcessor.class;
+        return SoaCommonBaseProcessor.class;
     }
 
     @Override

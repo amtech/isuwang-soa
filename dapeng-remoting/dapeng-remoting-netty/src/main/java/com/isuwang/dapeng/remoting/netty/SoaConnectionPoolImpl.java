@@ -5,7 +5,7 @@ import com.isuwang.dapeng.core.SoaBaseCode;
 import com.isuwang.dapeng.core.SoaException;
 import com.isuwang.dapeng.remoting.SoaConnection;
 import com.isuwang.dapeng.remoting.SoaConnectionPool;
-import com.isuwang.dapeng.remoting.SoaScalaConnection;
+import com.isuwang.dapeng.remoting.SoaCommonConnection;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,7 +49,7 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
     }
 
     @Override
-    public SoaScalaConnection getScalaConnection() throws SoaException {
+    public SoaCommonConnection getCommonConnection() throws SoaException {
 
         InvocationContext context = InvocationContext.Factory.getCurrentInstance();
 

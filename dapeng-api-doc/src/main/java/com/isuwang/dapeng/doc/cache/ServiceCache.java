@@ -2,9 +2,8 @@ package com.isuwang.dapeng.doc.cache;
 
 
 import com.google.common.collect.TreeMultimap;
-import com.isuwang.dapeng.core.Service;
 import com.isuwang.dapeng.core.ProcessorKey;
-import com.isuwang.dapeng.core.SoaBaseProcessor;
+import com.isuwang.dapeng.core.Service;
 import com.isuwang.dapeng.core.metadata.Field;
 import com.isuwang.dapeng.core.metadata.Method;
 import com.isuwang.dapeng.core.metadata.Struct;

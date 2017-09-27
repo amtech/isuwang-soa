@@ -9,7 +9,7 @@ import java.util.concurrent.Future;
  * @author craneding
  * @date 16/3/1
  */
-public interface SoaScalaConnection {
+public interface SoaCommonConnection {
 
     <REQ, RESP> RESP send(REQ request, TCommonBeanSerializer<REQ> requestSerializer, TCommonBeanSerializer<RESP> responseSerializer) throws TException;
 

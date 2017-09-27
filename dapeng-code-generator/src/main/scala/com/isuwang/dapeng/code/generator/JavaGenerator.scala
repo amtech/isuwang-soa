@@ -166,7 +166,7 @@ class JavaGenerator extends CodeGenerator {
 
       import com.isuwang.dapeng.core.*;
       import com.isuwang.org.apache.thrift.*;
-      import com.isuwang.dapeng.remoting.BaseScalaServiceClient;
+      import com.isuwang.dapeng.remoting.BaseCommonServiceClient;
       import java.util.concurrent.CompletableFuture;
       import java.util.concurrent.Future;
       import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + "." + service.name + "Codec.*"};
@@ -174,7 +174,7 @@ class JavaGenerator extends CodeGenerator {
       /**
       {notice}
       **/
-      public class {service.name}Client extends BaseScalaServiceClient<block>
+      public class {service.name}Client extends BaseCommonServiceClient<block>
 
       public {service.name}Client() <block>
         super("{service.namespace}.{service.name}", "{service.meta.version}");

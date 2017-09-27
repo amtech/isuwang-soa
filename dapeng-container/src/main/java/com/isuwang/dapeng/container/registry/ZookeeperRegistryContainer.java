@@ -4,6 +4,7 @@ import com.isuwang.dapeng.container.Container;
 import com.isuwang.dapeng.container.spring.SpringContainer;
 import com.isuwang.dapeng.core.ProcessorKey;
 import com.isuwang.dapeng.core.Service;
+import com.isuwang.dapeng.core.SoaCommonBaseProcessor;
 import com.isuwang.dapeng.registry.RegistryAgent;
 import com.isuwang.dapeng.registry.RegistryAgentProxy;
 import com.isuwang.dapeng.registry.zookeeper.RegistryAgentImpl;

@@ -20,13 +20,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author ever
  * @date 17/7/20
  */
-public class BaseScalaServiceClient extends BaseClient {
+public class BaseCommonServiceClient extends BaseClient {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(BaseScalaServiceClient.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(BaseCommonServiceClient.class);
 
     public static final AtomicInteger seqid_ = new AtomicInteger(0);
 
-    protected BaseScalaServiceClient(String serviceName, String versionName) {
+    protected BaseCommonServiceClient(String serviceName, String versionName) {
         super(serviceName, versionName);
     }
 
@@ -48,7 +48,7 @@ public class BaseScalaServiceClient extends BaseClient {
         stubFilterChain.setAttribute(StubFilterChain.ATTR_KEY_REQUEST, request);
         stubFilterChain.setAttribute(SendMessageFilter.ATTR_KEY_SENDMESSAGE, (SendMessageFilter.SendMessageAction) (chain) -> {
 
-            SoaScalaConnection conn = connectionPool.getScalaConnection();
+            SoaCommonConnection conn = connectionPool.getCommonConnection();
 
             try {
                 RESP resp = conn.send(request, requestSerializer, responseSerializer);
@@ -116,7 +116,7 @@ public class BaseScalaServiceClient extends BaseClient {
         stubFilterChain.setAttribute(StubFilterChain.ATTR_KEY_HEADER, soaHeader);
         stubFilterChain.setAttribute(StubFilterChain.ATTR_KEY_REQUEST, request);
         stubFilterChain.setAttribute(SendMessageFilter.ATTR_KEY_SENDMESSAGE, (SendMessageFilter.SendMessageAction) (chain) -> {
-            SoaScalaConnection conn = connectionPool.getScalaConnection();
+            SoaCommonConnection conn = connectionPool.getCommonConnection();
             Future<RESP> resp = conn.sendAsync(request, requestSerializer, responseSerializer, timeout);
             chain.setAttribute(StubFilterChain.ATTR_KEY_RESPONSE, resp);
         });

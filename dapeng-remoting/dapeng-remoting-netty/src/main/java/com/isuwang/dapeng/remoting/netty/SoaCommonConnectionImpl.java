@@ -1,7 +1,7 @@
 package com.isuwang.dapeng.remoting.netty;
 
 import com.isuwang.dapeng.core.*;
-import com.isuwang.dapeng.remoting.SoaScalaConnection;
+import com.isuwang.dapeng.remoting.SoaCommonConnection;
 import com.isuwang.org.apache.thrift.TApplicationException;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.TMessage;
@@ -14,9 +14,9 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-public class SoaCommonConnectionImpl implements SoaScalaConnection {
+public class SoaCommonConnectionImpl implements SoaCommonConnection {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SoaConnectionImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SoaCommonConnectionImpl.class);
 
     private SoaClient soaClient;
 

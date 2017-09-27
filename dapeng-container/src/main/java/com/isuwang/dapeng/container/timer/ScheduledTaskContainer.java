@@ -3,9 +3,8 @@ package com.isuwang.dapeng.container.timer;
 import com.isuwang.dapeng.container.Container;
 import com.isuwang.dapeng.container.spring.SpringContainer;
 import com.isuwang.dapeng.core.Service;
-import com.isuwang.dapeng.core.SoaBaseProcessor;
 import com.isuwang.dapeng.core.SoaProcessFunction;
-import com.isuwang.dapeng.core.TBeanSerializer;
+import com.isuwang.dapeng.core.TCommonBeanSerializer;
 import com.isuwang.dapeng.core.timer.ScheduledTask;
 import com.isuwang.dapeng.core.timer.ScheduledTaskCron;
 import com.isuwang.org.apache.thrift.TProcessor;
@@ -65,7 +64,7 @@ public class ScheduledTaskContainer implements Container {
                             if (method.isAnnotationPresent(ScheduledTaskCron.class)) {
 
                                 String methodName = method.getName();
-                                SoaProcessFunction<Object, Object, Object, ? extends TBeanSerializer<Object>, ? extends TBeanSerializer<Object>> soaProcessFunction = (SoaProcessFunction<Object, Object, Object, ? extends TBeanSerializer<Object>, ? extends TBeanSerializer<Object>>) processor.getProcessMapView().get(methodName);
+                                SoaProcessFunction<Object, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>> soaProcessFunction = (SoaProcessFunction<Object, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>>) processor.getProcessMapView().get(methodName);
 
                                 ScheduledTaskCron cron = method.getAnnotation(ScheduledTaskCron.class);
                                 String cronStr = cron.cron();

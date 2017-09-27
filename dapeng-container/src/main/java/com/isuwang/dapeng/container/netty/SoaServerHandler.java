@@ -279,7 +279,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
         TransactionContext.Factory.setCurrentInstance(context);
         PlatformProcessDataFactory.setCurrentInstance(processData);
 
-        SoaHeader soaHeader = context.getHeader();
+            SoaHeader soaHeader = context.getHeader();
 
         final TSoaTransport outputSoaTransport = new TSoaTransport(outputBuf);
         TSoaServiceProtocol outputProtocol = null;

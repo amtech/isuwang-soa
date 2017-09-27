@@ -437,7 +437,7 @@ class JavaCodecGenerator extends CodeGenerator {
           </block>
 
           @SuppressWarnings("unchecked")
-          private static {lt}I extends {service.getNamespace + "." + service.name}{gt} java.util.Map{lt}String, SoaProcessFunction{lt}I, ?, ?, ? extends TCommonBeanSerializer{lt}?{gt}, ? extends TCommonBeanSerializer{lt}?{gt}{gt}{gt} getProcessMap(java.util.Map{lt}String, SoaProcessFunction{lt}I, ?, ?, ? extends TScalaBeanSerializer{lt}?{gt}, ? extends TScalaBeanSerializer{lt}?{gt}{gt}{gt} processMap)<block>
+          private static {lt}I extends {service.getNamespace + "." + service.name}{gt} java.util.Map{lt}String, SoaProcessFunction{lt}I, ?, ?, ? extends TCommonBeanSerializer{lt}?{gt}, ? extends TCommonBeanSerializer{lt}?{gt}{gt}{gt} getProcessMap(java.util.Map{lt}String, SoaProcessFunction{lt}I, ?, ?, ? extends TCommonBeanSerializer{lt}?{gt}, ? extends TCommonBeanSerializer{lt}?{gt}{gt}{gt} processMap)<block>
             {
             toMethodArrayBuffer(service.getMethods).map{(method: Method)=>{
               <div>
@@ -529,7 +529,7 @@ class JavaCodecGenerator extends CodeGenerator {
       case KIND.BIGDECIMAL => <div>java.math.BigDecimal elem{index} = new java.math.BigDecimal(iprot.readString());</div>
       case KIND.DATE => <div>Long time = iprot.readI64(); java.util.Date elem{index} = new java.util.Date(time);</div>
       case KIND.STRUCT => <div>{dataType.qualifiedName} elem{index} = new {dataType.qualifiedName}();
-        new {dataType.qualifiedName.substring(dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().read(iprot);</div>
+        elem{index}=new {dataType.qualifiedName.substring(dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().read(iprot);</div>
       case KIND.ENUM => <div>{dataType.qualifiedName} elem{index} = {dataType.qualifiedName}.findByValue(iprot.readI32());</div>
       case KIND.MAP => <div>com.isuwang.org.apache.thrift.protocol.TMap _map{index} = iprot.readMapBegin();
         java.util.Map{lt}{toJavaDataType(dataType.keyType)},{toJavaDataType(dataType.valueType)}{gt} elem{index} = new java.util.HashMap{lt}{gt}(_map{index}.size);
