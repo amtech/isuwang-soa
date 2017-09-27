@@ -47,7 +47,7 @@ class JavaCodecGenerator extends CodeGenerator {
         public class {service.name}Codec <block>
         {
         toStructArrayBuffer(service.structDefinitions).map{(struct:Struct)=>{
-          <div>public static class {struct.name}Serializer implements TScalaBeanSerializer{lt}{struct.getNamespace() + "." + struct.name}{gt}<block>
+          <div>public static class {struct.name}Serializer implements TCommonBeanSerializer{lt}{struct.getNamespace() + "." + struct.name}{gt}<block>
             {getReadMethod(struct)}{getWriteMethod(struct)}{getValidateMethod(struct)}
             @Override
             public String toString({struct.getNamespace() + "." + struct.name} bean) <block> return bean == null ? "null" : bean.toString(); </block>
@@ -130,7 +130,7 @@ class JavaCodecGenerator extends CodeGenerator {
             }}
           </block>
 
-            public static class {method.name.charAt(0).toUpper + method.name.substring(1)}_argsSerializer implements TScalaBeanSerializer{lt}{method.name}_args{gt}<block>
+            public static class {method.name.charAt(0).toUpper + method.name.substring(1)}_argsSerializer implements TCommonBeanSerializer{lt}{method.name}_args{gt}<block>
             {getReadMethod(method.getRequest)}{getWriteMethod(method.getRequest)}{getValidateMethod(method.getRequest)}
 
             @Override
@@ -138,7 +138,7 @@ class JavaCodecGenerator extends CodeGenerator {
 
           </block>
 
-            public static class {method.name.charAt(0).toUpper + method.name.substring(1)}_resultSerializer implements TScalaBeanSerializer{lt}{method.name}_result{gt}<block>
+            public static class {method.name.charAt(0).toUpper + method.name.substring(1)}_resultSerializer implements TCommonBeanSerializer{lt}{method.name}_result{gt}<block>
             @Override
             public {method.response.name} read(TProtocol iprot) throws TException<block>
 
@@ -281,7 +281,7 @@ class JavaCodecGenerator extends CodeGenerator {
           </block>
         </block>
 
-        public static class GetServiceMetadata_argsSerializer implements TScalaBeanSerializer{lt}getServiceMetadata_args{gt} <block>
+        public static class GetServiceMetadata_argsSerializer implements TCommonBeanSerializer{lt}getServiceMetadata_args{gt} <block>
 
           @Override
           public getServiceMetadata_args read(TProtocol iprot) throws TException <block>
@@ -327,7 +327,7 @@ class JavaCodecGenerator extends CodeGenerator {
 
         </block>
 
-        public static class GetServiceMetadata_resultSerializer implements TScalaBeanSerializer{lt}getServiceMetadata_result{gt} <block>
+        public static class GetServiceMetadata_resultSerializer implements TCommonBeanSerializer{lt}getServiceMetadata_result{gt} <block>
           @Override
           public getServiceMetadata_result read(TProtocol iprot) throws TException <block>
 
@@ -431,13 +431,13 @@ class JavaCodecGenerator extends CodeGenerator {
         </block>
 
         @SuppressWarnings("unchecked")
-        public static class Processor{lt}I extends {service.getNamespace + "." + service.name}{gt} extends SoaScalaBaseProcessor<block>
+        public static class Processor{lt}I extends {service.getNamespace + "." + service.name}{gt} extends SoaCommonBaseProcessor<block>
           public Processor(I iface)<block>
             super(iface, getProcessMap(new java.util.HashMap{lt}{gt}()));
           </block>
 
           @SuppressWarnings("unchecked")
-          private static {lt}I extends {service.getNamespace + "." + service.name}{gt} java.util.Map{lt}String, SoaProcessFunction{lt}I, ?, ?, ? extends TScalaBeanSerializer{lt}?{gt}, ? extends TScalaBeanSerializer{lt}?{gt}{gt}{gt} getProcessMap(java.util.Map{lt}String, SoaProcessFunction{lt}I, ?, ?, ? extends TScalaBeanSerializer{lt}?{gt}, ? extends TScalaBeanSerializer{lt}?{gt}{gt}{gt} processMap)<block>
+          private static {lt}I extends {service.getNamespace + "." + service.name}{gt} java.util.Map{lt}String, SoaProcessFunction{lt}I, ?, ?, ? extends TCommonBeanSerializer{lt}?{gt}, ? extends TCommonBeanSerializer{lt}?{gt}{gt}{gt} getProcessMap(java.util.Map{lt}String, SoaProcessFunction{lt}I, ?, ?, ? extends TScalaBeanSerializer{lt}?{gt}, ? extends TScalaBeanSerializer{lt}?{gt}{gt}{gt} processMap)<block>
             {
             toMethodArrayBuffer(service.getMethods).map{(method: Method)=>{
               <div>

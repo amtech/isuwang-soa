@@ -25,7 +25,7 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
 
     private Map<String, SoaConnectionImpl> connectionMap = new ConcurrentHashMap<>();
 
-    private Map<String, SoaScalaConnectionImpl> scalaConnectionMap = new ConcurrentHashMap<>();
+    private Map<String, SoaCommonConnectionImpl> scalaConnectionMap = new ConcurrentHashMap<>();
 
     @Override
     public synchronized SoaConnection getConnection() throws SoaException {
@@ -62,7 +62,7 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
             return scalaConnectionMap.get(connectKey);
         }
 
-        SoaScalaConnectionImpl soaConnection = new SoaScalaConnectionImpl(context.getCalleeIp(), context.getCalleePort());
+        SoaCommonConnectionImpl soaConnection = new SoaCommonConnectionImpl(context.getCalleeIp(), context.getCalleePort());
 
         scalaConnectionMap.put(connectKey, soaConnection);
 

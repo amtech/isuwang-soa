@@ -14,13 +14,13 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-public class SoaScalaConnectionImpl implements SoaScalaConnection {
+public class SoaCommonConnectionImpl implements SoaScalaConnection {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SoaConnectionImpl.class);
 
     private SoaClient soaClient;
 
-    public SoaScalaConnectionImpl(String host, int port) {
+    public SoaCommonConnectionImpl(String host, int port) {
         try {
             soaClient = new SoaClient(host, port);
         } catch (SoaException e) {
@@ -29,7 +29,7 @@ public class SoaScalaConnectionImpl implements SoaScalaConnection {
     }
 
     @Override
-    public <REQ, RESP> RESP send(REQ request, TScalaBeanSerializer<REQ> requestSerializer, TScalaBeanSerializer<RESP> responseSerializer) throws TException {
+    public <REQ, RESP> RESP send(REQ request, TCommonBeanSerializer<REQ> requestSerializer, TCommonBeanSerializer<RESP> responseSerializer) throws TException {
         InvocationContext context = InvocationContext.Factory.getCurrentInstance();
         SoaHeader soaHeader = context.getHeader();
 
@@ -111,7 +111,7 @@ public class SoaScalaConnectionImpl implements SoaScalaConnection {
      * @throws TException
      */
     @Override
-    public <REQ, RESP> Future<RESP> sendAsync(REQ request, TScalaBeanSerializer<REQ> requestSerializer, TScalaBeanSerializer<RESP> responseSerializer, long timeout) throws TException {
+    public <REQ, RESP> Future<RESP> sendAsync(REQ request, TCommonBeanSerializer<REQ> requestSerializer, TCommonBeanSerializer<RESP> responseSerializer, long timeout) throws TException {
 
         InvocationContext context = InvocationContext.Factory.getCurrentInstance();
         SoaHeader soaHeader = context.getHeader();

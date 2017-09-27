@@ -22,14 +22,14 @@ import java.util.concurrent.CompletableFuture;
  * @author craneding
  * @date 15/9/18
  */
-public class SoaScalaBaseProcessor<I> implements TProcessor {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SoaScalaBaseProcessor.class);
+public class SoaCommonBaseProcessor<I> implements TProcessor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SoaCommonBaseProcessor.class);
 
     private final I iface;
     private Class<I> interfaceClass;
-    private final Map<String, SoaProcessFunction<I, ?, ?, ? extends TScalaBeanSerializer<?>, ? extends TScalaBeanSerializer<?>>> processMap;
+    private final Map<String, SoaProcessFunction<I, ?, ?, ? extends TCommonBeanSerializer<?>, ? extends TCommonBeanSerializer<?>>> processMap;
 
-    public SoaScalaBaseProcessor(I iface, Map<String, SoaProcessFunction<I, ?, ?, ? extends TScalaBeanSerializer<?>, ? extends TScalaBeanSerializer<?>>> processMap) {
+    public SoaCommonBaseProcessor(I iface, Map<String, SoaProcessFunction<I, ?, ?, ? extends TCommonBeanSerializer<?>, ? extends TCommonBeanSerializer<?>>> processMap) {
         this.iface = iface;
         this.processMap = processMap;
     }
@@ -60,7 +60,7 @@ public class SoaScalaBaseProcessor<I> implements TProcessor {
             // read
             //TMessage tMessage = in.readMessageBegin();
             @SuppressWarnings("unchecked")
-            SoaProcessFunction<I, Object, Object, ? extends TScalaBeanSerializer<Object>, ? extends TScalaBeanSerializer<Object>> soaProcessFunction = (SoaProcessFunction<I, Object, Object, ? extends TScalaBeanSerializer<Object>, ? extends TScalaBeanSerializer<Object>>) getProcessMapView().get(methodName);
+            SoaProcessFunction<I, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>> soaProcessFunction = (SoaProcessFunction<I, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>>) getProcessMapView().get(methodName);
             if (soaProcessFunction == null)
                 throw new SoaException("系统错误", "方法(" + methodName + ")不存在");
             Object args = soaProcessFunction.getReqSerializer().read(in);
@@ -127,7 +127,7 @@ public class SoaScalaBaseProcessor<I> implements TProcessor {
         filterChain.setAttribute(DispatchFilter.ATTR_KEY_CONTAINER_DISPATCH_ACTION, (DispatchFilter.DispatchAction) chain -> {
 
             @SuppressWarnings("unchecked")
-            SoaProcessFunction<I, Object, Object, ? extends TScalaBeanSerializer<Object>, ? extends TScalaBeanSerializer<Object>> soaProcessFunction = (SoaProcessFunction<I, Object, Object, ? extends TScalaBeanSerializer<Object>, ? extends TScalaBeanSerializer<Object>>) getProcessMapView().get(methodName);
+            SoaProcessFunction<I, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>> soaProcessFunction = (SoaProcessFunction<I, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>>) getProcessMapView().get(methodName);
             Object args = soaProcessFunction.getReqSerializer().read(in);
             in.readMessageEnd();
 
@@ -165,7 +165,7 @@ public class SoaScalaBaseProcessor<I> implements TProcessor {
      * @param out
      * @param future
      */
-    private void AsyncAccept(Context context, SoaProcessFunction<I, Object, Object, ? extends TScalaBeanSerializer<Object>, ? extends TScalaBeanSerializer<Object>> soaProcessFunction, Object result, TProtocol out, CompletableFuture future) {
+    private void AsyncAccept(Context context, SoaProcessFunction<I, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>> soaProcessFunction, Object result, TProtocol out, CompletableFuture future) {
 
         try {
             TransactionContext.Factory.setCurrentInstance((TransactionContext) context);
@@ -203,7 +203,7 @@ public class SoaScalaBaseProcessor<I> implements TProcessor {
     }
 
     @Override
-    public Map<String, SoaProcessFunction<I, ?, ?, ? extends TScalaBeanSerializer<?>, ? extends TScalaBeanSerializer<?>>> getProcessMapView() {
+    public Map<String, SoaProcessFunction<I, ?, ?, ? extends TCommonBeanSerializer<?>, ? extends TCommonBeanSerializer<?>>> getProcessMapView() {
         return Collections.unmodifiableMap(processMap);
     }
 
