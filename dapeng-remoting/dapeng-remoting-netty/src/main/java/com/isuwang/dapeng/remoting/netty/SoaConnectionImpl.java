@@ -59,6 +59,7 @@ public class SoaConnectionImpl implements SoaConnection {
                 TSoaServiceProtocol inputProtocol = new TSoaServiceProtocol(inputSoaTransport, true);
 
                 TMessage msg = inputProtocol.readMessageBegin();
+                soaHeader=InvocationContext.Factory.getCurrentInstance().getHeader();
                 if (TMessageType.EXCEPTION == msg.type) {
                     TApplicationException x = TApplicationException.read(inputProtocol);
                     inputProtocol.readMessageEnd();

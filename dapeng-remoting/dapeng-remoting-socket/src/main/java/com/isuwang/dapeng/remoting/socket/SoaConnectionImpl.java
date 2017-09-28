@@ -26,7 +26,7 @@ public class SoaConnectionImpl implements SoaCommonConnection {
 
     public <REQ, RESP> RESP send(REQ request, TCommonBeanSerializer<REQ> requestSerializer, TCommonBeanSerializer<RESP> responseSerializer) throws TException {
         final InvocationContext context = InvocationContext.Factory.getCurrentInstance();
-        final SoaHeader header = context.getHeader();
+        SoaHeader header = context.getHeader();
         RESP response=null;
 
         try (
@@ -48,8 +48,8 @@ public class SoaConnectionImpl implements SoaCommonConnection {
             protocol.writeMessageEnd();
 
             transport.flush();
-
             TMessage msg = protocol.readMessageBegin();
+            header =  InvocationContext.Factory.getCurrentInstance().getHeader();
             if (msg.type == TMessageType.EXCEPTION) {
                 TApplicationException x = TApplicationException.read(protocol);
                 protocol.readMessageEnd();
