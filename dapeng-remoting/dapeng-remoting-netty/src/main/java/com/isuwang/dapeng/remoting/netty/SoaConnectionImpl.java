@@ -146,20 +146,21 @@ public class SoaConnectionImpl implements SoaConnection {
 
                     try {
                         TMessage msg = inputProtocol.readMessageBegin();
+                        SoaHeader resultSoaHeader = InvocationContext.Factory.getCurrentInstance().getHeader();
                         if (TMessageType.EXCEPTION == msg.type) {
                             TApplicationException x = TApplicationException.read(inputProtocol);
                             inputProtocol.readMessageEnd();
                             throw x;
                         } else if (context.getSeqid() != msg.seqid) {
-                            throw new TApplicationException(4, soaHeader.getMethodName() + " failed: out of sequence response");
+                            throw new TApplicationException(4, resultSoaHeader.getMethodName() + " failed: out of sequence response");
                         } else {
-                            if ("0000".equals(soaHeader.getRespCode().get())) {
+                            if ("0000".equals(resultSoaHeader.getRespCode().get())) {
                                 responseSerializer.read(response, inputProtocol);
                                 inputProtocol.readMessageEnd();
 
                                 finalResponseFuture.complete(response);
                             } else {
-                                throw new SoaException(soaHeader.getRespCode().get(), soaHeader.getRespMessage().get());
+                                throw new SoaException(resultSoaHeader.getRespCode().get(), resultSoaHeader.getRespMessage().get());
                             }
                         }
                     } catch (SoaException e) {
