@@ -3,6 +3,7 @@ package com.isuwang.dapeng.container.netty;
 import com.isuwang.dapeng.container.util.LoggerUtil;
 import com.isuwang.dapeng.container.util.PlatformProcessDataFactory;
 import com.isuwang.dapeng.core.*;
+import com.isuwang.dapeng.core.log.LogUtil;
 import com.isuwang.dapeng.monitor.api.domain.PlatformProcessData;
 import com.isuwang.dapeng.registry.ConfigKey;
 import com.isuwang.dapeng.registry.RegistryAgentProxy;
@@ -308,15 +309,17 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
             if (soaHeader.getRespMessage().isPresent())
                 responseMsg = soaHeader.getRespMessage().get();
         } catch (SoaException e) {
-            LOGGER.error(e.getMessage(), e);
+
+            //LOGGER.error(e.getMessage(), e);
+            LogUtil.logError(SoaServerHandler.class,soaHeader,e.getMessage(),e);
 
             writeErrorMessage(ctx, outputBuf, context, soaHeader, outputSoaTransport, outputProtocol, e);
 
             responseCode = e.getCode();
             responseMsg = e.getMsg();
         } catch (Throwable e) {
-            LOGGER.error(e.getMessage(), e);
-
+            //LOGGER.error(e.getMessage(), e);
+            LogUtil.logError(SoaServerHandler.class,soaHeader,e.getMessage(),e);
             String errMsg = e.getCause() != null ? e.getCause().toString() : (e.getMessage() != null ? e.getMessage().toString() : e.toString());
             writeErrorMessage(ctx, outputBuf, context, soaHeader, outputSoaTransport, outputProtocol, new SoaException(SoaBaseCode.UnKnown, errMsg));
 

@@ -24,7 +24,7 @@ import static java.util.stream.Collectors.toList;
  * @author craneding
  * @date 16/3/7
  */
-public class QPSStatFilter implements StatusFilter {
+public class QPSStatFilter implements StatusFilter ,ContainerFilter{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QPSStatFilter.class);
 

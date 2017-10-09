@@ -17,7 +17,7 @@ import java.util.Arrays;
 /**
  * Created by tangliu on 2016/4/11.
  */
-public class SoaGlobalTransactionalFilter implements Filter {
+public class SoaGlobalTransactionalFilter implements ContainerFilter {
     @Override
     public void doFilter(FilterChain chain) throws TException {
         final SoaHeader soaHeader = (SoaHeader) chain.getAttribute(ContainerFilterChain.ATTR_KEY_HEADER);

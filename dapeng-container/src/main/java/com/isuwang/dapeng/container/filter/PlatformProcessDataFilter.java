@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 /**
  * Created by tangliu on 2016/3/9.
  */
-public class PlatformProcessDataFilter implements StatusFilter {
+public class PlatformProcessDataFilter implements StatusFilter ,ContainerFilter{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PlatformProcessDataFilter.class);
 

@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
  * @author craneding
  * @date 16/1/20
  */
-public class NetworkLogFilter implements Filter {
+public class NetworkLogFilter implements RemoteApiFilter {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkLogFilter.class);
 
     @Override
