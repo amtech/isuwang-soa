@@ -73,7 +73,9 @@ public class SoaCommonBaseProcessor<I> implements TProcessor {
             }
 
             //LOGGER.info("{} {} {} {} request header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid(), soaHeader.toString(), formatToString(soaProcessFunction.getReqSerializer().toString(args)));
-            LogUtil.logInfo(SoaScalaBaseProcessor.class,soaHeader,"{} {} {} {} request header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid().toString(), soaHeader.toString(), formatToString(soaProcessFunction.getReqSerializer().toString(args)));
+            LogUtil.logInfo(SoaScalaBaseProcessor.class,soaHeader,"{} {} {} operatorId:{} operatorName:{} response body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid().toString(), soaHeader.toString(), formatToString(soaProcessFunction.getResSerializer().toString(args)));
+            LogUtil.logDebug(SoaScalaBaseProcessor.class,soaHeader,"{} {} {} {} response header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(),soaHeader.getOperatorId(),soaHeader.getOperatorName(), formatToString(soaProcessFunction.getResSerializer().toString(args)));
+
             long startTime = System.currentTimeMillis();
 
 
@@ -81,7 +83,8 @@ public class SoaCommonBaseProcessor<I> implements TProcessor {
             try {
                 result = soaProcessFunction.getResult(iface, args);
                 //LOGGER.info("{} {} {} {} response header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid(), soaHeader.toString(), formatToString(soaProcessFunction.getResSerializer().toString(result)));
-                LogUtil.logInfo(SoaScalaBaseProcessor.class,soaHeader,"{} {} {} {} response header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid().toString(), soaHeader.toString(), formatToString(soaProcessFunction.getResSerializer().toString(result)));
+                LogUtil.logInfo(SoaScalaBaseProcessor.class,soaHeader,"{} {} {} operatorId:{} operatorName:{} response body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid().toString(), soaHeader.toString(), formatToString(soaProcessFunction.getResSerializer().toString(result)));
+                LogUtil.logDebug(SoaScalaBaseProcessor.class,soaHeader,"{} {} {} {} response header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(),soaHeader.getOperatorId(),soaHeader.getOperatorName(), formatToString(soaProcessFunction.getResSerializer().toString(result)));
             } finally {
                 chain.setAttribute(ContainerFilterChain.ATTR_KEY_I_PROCESSTIME, System.currentTimeMillis() - startTime);
 
