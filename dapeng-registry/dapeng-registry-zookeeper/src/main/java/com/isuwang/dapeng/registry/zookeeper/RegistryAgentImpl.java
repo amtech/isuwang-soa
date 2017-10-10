@@ -158,9 +158,9 @@ public class RegistryAgentImpl implements RegistryAgent {
                 }
             }
 
-            LOGGER.info("路由过滤前可用列表{}", serviceInfos.stream().map(s -> s.getHost()).collect(Collectors.toList()));
+            LOGGER.debug("路由过滤前可用列表{}", serviceInfos.stream().map(s -> s.getHost()).collect(Collectors.toList()));
             serviceInfos = tmpList;
-            LOGGER.info("路由过滤后可用列表{}", serviceInfos.stream().map(s -> s.getHost()).collect(Collectors.toList()));
+            LOGGER.debug("路由过滤后可用列表{}", serviceInfos.stream().map(s -> s.getHost()).collect(Collectors.toList()));
         }
 
         return new ServiceInfos(usingFallbackZookeeper, serviceInfos);
