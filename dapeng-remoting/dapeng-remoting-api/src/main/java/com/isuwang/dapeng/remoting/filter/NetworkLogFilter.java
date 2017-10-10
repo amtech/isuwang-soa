@@ -32,7 +32,7 @@ public class NetworkLogFilter implements Filter {
         } finally {
             // Object response = chain.getAttribute(StubFilterChain.ATTR_KEY_RESPONSE);
             final long endTime = System.currentTimeMillis();
-            LOGGER.info("{} {} {} callee: {}:{} response respCode:{} time:${}ms", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(),
+            LOGGER.info("{} {} {} callee: {}:{} response respCode:{} time:{}ms", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(),
                     context.getCalleeIp(), context.getCalleePort(), soaHeader.getRespCode(), endTime-startTime);
         }
     }
