@@ -48,9 +48,12 @@
                         <directory>${basedir}/src/main/resources</directory>
                         <includes>
                             <include>logback.xml</include>
-                            <include>server-conf.xml</include>
                         </includes>
                         <targetPath>${project.build.directory}/${devName}/conf</targetPath>
+                    </resource>
+                    <resource>
+                        <filtering>false</filtering>
+                        <directory>${basedir}/src/main/resources</directory>
                     </resource>
                 </resources>
                 <plugins>
