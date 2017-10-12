@@ -21,6 +21,9 @@ class ScalaCodecGenerator extends CodeGenerator {
 
   }
 
+  val keywords = Set("type") // TODO is there any other keyword need to be escape
+  def nameAsId(name: String) = if(keywords contains name) s"`$name`" else name
+
   def toCodecTemplate(service:Service, namespaces:util.Set[String]): Elem = {
     //val structNameCache = new util.ArrayList[String]()
 
@@ -54,7 +57,7 @@ class ScalaCodecGenerator extends CodeGenerator {
         {toMethodArrayBuffer(service.methods).map{(method: Method)=> {
 
           <div>
-            case class {method.name}_args({toFieldArrayBuffer(method.request.getFields).map{(field: Field)=>{<div>{field.name}:{toScalaDataType(field.dataType)}{if(field != method.request.getFields.get(method.request.getFields.size-1)) <span>,</span>}</div>}}})
+            case class {method.name}_args({toFieldArrayBuffer(method.request.getFields).map{(field: Field)=>{<div>{nameAsId(field.name)}:{toScalaDataType(field.dataType)}{if(field != method.request.getFields.get(method.request.getFields.size-1)) <span>,</span>}</div>}}})
 
             case class {method.name}_result({toFieldArrayBuffer(method.response.getFields).map{(field: Field)=>{<div>{caseClassFiledCombile(field)}{if(field != method.response.getFields.get(method.response.getFields.size-1)) <span>,</span>}</div>}}})
 
@@ -113,7 +116,7 @@ class ScalaCodecGenerator extends CodeGenerator {
             @throws[TException]
             def getResult(iface: {service.namespace}.{service.name}, args: {method.name}_args):{method.name}_result = <block>
 
-              val _result = iface.{method.name}({toFieldArrayBuffer(method.request.getFields).map{(field: Field)=>{<div>args.{field.name}{if(field != method.request.getFields.get(method.request.getFields.size-1)) <span>,</span>}</div>}}})
+              val _result = iface.{method.name}({toFieldArrayBuffer(method.request.getFields).map{(field: Field)=>{<div>args.{nameAsId(field.name)}{if(field != method.request.getFields.get(method.request.getFields.size-1)) <span>,</span>}</div>}}})
               {method.response.name}({if(method.response.fields.get(0).dataType.kind != KIND.VOID) <div>_result</div>} )
             </block>
           </block>
@@ -386,7 +389,7 @@ class ScalaCodecGenerator extends CodeGenerator {
         iprot.readStructBegin()
 
       {toFieldArrayBuffer(struct.getFields).map{(field : Field) =>{
-        <div>var {field.name}: {if(field.isOptional) <div>Option[</div>}{toScalaDataType(field.dataType)}{if(field.isOptional) <div>]</div>} = {if(field.isOptional) <div>None</div> else getDefaultValueWithType(field.dataType)}
+        <div>var {nameAsId(field.name)}: {if(field.isOptional) <div>Option[</div>}{toScalaDataType(field.dataType)}{if(field.isOptional) <div>]</div>} = {if(field.isOptional) <div>None</div> else getDefaultValueWithType(field.dataType)}
         </div>
       }}}
 
@@ -399,7 +402,7 @@ class ScalaCodecGenerator extends CodeGenerator {
             <div>
               case {field.tag} =>
                   schemeField.`type` match <block>
-                    case {toThriftDateType(field.dataType)} => {field.name} = {if(field.isOptional) <div>Option(</div>}{getScalaReadElement(field.dataType, 0)}{if(field.isOptional) <div>)</div>}
+                    case {toThriftDateType(field.dataType)} => {nameAsId(field.name)} = {if(field.isOptional) <div>Option(</div>}{getScalaReadElement(field.dataType, 0)}{if(field.isOptional) <div>)</div>}
                     case _ => com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.`type`)
             </block>
             </div>
@@ -411,7 +414,7 @@ class ScalaCodecGenerator extends CodeGenerator {
       iprot.readFieldEnd
       iprot.readStructEnd
 
-      val bean = {toStructName(struct)}({toFieldArrayBuffer(struct.getFields).map{(field : Field) =>{<div>{field.name} = {field.name}{if(field != struct.getFields.get(struct.getFields.size-1)) <span>,</span>}</div>}}})
+      val bean = {toStructName(struct)}({toFieldArrayBuffer(struct.getFields).map{(field : Field) =>{<div>{nameAsId(field.name)} = {nameAsId(field.name)}{if(field != struct.getFields.get(struct.getFields.size-1)) <span>,</span>}</div>}}})
       validate(bean)
 
       bean
@@ -474,9 +477,9 @@ class ScalaCodecGenerator extends CodeGenerator {
         if(field.dataType.getKind() == DataType.KIND.VOID) {}
         else {
           <div>
-            {if(field.isOptional) <div>if(bean.{field.name}.isDefined)</div>}<block>
-            val elem{index} = bean.{field.name} {if(field.isOptional) <div>.get</div>}
-            oprot.writeFieldBegin(new com.isuwang.org.apache.thrift.protocol.TField("{field.name}", {toThriftDateType(field.dataType)}, {field.tag}.asInstanceOf[Short]))
+            {if(field.isOptional) <div>if(bean.{nameAsId(field.name)}.isDefined)</div>}<block>
+            val elem{index} = bean.{nameAsId(field.name)} {if(field.isOptional) <div>.get</div>}
+            oprot.writeFieldBegin(new com.isuwang.org.apache.thrift.protocol.TField("{nameAsId(field.name)}", {toThriftDateType(field.dataType)}, {field.tag}.asInstanceOf[Short]))
             {toScalaWriteElement(field.dataType, index)}
             oprot.writeFieldEnd
             {index = index + 1}
@@ -500,20 +503,20 @@ class ScalaCodecGenerator extends CodeGenerator {
         <div>{
           if(!field.isOptional && field.dataType.kind != DataType.KIND.VOID && checkIfNeedValidate(field.isOptional, field.dataType)){
             <div>
-              if(bean.{field.name} == null)
-              throw new SoaException(SoaBaseCode.NotNull, "{field.name}字段不允许为空")
+              if(bean.{nameAsId(field.name)} == null)
+              throw new SoaException(SoaBaseCode.NotNull, "{nameAsId(field.name)}字段不允许为空")
             </div>}}</div>
           <div>{
             if(!field.isOptional && field.dataType.kind == KIND.STRUCT && field.dataType.kind != DataType.KIND.VOID){
               <div>
-                if(bean.{field.name} != null)
-                new {field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().validate(bean.{field.name})
+                if(bean.{nameAsId(field.name)} != null)
+                new {field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().validate(bean.{nameAsId(field.name)})
               </div>}}</div>
           <div>{
             if(field.isOptional && field.dataType.kind == KIND.STRUCT && field.dataType.kind != DataType.KIND.VOID){
               <div>
-                if(bean.{field.name}.isDefined)
-                new {field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().validate(bean.{field.name}.get)
+                if(bean.{nameAsId(field.name)}.isDefined)
+                new {field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().validate(bean.{nameAsId(field.name)}.get)
               </div>}}</div>
       }
       }
@@ -541,7 +544,7 @@ class ScalaCodecGenerator extends CodeGenerator {
 
 
   def caseClassFiledCombile(field: Field): Elem ={
-    <div>{if(field.dataType.kind != KIND.VOID) <div>{field.name}:{toScalaDataType(field.dataType)}</div>}</div>
+    <div>{if(field.dataType.kind != KIND.VOID) <div>{nameAsId(field.name)}:{toScalaDataType(field.dataType)}</div>}</div>
 
   }
 
@@ -550,12 +553,12 @@ class ScalaCodecGenerator extends CodeGenerator {
 
 //  def getToStringElement(field: Field): Elem = {
 //    <div>
-//      stringBuilder.append("\"").append("{field.name}").append("\":{if(field.dataType.kind == DataType.KIND.STRING) <div>\"</div>}").append({getToStringByDataType(field)}).append("{if(field.dataType.kind == DataType.KIND.STRING) <div>\"</div>},");
+//      stringBuilder.append("\"").append("{nameAsId(field.name)}").append("\":{if(field.dataType.kind == DataType.KIND.STRING) <div>\"</div>}").append({getToStringByDataType(field)}).append("{if(field.dataType.kind == DataType.KIND.STRING) <div>\"</div>},");
 //    </div>
 //  }
 //
 //  def getToStringByDataType(field: Field):Elem = {
-//    if(field.dataType.kind == KIND.STRUCT) <div>this.{field.name} == null ? "null" : this.{field.name}.toString()</div> else <div>{field.name}</div>
+//    if(field.dataType.kind == KIND.STRUCT) <div>this.{nameAsId(field.name)} == null ? "null" : this.{nameAsId(field.name)}.toString()</div> else <div>{nameAsId(field.name)}</div>
 //  }
 
 }

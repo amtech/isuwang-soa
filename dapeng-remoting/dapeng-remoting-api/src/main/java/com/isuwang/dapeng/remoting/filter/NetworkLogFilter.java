@@ -1,5 +1,6 @@
 package com.isuwang.dapeng.remoting.filter;
 
+import com.isuwang.dapeng.core.InvocationContext;
 import com.isuwang.dapeng.core.SoaHeader;
 import com.isuwang.dapeng.core.filter.Filter;
 import com.isuwang.dapeng.core.filter.FilterChain;
@@ -21,15 +22,18 @@ public class NetworkLogFilter implements RemoteApiFilter {
         final SoaHeader soaHeader = (SoaHeader) chain.getAttribute(StubFilterChain.ATTR_KEY_HEADER);
         final Object request = chain.getAttribute(StubFilterChain.ATTR_KEY_REQUEST);
 
-        LOGGER.info("{} {} {} request header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), soaHeader.toString(), request.toString());
+        final long startTime = System.currentTimeMillis();
+        final InvocationContext context = (InvocationContext) chain.getAttribute(StubFilterChain.ATTR_KEY_CONTEXT);
+
+        LOGGER.info("{} {} {} request", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName());
 
         try {
             chain.doFilter();
         } finally {
-            Object response = chain.getAttribute(StubFilterChain.ATTR_KEY_RESPONSE);
-
-            if (response != null)
-                LOGGER.info("{} {} {} response header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), soaHeader.toString(), formatToString(response.toString()));
+            // Object response = chain.getAttribute(StubFilterChain.ATTR_KEY_RESPONSE);
+            final long endTime = System.currentTimeMillis();
+            LOGGER.info("{} {} {} callee: {}:{} response respCode:{} time:{}ms", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(),
+                    context.getCalleeIp(), context.getCalleePort(), soaHeader.getRespCode(), endTime-startTime);
         }
     }
 

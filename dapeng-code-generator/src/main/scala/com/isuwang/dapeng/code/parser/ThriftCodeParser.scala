@@ -164,7 +164,7 @@ class ThriftCodeParser(var language: String) {
         dataType.setKind(DataType.KIND.ENUM)
 
         val doc1 = if (scopePrefix != None) docCache(scopePrefix.get.name) else defaultDoc
-        val enumController = new EnumController(enum, getGenerator(doc1), doc1.namespace(language))
+        val enumController = new EnumController(enum, getGenerator(doc1), getNameSpace(doc1, language))
 
         dataType.setQualifiedName(enumController.namespace + "." + enumController.name)
 
@@ -172,7 +172,7 @@ class ThriftCodeParser(var language: String) {
         dataType.setKind(DataType.KIND.STRUCT)
 
         val doc1 = if (scopePrefix != None) docCache(scopePrefix.get.name) else defaultDoc
-        val structController = new StructController(struct, false, getGenerator(doc1), doc1.namespace(language))
+        val structController = new StructController(struct, false, getGenerator(doc1), getNameSpace(doc1, language))
 
         dataType.setQualifiedName(structController.namespace + "." + structController.name)
       case _: ListType =>
@@ -195,11 +195,20 @@ class ThriftCodeParser(var language: String) {
     dataType
   }
 
+  private def getNameSpace(doc: Document, language:String): Option[Identifier] = {
+    doc.namespace(language) match {
+      case x@Some(id) => x
+      case None =>  // return a default namespace of java
+        doc.namespace("java")
+    }
+
+  }
+
   private def findEnums(doc: Document, generator: ApacheJavaGenerator): util.List[TEnum] = {
     val results = new util.ArrayList[TEnum]()
 
     doc.enums.foreach(e => {
-      val controller = new EnumController(e, generator, doc.namespace(language))
+      val controller = new EnumController(e, generator, getNameSpace(doc, language))
 
       val tenum = new TEnum()
       if (controller.has_namespace)
@@ -238,7 +247,7 @@ class ThriftCodeParser(var language: String) {
 
   private def findStructs(doc0: Document, generator: ApacheJavaGenerator): List[metadata.Struct] =
     doc0.structs.toList.map { (struct: StructLike) =>
-      val controller = new StructController(struct, false, generator, doc0.namespace(language))
+      val controller = new StructController(struct, false, generator, getNameSpace(doc0, language))
 
       new metadata.Struct {
         //this.setNamespace(if (controller.has_non_nullable_fields) controller.namespace else null)
@@ -282,7 +291,7 @@ class ThriftCodeParser(var language: String) {
     val results = new util.ArrayList[metadata.Service]()
 
     doc.services.foreach(s => {
-      val controller = new ServiceController(s, generator, doc.namespace(language))
+      val controller = new ServiceController(s, generator, getNameSpace(doc, language))
 
       val service = new metadata.Service()
 

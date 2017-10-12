@@ -214,14 +214,14 @@ class ScalaGenerator extends CodeGenerator {
          **/
 
             def {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
-              <div>{field.name}:{toDataTypeTemplate(field.getDataType())} {if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}}) : {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} = <block>
+              <div>{nameAsId(field.name)}:{toDataTypeTemplate(field.getDataType())} {if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}}) : {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} = <block>
 
             initContext("{method.name}");
 
             try <block>
               val response = sendBase({method.request.name}({
               toFieldArrayBuffer(method.getRequest.getFields).map{(field: Field)=>{
-                <div>{field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>
+                <div>{nameAsId(field.name)}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>
               }
               }
               }), new {method.request.name.charAt(0).toUpper + method.request.name.substring(1)}Serializer(), new {method.response.name.charAt(0).toUpper + method.response.name.substring(1)}Serializer())
@@ -300,14 +300,14 @@ class ScalaGenerator extends CodeGenerator {
             * {method.doc}
             **/
             def {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
-            <div>{field.name}:{toDataTypeTemplate(field.getDataType())} ,</div>}}} timeout: Long) : scala.concurrent.Future[{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}] = <block>
+            <div>{nameAsId(field.name)}:{toDataTypeTemplate(field.getDataType())} ,</div>}}} timeout: Long) : scala.concurrent.Future[{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}] = <block>
 
             initContext("{method.name}");
 
             try <block>
               val _responseFuture = sendBaseAsync({method.request.name}({
               toFieldArrayBuffer(method.getRequest.getFields).map{(field: Field)=>{
-                <div>{field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>
+                <div>{nameAsId(field.name)}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>
               }
               }
               }), new {method.request.name.charAt(0).toUpper + method.request.name.substring(1)}Serializer(), new {method.response.name.charAt(0).toUpper + method.response.name.substring(1)}Serializer(), timeout).asInstanceOf[java.util.concurrent.CompletableFuture[{method.response.name}]]
@@ -355,23 +355,25 @@ class ScalaGenerator extends CodeGenerator {
 
         {
         toEnumItemArrayBuffer(enum.enumItems).map{(enumItem: EnumItem)=>{
-          <div>val {enumItem.label} = Value({enumItem.value}, "{enumItem.doc.trim}")
-          </div>
+          if(enumItem.doc != null)
+            <div>val {enumItem.label} = Value({enumItem.value}, "{enumItem.doc.trim}")
+            </div>
+          else
+            <div>val {enumItem.label} = Value({enumItem.value})
+            </div>
         }
         }
         }
+        <div>val UNDEFINED = Value(-1) // undefined enum
+        </div>
 
-        def findByValue(v: Int): {enum.name} = <block>
-          v match <block>
-            {toEnumItemArrayBuffer(enum.enumItems).map{(enumItem: EnumItem) =>{
-              <div>case {enumItem.value} => {enumItem.label}
-              </div>
-            }
-            }
-            }
-            case _ => null
+        def findByValue(v: Int): {enum.name} = try<block>
+            {enum.name}.apply(v)
           </block>
-        </block>
+          catch<block>
+            case ex: Throwable => UNDEFINED;
+          </block>
+
       </block>
       </div>
     }
@@ -394,11 +396,14 @@ class ScalaGenerator extends CodeGenerator {
         *{field.doc}
         **/
         {index = index + 1}
-        {field.name} : {if(field.isOptional) <div>Option[</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>] = None</div>}{if(index < struct.getFields.size) <span>,</span>}</div>}}}
+        {nameAsId(field.name)} : {if(field.isOptional) <div>Option[</div>}{toDataTypeTemplate(field.getDataType)}{if(field.isOptional) <div>] = None</div>}{if(index < struct.getFields.size) <span>,</span>}</div>}}}
         )
       </div>
     }
   }
+
+  val keywords = Set("type") // TODO is there any other keyword need to be escape
+  def nameAsId(name: String) = if(keywords contains name) s"`$name`" else name
 
   private def toServiceTemplate(service:Service): Elem = {
     return {
@@ -425,7 +430,7 @@ class ScalaGenerator extends CodeGenerator {
             {if(method.doc != null && method.doc.contains("@SoaGlobalTransactional")) <div>@SoaGlobalTransactional</div>}
             def {method.name}(
             {toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
-            <div>{field.name}: {toDataTypeTemplate(field.getDataType())} {if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}
+            <div>{nameAsId(field.name)}: {toDataTypeTemplate(field.getDataType())} {if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}
             }
             }): {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}
 
@@ -474,7 +479,7 @@ class ScalaGenerator extends CodeGenerator {
   }
 
   def getToStringElement(field: Field): Elem = {
-    <div>stringBuilder.append("\"").append("{field.name}").append("\":{if(field.dataType.kind == DataType.KIND.STRING) <div>\"</div>}").append({getToStringByDataType(field)}).append("{if(field.dataType.kind == DataType.KIND.STRING) <div>\"</div>},");
+    <div>stringBuilder.append("\"").append("{nameAsId(field.name)}").append("\":{if(field.dataType.kind == DataType.KIND.STRING) <div>\"</div>}").append({getToStringByDataType(field)}).append("{if(field.dataType.kind == DataType.KIND.STRING) <div>\"</div>},");
     </div>
   }
 
@@ -483,8 +488,8 @@ class ScalaGenerator extends CodeGenerator {
     if(field.getDoc != null && field.getDoc.toLowerCase.contains("@logger(level=\"off\")"))
        <div>"LOGGER_LEVEL_OFF"</div>
     else if(field.isOptional)
-       <div>this.{field.name}.isPresent()?this.{field.name}.get(){if(field.dataType.kind == KIND.STRUCT) <div>.toString()</div>}:null</div>
+       <div>this.{nameAsId(field.name)}.isPresent()?this.{nameAsId(field.name)}.get(){if(field.dataType.kind == KIND.STRUCT) <div>.toString()</div>}:null</div>
     else
-       <div>this.{field.name}{if(field.dataType.kind == KIND.STRUCT) <div>.toString()</div>}</div>
+       <div>this.{nameAsId(field.name)}{if(field.dataType.kind == KIND.STRUCT) <div>.toString()</div>}</div>
   }
 }

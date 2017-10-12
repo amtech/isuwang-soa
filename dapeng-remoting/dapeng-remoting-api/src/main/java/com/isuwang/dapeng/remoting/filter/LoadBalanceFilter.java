@@ -63,8 +63,7 @@ public class LoadBalanceFilter implements RemoteApiFilter {
         }
 
         if (callerInfo != null) {
-            LOGGER.info("{} {} {} target:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), callerInfo);
-
+            // LOGGER.info("{} {} {} target:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), callerInfo);
             String[] infos = callerInfo.split(":");
             context.setCalleeIp(infos[0]);
             context.setCalleePort(Integer.valueOf(infos[1]));
