@@ -10,5 +10,5 @@
 #### Maven运行
 
 ```
-mvn compile com.isuwang:dapeng-maven-plugin:1.2.0:run
+mvn compile com.isuwang:dapeng-maven-plugin:1.2.1:run
 ```
