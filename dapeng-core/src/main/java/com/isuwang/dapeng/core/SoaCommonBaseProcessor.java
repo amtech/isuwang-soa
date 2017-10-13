@@ -73,8 +73,8 @@ public class SoaCommonBaseProcessor<I> implements TProcessor {
             }
 
             //LOGGER.info("{} {} {} {} request header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid(), soaHeader.toString(), formatToString(soaProcessFunction.getReqSerializer().toString(args)));
-            LogUtil.logInfo(SoaCommonBaseProcessor.class,soaHeader,"{} {} {} operatorId:{} operatorName:{} request body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), soaHeader.getOperatorId(), soaHeader.getOperatorName(), formatToString(soaProcessFunction.getResSerializer().toString(args)));
-            LogUtil.logDebug(SoaCommonBaseProcessor.class,soaHeader,"{} {} {} {} response header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(),soaHeader.getOperatorId(),soaHeader.getOperatorName(), formatToString(soaProcessFunction.getResSerializer().toString(args)));
+            LogUtil.logInfo(SoaCommonBaseProcessor.class,soaHeader,"{} {} {} operatorId:{} operatorName:{} request body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), soaHeader.getOperatorId(), soaHeader.getOperatorName(), formatToString(soaProcessFunction.getReqSerializer().toString(args)));
+            LogUtil.logDebug(SoaCommonBaseProcessor.class,soaHeader,"{} {} {} {} request header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(),soaHeader.getOperatorId(),soaHeader.getOperatorName(), formatToString(soaProcessFunction.getReqSerializer().toString(args)));
 
             long startTime = System.currentTimeMillis();
 
