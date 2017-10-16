@@ -2,6 +2,7 @@ package com.isuwang.dapeng.message.consumer.container;
 
 import com.isuwang.dapeng.core.SoaProcessFunction;
 import com.isuwang.dapeng.core.TCommonBeanSerializer;
+import com.isuwang.dapeng.core.plugin.SoaPluginContainer;
 import com.isuwang.dapeng.message.consumer.api.context.ConsumerContext;
 import com.isuwang.dapeng.message.consumer.api.service.MessageConsumerService;
 import com.isuwang.org.apache.thrift.TProcessor;
@@ -18,13 +19,12 @@ import java.util.Set;
 /**
  * Created by tangliu on 2016/9/18.
  */
-public class KafkaMessageContainer {
+public class KafkaMessageContainer implements SoaPluginContainer{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaMessageContainer.class);
 
-    public static Map<Object, Class<?>> contexts;
-
     @SuppressWarnings("unchecked")
+    @Override
     public void start() {
 
         MessageConsumerService consumerService = new com.isuwang.dapeng.message.consumer.kafka.MessageConsumerServiceImpl();
