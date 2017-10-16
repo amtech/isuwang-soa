@@ -26,10 +26,14 @@ public class PluginContainer implements Container {
         }
 
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-        ServiceLoader<SoaPluginContainer>soaPluginContainers = ServiceLoader.load(SoaPluginContainer.class,contextClassLoader);
-        for (SoaPluginContainer soaPluginContainer:soaPluginContainers) {
-            soaPluginContainer.start();
-            System.out.println("load plugin container:" + soaPluginContainer.getClass().getName());
+
+        for (ClassLoader pluginClassLoader : SpringContainer.pluginClassLoaders) {
+
+            ServiceLoader<SoaPluginContainer>soaPluginContainers = ServiceLoader.load(SoaPluginContainer.class,pluginClassLoader);
+            for (SoaPluginContainer soaPluginContainer:soaPluginContainers) {
+                soaPluginContainer.start();
+                System.out.println("load plugin container:" + soaPluginContainer.getClass().getName());
+            }
         }
 
         Thread.currentThread().setContextClassLoader(contextClassLoader);
