@@ -233,7 +233,9 @@ public class GlobalTransactionManager {
             }
 
             LOGGER.info("--- 定时事务管理器结束 ---");
-        } finally {
+        }catch (Exception e){
+            LOGGER.error(e.getMessage(),e);
+        }finally {
             working.set(false);
         }
     }
