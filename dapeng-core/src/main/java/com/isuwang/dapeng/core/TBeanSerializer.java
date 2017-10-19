@@ -9,6 +9,7 @@ import com.isuwang.org.apache.thrift.protocol.TProtocol;
  * @author craneding
  * @date 15/4/26
  */
+@Deprecated
 public interface TBeanSerializer<T> {
 
     void read(T bean, TProtocol iprot) throws TException;

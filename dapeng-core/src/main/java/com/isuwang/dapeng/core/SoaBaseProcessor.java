@@ -2,6 +2,7 @@ package com.isuwang.dapeng.core;
 
 import com.isuwang.dapeng.core.filter.container.ContainerFilterChain;
 import com.isuwang.dapeng.core.filter.container.DispatchFilter;
+import com.isuwang.dapeng.core.log.LogUtil;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.TProcessor;
 import com.isuwang.org.apache.thrift.protocol.TMessage;
@@ -22,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
  * @author craneding
  * @date 15/9/18
  */
+@Deprecated
 public class SoaBaseProcessor<I> implements TProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SoaBaseProcessor.class);
@@ -74,14 +76,19 @@ public class SoaBaseProcessor<I> implements TProcessor {
                 soaHeader.setSessionId(Optional.of(UUID.randomUUID().toString()));
             }
 
-            LOGGER.info("{} {} {} {} request header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid(), soaHeader.toString(), formatToString(soaProcessFunction.getReqSerializer().toString(args)));
+            //LOGGER.info("{} {} {} {} request header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid(), soaHeader.toString(), formatToString(soaProcessFunction.getReqSerializer().toString(args)));
+            LogUtil.logInfo(SoaBaseProcessor.class,soaHeader,"{} {} {} operatorId:{} operatorName:{} request body:{}",soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(),soaHeader.getOperatorId(),soaHeader.getOperatorName(),formatToString(soaProcessFunction.getReqSerializer().toString(args)));
+            LogUtil.logDebug(SoaBaseProcessor.class,soaHeader,"{} {} {} {} request header:{} body:{}",soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid().toString(), soaHeader.toString(), formatToString(soaProcessFunction.getReqSerializer().toString(args)));
+
             long startTime = System.currentTimeMillis();
 
 
             Object result = null;
             try {
                 result = soaProcessFunction.getResult(iface, args);
-                LOGGER.info("{} {} {} {} response header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid(), soaHeader.toString(), formatToString(soaProcessFunction.getResSerializer().toString(result)));
+                //LOGGER.info("{} {} {} {} response header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid(), soaHeader.toString(), formatToString(soaProcessFunction.getResSerializer().toString(result)));
+                LogUtil.logInfo(SoaBaseProcessor.class,soaHeader,"{} {} {} operatorId:{} operatorName:{} response body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(),soaHeader.getOperatorId(),soaHeader.getOperatorName(),formatToString(soaProcessFunction.getResSerializer().toString(result)));
+                LogUtil.logDebug(SoaBaseProcessor.class,soaHeader,"{} {} {} {} response header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(),soaHeader.getOperatorId(),soaHeader.getOperatorName(), formatToString(soaProcessFunction.getResSerializer().toString(result)));
             } finally {
                 chain.setAttribute(ContainerFilterChain.ATTR_KEY_I_PROCESSTIME, System.currentTimeMillis() - startTime);
 
@@ -98,6 +105,7 @@ public class SoaBaseProcessor<I> implements TProcessor {
         });
 
         filterChain.doFilter();
+
 
         return true;
     }

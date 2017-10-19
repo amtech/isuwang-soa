@@ -11,7 +11,7 @@ import com.isuwang.org.apache.thrift.TException;
 /**
  * Created by tangliu on 2016/4/11.
  */
-public class SoaTransactionalProcessFilter implements Filter {
+public class SoaTransactionalProcessFilter implements RemoteApiFilter{
     @Override
     public void doFilter(FilterChain chain) throws TException {
 

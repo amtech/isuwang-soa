@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by tangliu on 2016/1/15.
  */
-public class LoadBalanceFilter implements Filter {
+public class LoadBalanceFilter implements RemoteApiFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoadBalanceFilter.class);
 

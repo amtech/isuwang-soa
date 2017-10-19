@@ -29,7 +29,6 @@ public class JSONSerializer extends TBaseBeanSerializer {
     }
 
 
-    @Override
     public void read(InvocationInfo invocationInfo, TProtocol iprot) throws TException {
         DataInfo dataInfo = invocationInfo.getDataInfo();
 
@@ -246,7 +245,6 @@ public class JSONSerializer extends TBaseBeanSerializer {
         return value;
     }
 
-    @Override
     public void write(InvocationInfo invocationInfo, TProtocol oprot) throws TException {
         DataInfo dataInfo = invocationInfo.getDataInfo();
         String consumesValue = dataInfo.getConsumesValue();
@@ -302,7 +300,6 @@ public class JSONSerializer extends TBaseBeanSerializer {
         oprot.writeFieldStop();
         oprot.writeStructEnd();
     }
-
 
     public static void main(String[] args) {
         String test = "test";

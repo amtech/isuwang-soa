@@ -1,8 +1,8 @@
 package com.isuwang.dapeng.message.consumer.container;
 
-import com.isuwang.dapeng.core.SoaBaseProcessor;
 import com.isuwang.dapeng.core.SoaProcessFunction;
-import com.isuwang.dapeng.core.TBeanSerializer;
+import com.isuwang.dapeng.core.TCommonBeanSerializer;
+import com.isuwang.dapeng.core.plugin.SoaPluginContainer;
 import com.isuwang.dapeng.message.consumer.api.context.ConsumerContext;
 import com.isuwang.dapeng.message.consumer.api.service.MessageConsumerService;
 import com.isuwang.org.apache.thrift.TProcessor;
@@ -19,13 +19,12 @@ import java.util.Set;
 /**
  * Created by tangliu on 2016/9/18.
  */
-public class KafkaMessageContainer {
+public class KafkaMessageContainer implements SoaPluginContainer{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KafkaMessageContainer.class);
 
-    public static Map<Object, Class<?>> contexts;
-
     @SuppressWarnings("unchecked")
+    @Override
     public void start() {
 
         MessageConsumerService consumerService = new com.isuwang.dapeng.message.consumer.kafka.MessageConsumerServiceImpl();
@@ -67,7 +66,7 @@ public class KafkaMessageContainer {
                             if (method.isAnnotationPresent(MessageConsumerActionClass)) {
 
                                 String methodName = method.getName();
-                                SoaProcessFunction<Object, Object, Object, ? extends TBeanSerializer<Object>, ? extends TBeanSerializer<Object>> soaProcessFunction = (SoaProcessFunction<Object, Object, Object, ? extends TBeanSerializer<Object>, ? extends TBeanSerializer<Object>>) processor.getProcessMapView().get(methodName);
+                                SoaProcessFunction<Object, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>> soaProcessFunction = (SoaProcessFunction<Object, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>>) processor.getProcessMapView().get(methodName);
 
                                 Annotation annotation = method.getAnnotation(MessageConsumerActionClass);
                                 String topic = (String) annotation.getClass().getDeclaredMethod("topic").invoke(annotation);

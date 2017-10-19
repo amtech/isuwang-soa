@@ -9,7 +9,7 @@ import java.util.Optional;
  * Created by tangliu on 2016/1/11.
  * SoaHeader序列化和反序列化
  */
-public class SoaHeaderSerializer implements TBeanSerializer<SoaHeader> {
+public class SoaHeaderSerializer implements TCommonBeanSerializer<SoaHeader> {
 
     /**
      * 反序列化
@@ -17,7 +17,8 @@ public class SoaHeaderSerializer implements TBeanSerializer<SoaHeader> {
      * @throws TException
      */
     @Override
-    public void read(SoaHeader bean, TProtocol iprot) throws TException {
+    public SoaHeader read(TProtocol iprot) throws TException {
+        SoaHeader bean = new SoaHeader();
         TField schemeField;
         iprot.readStructBegin();
         while (true) {
@@ -152,6 +153,7 @@ public class SoaHeaderSerializer implements TBeanSerializer<SoaHeader> {
             iprot.readFieldEnd();
         }
         iprot.readStructEnd();
+        return bean;
     }
 
 

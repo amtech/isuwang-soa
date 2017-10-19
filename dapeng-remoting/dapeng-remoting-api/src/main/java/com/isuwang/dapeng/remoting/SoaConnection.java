@@ -9,6 +9,7 @@ import java.util.concurrent.Future;
  * @author craneding
  * @date 16/3/1
  */
+@Deprecated
 public interface SoaConnection {
 
     <REQ, RESP> RESP send(REQ request, RESP response, TBeanSerializer<REQ> requestSerializer, TBeanSerializer<RESP> responseSerializer) throws TException;

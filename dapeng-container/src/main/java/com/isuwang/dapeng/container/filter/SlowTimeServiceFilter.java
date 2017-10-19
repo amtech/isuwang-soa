@@ -9,7 +9,7 @@ import com.isuwang.org.apache.thrift.TException;
 /**
  * Created by tangliu on 2016/2/1.
  */
-public class SlowTimeServiceFilter implements StatusFilter {
+public class SlowTimeServiceFilter implements StatusFilter ,ContainerFilter{
 
     private final TaskManager taskManager = new TaskManager();
 

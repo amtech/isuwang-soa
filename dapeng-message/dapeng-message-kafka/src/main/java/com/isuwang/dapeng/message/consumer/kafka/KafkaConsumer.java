@@ -2,7 +2,7 @@ package com.isuwang.dapeng.message.consumer.kafka;
 
 import com.isuwang.dapeng.core.SoaProcessFunction;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
-import com.isuwang.dapeng.core.TBeanSerializer;
+import com.isuwang.dapeng.core.TCommonBeanSerializer;
 import com.isuwang.dapeng.message.consumer.api.context.ConsumerContext;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
@@ -113,7 +113,7 @@ public class KafkaConsumer extends Thread {
 
     private void dealMessage(ConsumerContext customer, byte[] message) {
 
-        SoaProcessFunction<Object, Object, Object, ? extends TBeanSerializer<Object>, ? extends TBeanSerializer<Object>> soaProcessFunction = customer.getSoaProcessFunction();
+        SoaProcessFunction<Object, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>> soaProcessFunction = customer.getSoaProcessFunction();
         Object iface = customer.getIface();
 
         long count = new ArrayList<>(Arrays.asList(iface.getClass().getInterfaces()))

@@ -2,6 +2,7 @@ package com.isuwang.dapeng.core;
 
 import com.isuwang.dapeng.core.filter.container.ContainerFilterChain;
 import com.isuwang.dapeng.core.filter.container.DispatchFilter;
+import com.isuwang.dapeng.core.log.LogUtil;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.TProcessor;
 import com.isuwang.org.apache.thrift.protocol.TMessage;
@@ -22,14 +23,14 @@ import java.util.concurrent.CompletableFuture;
  * @author craneding
  * @date 15/9/18
  */
-public class SoaScalaBaseProcessor<I> implements TProcessor {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SoaScalaBaseProcessor.class);
+public class SoaCommonBaseProcessor<I> implements TProcessor {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SoaCommonBaseProcessor.class);
 
     private final I iface;
     private Class<I> interfaceClass;
-    private final Map<String, SoaProcessFunction<I, ?, ?, ? extends TScalaBeanSerializer<?>, ? extends TScalaBeanSerializer<?>>> processMap;
+    private final Map<String, SoaProcessFunction<I, ?, ?, ? extends TCommonBeanSerializer<?>, ? extends TCommonBeanSerializer<?>>> processMap;
 
-    public SoaScalaBaseProcessor(I iface, Map<String, SoaProcessFunction<I, ?, ?, ? extends TScalaBeanSerializer<?>, ? extends TScalaBeanSerializer<?>>> processMap) {
+    public SoaCommonBaseProcessor(I iface, Map<String, SoaProcessFunction<I, ?, ?, ? extends TCommonBeanSerializer<?>, ? extends TCommonBeanSerializer<?>>> processMap) {
         this.iface = iface;
         this.processMap = processMap;
     }
@@ -60,7 +61,7 @@ public class SoaScalaBaseProcessor<I> implements TProcessor {
             // read
             //TMessage tMessage = in.readMessageBegin();
             @SuppressWarnings("unchecked")
-            SoaProcessFunction<I, Object, Object, ? extends TScalaBeanSerializer<Object>, ? extends TScalaBeanSerializer<Object>> soaProcessFunction = (SoaProcessFunction<I, Object, Object, ? extends TScalaBeanSerializer<Object>, ? extends TScalaBeanSerializer<Object>>) getProcessMapView().get(methodName);
+            SoaProcessFunction<I, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>> soaProcessFunction = (SoaProcessFunction<I, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>>) getProcessMapView().get(methodName);
             if (soaProcessFunction == null)
                 throw new SoaException("系统错误", "方法(" + methodName + ")不存在");
             Object args = soaProcessFunction.getReqSerializer().read(in);
@@ -71,14 +72,19 @@ public class SoaScalaBaseProcessor<I> implements TProcessor {
                 soaHeader.setSessionId(Optional.of(UUID.randomUUID().toString()));
             }
 
-            LOGGER.info("{} {} {} {} request header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid(), soaHeader.toString(), formatToString(soaProcessFunction.getReqSerializer().toString(args)));
+            //LOGGER.info("{} {} {} {} request header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid(), soaHeader.toString(), formatToString(soaProcessFunction.getReqSerializer().toString(args)));
+            LogUtil.logInfo(SoaCommonBaseProcessor.class,soaHeader,"{} {} {} operatorId:{} operatorName:{} request body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), soaHeader.getOperatorId(), soaHeader.getOperatorName(), formatToString(soaProcessFunction.getReqSerializer().toString(args)));
+            LogUtil.logDebug(SoaCommonBaseProcessor.class,soaHeader,"{} {} {} {} request header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(),soaHeader.getOperatorId(),soaHeader.getOperatorName(), formatToString(soaProcessFunction.getReqSerializer().toString(args)));
+
             long startTime = System.currentTimeMillis();
 
 
             Object result = null;
             try {
                 result = soaProcessFunction.getResult(iface, args);
-                LOGGER.info("{} {} {} {} response header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid(), soaHeader.toString(), formatToString(soaProcessFunction.getResSerializer().toString(result)));
+                //LOGGER.info("{} {} {} {} response header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), context.getSeqid(), soaHeader.toString(), formatToString(soaProcessFunction.getResSerializer().toString(result)));
+                LogUtil.logInfo(SoaCommonBaseProcessor.class,soaHeader,"{} {} {} operatorId:{} operatorName:{} response body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), soaHeader.getOperatorId(), soaHeader.getOperatorName(), formatToString(soaProcessFunction.getResSerializer().toString(result)));
+                LogUtil.logDebug(SoaCommonBaseProcessor.class,soaHeader,"{} {} {} {} response header:{} body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(),soaHeader.getOperatorId(),soaHeader.getOperatorName(), formatToString(soaProcessFunction.getResSerializer().toString(result)));
             } finally {
                 chain.setAttribute(ContainerFilterChain.ATTR_KEY_I_PROCESSTIME, System.currentTimeMillis() - startTime);
 
@@ -127,7 +133,7 @@ public class SoaScalaBaseProcessor<I> implements TProcessor {
         filterChain.setAttribute(DispatchFilter.ATTR_KEY_CONTAINER_DISPATCH_ACTION, (DispatchFilter.DispatchAction) chain -> {
 
             @SuppressWarnings("unchecked")
-            SoaProcessFunction<I, Object, Object, ? extends TScalaBeanSerializer<Object>, ? extends TScalaBeanSerializer<Object>> soaProcessFunction = (SoaProcessFunction<I, Object, Object, ? extends TScalaBeanSerializer<Object>, ? extends TScalaBeanSerializer<Object>>) getProcessMapView().get(methodName);
+            SoaProcessFunction<I, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>> soaProcessFunction = (SoaProcessFunction<I, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>>) getProcessMapView().get(methodName);
             Object args = soaProcessFunction.getReqSerializer().read(in);
             in.readMessageEnd();
 
@@ -165,7 +171,7 @@ public class SoaScalaBaseProcessor<I> implements TProcessor {
      * @param out
      * @param future
      */
-    private void AsyncAccept(Context context, SoaProcessFunction<I, Object, Object, ? extends TScalaBeanSerializer<Object>, ? extends TScalaBeanSerializer<Object>> soaProcessFunction, Object result, TProtocol out, CompletableFuture future) {
+    private void AsyncAccept(Context context, SoaProcessFunction<I, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>> soaProcessFunction, Object result, TProtocol out, CompletableFuture future) {
 
         try {
             TransactionContext.Factory.setCurrentInstance((TransactionContext) context);
@@ -203,7 +209,7 @@ public class SoaScalaBaseProcessor<I> implements TProcessor {
     }
 
     @Override
-    public Map<String, SoaProcessFunction<I, ?, ?, ? extends TScalaBeanSerializer<?>, ? extends TScalaBeanSerializer<?>>> getProcessMapView() {
+    public Map<String, SoaProcessFunction<I, ?, ?, ? extends TCommonBeanSerializer<?>, ? extends TCommonBeanSerializer<?>>> getProcessMapView() {
         return Collections.unmodifiableMap(processMap);
     }
 

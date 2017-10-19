@@ -2,14 +2,13 @@ package com.isuwang.dapeng.container.plugin;
 
 import com.isuwang.dapeng.container.Container;
 import com.isuwang.dapeng.container.spring.SpringContainer;
-import com.isuwang.dapeng.core.xml.container.DapengPluginContainer;
+import com.isuwang.dapeng.core.plugin.SoaPluginContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXB;
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+
+import java.util.Map;
+import java.util.ServiceLoader;
 
 /**
  * Created by tangliu on 2016/9/18.
@@ -22,28 +21,21 @@ public class PluginContainer implements Container {
     @SuppressWarnings("unchecked")
     public void start() {
 
+        for (Map.Entry<Object, Class<?>> entry : SpringContainer.getContexts().entrySet()) {
+            SoaPluginContainer.contexts.put(entry.getKey(),entry.getValue());
+        }
+
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 
         for (ClassLoader pluginClassLoader : SpringContainer.pluginClassLoaders) {
-            try (InputStream is = pluginClassLoader.getResourceAsStream("dapeng-plugin-container.xml")) {
 
-                final DapengPluginContainer pluginContainer = JAXB.unmarshal(is, DapengPluginContainer.class);
-
-                Class<?> containerClass = pluginClassLoader.loadClass(pluginContainer.getRef());
-
-                Field contextField = containerClass.getField("contexts");
-                contextField.set(containerClass, SpringContainer.getContexts());
-
-                Object containerObj = containerClass.newInstance();
-
-                Thread.currentThread().setContextClassLoader(pluginClassLoader);
-                Method startMethod = containerClass.getMethod("start");
-                startMethod.invoke(containerObj);
-
-            } catch (Exception e) {
-                LOGGER.error(e.getMessage(), e);
+            ServiceLoader<SoaPluginContainer>soaPluginContainers = ServiceLoader.load(SoaPluginContainer.class,pluginClassLoader);
+            for (SoaPluginContainer soaPluginContainer:soaPluginContainers) {
+                soaPluginContainer.start();
+                System.out.println("load plugin container:" + soaPluginContainer.getClass().getName());
             }
         }
+
         Thread.currentThread().setContextClassLoader(contextClassLoader);
     }
 

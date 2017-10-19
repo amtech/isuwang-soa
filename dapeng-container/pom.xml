@@ -5,7 +5,7 @@
     <parent>
         <artifactId>dapeng-parent</artifactId>
         <groupId>com.isuwang</groupId>
-        <version>1.2.0</version>
+        <version>1.2.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -48,9 +48,12 @@
                         <directory>${basedir}/src/main/resources</directory>
                         <includes>
                             <include>logback.xml</include>
-                            <include>server-conf.xml</include>
                         </includes>
                         <targetPath>${project.build.directory}/${devName}/conf</targetPath>
+                    </resource>
+                    <resource>
+                        <filtering>false</filtering>
+                        <directory>${basedir}/src/main/resources</directory>
                     </resource>
                 </resources>
                 <plugins>

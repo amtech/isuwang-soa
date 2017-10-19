@@ -1,1 +1,0 @@
-<soa-registry name="zookeeperRegistry" ref="com.isuwang.dapeng.registry.zookeeper.RegistryAgentImpl" />

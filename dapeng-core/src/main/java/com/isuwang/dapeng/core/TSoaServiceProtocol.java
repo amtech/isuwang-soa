@@ -210,7 +210,8 @@ public class TSoaServiceProtocol extends TProtocol {
 
         context.setSeqid(realHeaderProtocol.readI32());
 
-        new SoaHeaderSerializer().read(context.getHeader(), this);
+        SoaHeader soaHeader =new SoaHeaderSerializer().read( this);
+        context.setHeader(soaHeader);
 
         return realContentProtocol.readMessageBegin();
     }

@@ -1,7 +1,7 @@
 package com.isuwang.dapeng.remoting.netty;
 
 import com.isuwang.dapeng.core.*;
-import com.isuwang.dapeng.remoting.SoaScalaConnection;
+import com.isuwang.dapeng.remoting.SoaCommonConnection;
 import com.isuwang.org.apache.thrift.TApplicationException;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.TMessage;
@@ -14,13 +14,13 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-public class SoaScalaConnectionImpl implements SoaScalaConnection {
+public class SoaCommonConnectionImpl implements SoaCommonConnection {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SoaConnectionImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SoaCommonConnectionImpl.class);
 
     private SoaClient soaClient;
 
-    public SoaScalaConnectionImpl(String host, int port) {
+    public SoaCommonConnectionImpl(String host, int port) {
         try {
             soaClient = new SoaClient(host, port);
         } catch (SoaException e) {
@@ -29,7 +29,7 @@ public class SoaScalaConnectionImpl implements SoaScalaConnection {
     }
 
     @Override
-    public <REQ, RESP> RESP send(REQ request, TScalaBeanSerializer<REQ> requestSerializer, TScalaBeanSerializer<RESP> responseSerializer) throws TException {
+    public <REQ, RESP> RESP send(REQ request, TCommonBeanSerializer<REQ> requestSerializer, TCommonBeanSerializer<RESP> responseSerializer) throws TException {
         InvocationContext context = InvocationContext.Factory.getCurrentInstance();
         SoaHeader soaHeader = context.getHeader();
 
@@ -61,6 +61,9 @@ public class SoaScalaConnectionImpl implements SoaScalaConnection {
                 TSoaServiceProtocol inputProtocol = new TSoaServiceProtocol(inputSoaTransport, true);
 
                 TMessage msg = inputProtocol.readMessageBegin();
+
+                soaHeader = InvocationContext.Factory.getCurrentInstance().getHeader();
+
                 if (TMessageType.EXCEPTION == msg.type) {
                     TApplicationException x = TApplicationException.read(inputProtocol);
                     inputProtocol.readMessageEnd();
@@ -111,7 +114,7 @@ public class SoaScalaConnectionImpl implements SoaScalaConnection {
      * @throws TException
      */
     @Override
-    public <REQ, RESP> Future<RESP> sendAsync(REQ request, TScalaBeanSerializer<REQ> requestSerializer, TScalaBeanSerializer<RESP> responseSerializer, long timeout) throws TException {
+    public <REQ, RESP> Future<RESP> sendAsync(REQ request, TCommonBeanSerializer<REQ> requestSerializer, TCommonBeanSerializer<RESP> responseSerializer, long timeout) throws TException {
 
         InvocationContext context = InvocationContext.Factory.getCurrentInstance();
         SoaHeader soaHeader = context.getHeader();
@@ -147,20 +150,21 @@ public class SoaScalaConnectionImpl implements SoaScalaConnection {
 
                     try {
                         TMessage msg = inputProtocol.readMessageBegin();
+                        SoaHeader resultSoaHeader = InvocationContext.Factory.getCurrentInstance().getHeader();
                         if (TMessageType.EXCEPTION == msg.type) {
                             TApplicationException x = TApplicationException.read(inputProtocol);
                             inputProtocol.readMessageEnd();
                             throw x;
                         } else if (context.getSeqid() != msg.seqid) {
-                            throw new TApplicationException(4, soaHeader.getMethodName() + " failed: out of sequence response");
+                            throw new TApplicationException(4, resultSoaHeader.getMethodName() + " failed: out of sequence response");
                         } else {
-                            if ("0000".equals(soaHeader.getRespCode().get())) {
+                            if ("0000".equals(resultSoaHeader.getRespCode().get())) {
                                 RESP response = responseSerializer.read(inputProtocol);
                                 inputProtocol.readMessageEnd();
 
                                 finalResponseFuture.complete(response);
                             } else {
-                                throw new SoaException(soaHeader.getRespCode().get(), soaHeader.getRespMessage().get());
+                                throw new SoaException(resultSoaHeader.getRespCode().get(), resultSoaHeader.getRespMessage().get());
                             }
                         }
                     } catch (SoaException e) {

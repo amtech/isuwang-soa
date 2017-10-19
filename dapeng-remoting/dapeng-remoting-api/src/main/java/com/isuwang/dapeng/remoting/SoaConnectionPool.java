@@ -8,9 +8,10 @@ import com.isuwang.dapeng.core.SoaException;
  */
 public interface SoaConnectionPool {
 
+    @Deprecated
     SoaConnection getConnection() throws SoaException;
 
-    SoaScalaConnection getScalaConnection() throws SoaException;
+    SoaCommonConnection getCommonConnection() throws SoaException;
 
     void removeConnection() throws SoaException;
 }

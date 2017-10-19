@@ -2,7 +2,7 @@ package com.isuwang.dapeng.container.timer;
 
 import com.isuwang.dapeng.container.util.LoggerUtil;
 import com.isuwang.dapeng.core.SoaProcessFunction;
-import com.isuwang.dapeng.core.TBeanSerializer;
+import com.isuwang.dapeng.core.TCommonBeanSerializer;
 import com.isuwang.dapeng.core.helper.MasterHelper;
 import com.isuwang.org.apache.thrift.TException;
 import org.quartz.Job;
@@ -33,8 +33,8 @@ public class ScheduledJob implements Job {
 
         logger.info("定时任务({})开始执行", context.getJobDetail().getKey().getName());
 
-        SoaProcessFunction<Object, Object, Object, ? extends TBeanSerializer<Object>, ? extends TBeanSerializer<Object>> soaProcessFunction =
-                (SoaProcessFunction<Object, Object, Object, ? extends TBeanSerializer<Object>, ? extends TBeanSerializer<Object>>) data.get("function");
+        SoaProcessFunction<Object, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>> soaProcessFunction =
+                (SoaProcessFunction<Object, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>>) data.get("function");
 
         Object iface = data.get("iface");
         Object args = soaProcessFunction.getEmptyArgsInstance();

@@ -5,7 +5,7 @@ import com.isuwang.dapeng.core.SoaBaseCode;
 import com.isuwang.dapeng.core.SoaException;
 import com.isuwang.dapeng.remoting.SoaConnection;
 import com.isuwang.dapeng.remoting.SoaConnectionPool;
-import com.isuwang.dapeng.remoting.SoaScalaConnection;
+import com.isuwang.dapeng.remoting.SoaCommonConnection;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,7 +25,7 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
 
     private Map<String, SoaConnectionImpl> connectionMap = new ConcurrentHashMap<>();
 
-    private Map<String, SoaScalaConnectionImpl> scalaConnectionMap = new ConcurrentHashMap<>();
+    private Map<String, SoaCommonConnectionImpl> scalaConnectionMap = new ConcurrentHashMap<>();
 
     @Override
     public synchronized SoaConnection getConnection() throws SoaException {
@@ -49,7 +49,7 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
     }
 
     @Override
-    public SoaScalaConnection getScalaConnection() throws SoaException {
+    public SoaCommonConnection getCommonConnection() throws SoaException {
 
         InvocationContext context = InvocationContext.Factory.getCurrentInstance();
 
@@ -62,7 +62,7 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
             return scalaConnectionMap.get(connectKey);
         }
 
-        SoaScalaConnectionImpl soaConnection = new SoaScalaConnectionImpl(context.getCalleeIp(), context.getCalleePort());
+        SoaCommonConnectionImpl soaConnection = new SoaCommonConnectionImpl(context.getCalleeIp(), context.getCalleePort());
 
         scalaConnectionMap.put(connectKey, soaConnection);
 

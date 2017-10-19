@@ -114,6 +114,7 @@ public class SoaClient {
         msg.readBytes(new byte[len], 0, len);
         msg.skipBytes(1);
         int seqid = msg.readInt();
+
         msg.readerIndex(readerIndex);
 
         ByteBuf[] byteBufs = caches.get(String.valueOf(seqid));
