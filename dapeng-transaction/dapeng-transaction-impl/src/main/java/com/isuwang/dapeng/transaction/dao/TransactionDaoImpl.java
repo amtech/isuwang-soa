@@ -132,7 +132,7 @@ public class TransactionDaoImpl extends JdbcDaoSupport implements ITransactionDa
      */
     @Override
     public List<TGlobalTransaction> findSuccessWithFailedProcessGlobals() {
-        return this.getJdbcTemplate().query("select g.id, g.status from global_transactions g INNER JOIN global_transaction_process p ON g.id = p.transaction_id where g.status=2 and (p.status=3 or p.status=4) GROUP BY g.id", new GlobalTransactionMapper());
+        return this.getJdbcTemplate().query("select g.* from global_transactions g INNER JOIN global_transaction_process p ON g.id = p.transaction_id where g.status=2 and (p.status=3 or p.status=4) GROUP BY g.id", new GlobalTransactionMapper());
     }
 
     @Override
