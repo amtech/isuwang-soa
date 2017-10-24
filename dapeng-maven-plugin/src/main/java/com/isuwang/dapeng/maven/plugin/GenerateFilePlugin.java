@@ -46,6 +46,10 @@ public class GenerateFilePlugin extends AbstractMojo {
             deleteDir(commonFile);
         }
 
+        Scrooge.main(new String[]{"-gen", "scala", "-all",
+                "-in", sourceFilePath,
+                "-out", targetFilePath});
+
 
     }
     private static boolean deleteDir(File dir) {
