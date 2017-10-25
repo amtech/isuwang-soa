@@ -332,7 +332,7 @@ class JavaGenerator extends CodeGenerator {
       public String getServiceMetadata() throws SoaException <block>
         initContext("getServiceMetadata");
         try <block>
-          getServiceMetadata_args getServiceMetadata_args = new getServiceMetadata_args();
+          getServiceMetadata_args getServiceMetadata_args = new GetServiceMetadata_args();
           getServiceMetadata_result response = sendBase(getServiceMetadata_args, new GetServiceMetadata_argsSerializer(), new GetServiceMetadata_resultSerializer());
           return response.getSuccess();
         </block>catch (SoaException e)<block>

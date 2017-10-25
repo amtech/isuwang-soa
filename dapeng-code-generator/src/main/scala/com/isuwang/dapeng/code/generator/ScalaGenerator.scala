@@ -180,42 +180,42 @@ class ScalaGenerator extends CodeGenerator {
 
 
       println(s"生成serializer")
-      val scalaSerializerGenerator=new JavaSerializerGenerator();
+      val scalaSerializerGenerator=new ScalaSerializerGenerator();
       toStructArrayBuffer(service.structDefinitions).map{(struct:Struct)=>{
         val structSerializerTemplate = new StringTemplate(scalaSerializerGenerator.toStructSerializerTemplate(service.name,struct))
-        val structSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.serializer"),s"${struct.name}Serializer.java"), "UTF-8")
+        val structSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.scala.serializer"),s"${struct.name}Serializer.scala"), "UTF-8")
         structSerializerWriter.write(structSerializerTemplate.toString)
         structSerializerWriter.close()
       }}
       toMethodArrayBuffer(service.methods).map{(method: Method)=> {
         val argsMethodSerializerTemplate = new StringTemplate(scalaSerializerGenerator.toArgsMethodSerializerTemplate(service.name,method))
-        val argsMethodSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.serializer"),s"${method.name.charAt(0).toUpper + method.name.substring(1)}_argsSerializer.java"), "UTF-8")
+        val argsMethodSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.scala.serializer"),s"${method.name.charAt(0).toUpper + method.name.substring(1)}_argsSerializer.scala"), "UTF-8")
         argsMethodSerializerWriter.write(argsMethodSerializerTemplate.toString)
         argsMethodSerializerWriter.close()
 
         val resultMethodSerializerTemplate = new StringTemplate(scalaSerializerGenerator.toResultMethodSerializerTemplate(service.name,method))
-        val resultMethodSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.serializer"),s"${method.name.charAt(0).toUpper + method.name.substring(1)}_resultSerializer.java"), "UTF-8")
+        val resultMethodSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.scala.serializer"),s"${method.name.charAt(0).toUpper + method.name.substring(1)}_resultSerializer.scala"), "UTF-8")
         resultMethodSerializerWriter.write(resultMethodSerializerTemplate.toString)
         resultMethodSerializerWriter.close()
 
       }}
       val metadataArgsSerializerTemplate = new StringTemplate(scalaSerializerGenerator.toMetadataArgsSerializerTemplate(service.name))
-      val metadataArgsSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.serializer"),s"GetServiceMetadata_argsSerializer.java"), "UTF-8")
+      val metadataArgsSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.scala.serializer"),s"GetServiceMetadata_argsSerializer.scala"), "UTF-8")
       metadataArgsSerializerWriter.write(metadataArgsSerializerTemplate.toString)
       metadataArgsSerializerWriter.close()
 
       val metadataResultSerializerTemplate = new StringTemplate(scalaSerializerGenerator.toMetadataResultSerializerTemplate(service))
-      val metadataResultSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.serializer"),s"GetServiceMetadata_resultSerializer.java"), "UTF-8")
+      val metadataResultSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.scala.serializer"),s"GetServiceMetadata_resultSerializer.scala"), "UTF-8")
       metadataResultSerializerWriter.write(metadataResultSerializerTemplate.toString)
       metadataResultSerializerWriter.close()
 
       val metadataArgsTemplate = new StringTemplate(scalaSerializerGenerator.toMetadataArgsTemplate())
-      val metadataArgsWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.serializer"),s"getServiceMetadata_args.java"), "UTF-8")
+      val metadataArgsWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.scala.serializer"),s"GetServiceMetadata_args.scala"), "UTF-8")
       metadataArgsWriter.write(metadataArgsTemplate.toString)
       metadataArgsWriter.close()
 
       val metadataResultTemplate =new StringTemplate(scalaSerializerGenerator.toMetadataResultTemplate())
-      val metadataResultWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.serializer"),s"getServiceMetadata_result.java"), "UTF-8")
+      val metadataResultWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.scala.serializer"),s"GetServiceMetadata_result.scala"), "UTF-8")
       metadataResultWriter.write(metadataResultTemplate.toString)
       metadataResultWriter.close()
 
@@ -248,6 +248,7 @@ class ScalaGenerator extends CodeGenerator {
         import com.isuwang.dapeng.core._
         import com.isuwang.org.apache.thrift._
         import com.isuwang.dapeng.remoting.BaseCommonServiceClient
+        import com.isuwang.soa.scala.serializer._
         import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + "." + service.name + "Codec._"}
 
         /**
@@ -308,7 +309,7 @@ class ScalaGenerator extends CodeGenerator {
         def getServiceMetadata: String = <block>
           initContext("getServiceMetadata")
           try <block>
-            val _request = new getServiceMetadata_args()
+            val _request = new GetServiceMetadata_args()
             val _response = sendBase(_request, new GetServiceMetadata_argsSerializer(), new GetServiceMetadata_resultSerializer())
             _response.success
           </block>catch<block>
@@ -336,6 +337,7 @@ class ScalaGenerator extends CodeGenerator {
         import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + "." + service.name + "Codec._"}
         import scala.concurrent.<block>Future, Promise</block>
         import java.util.function.BiConsumer
+        import com.isuwang.soa.scala.serializer._
 
         /**
         {notice}

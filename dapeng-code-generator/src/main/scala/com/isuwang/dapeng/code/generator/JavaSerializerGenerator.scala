@@ -341,12 +341,12 @@ class JavaSerializerGenerator extends CodeGenerator{
     </div>
   }
 
-  def getReadMethod(struct: Struct,serviceName:String): Elem = {
+  def getReadMethod(struct: Struct,codecName:String): Elem = {
     <div>
       @Override
-      public {serviceName}{toStructName(struct)} read(TProtocol iprot) throws TException<block>
+      public {codecName}{toStructName(struct)} read(TProtocol iprot) throws TException<block>
 
-      {serviceName}{toStructName(struct)} bean = new {serviceName}{toStructName(struct)}();
+      {codecName}{toStructName(struct)} bean = new {codecName}{toStructName(struct)}();
       com.isuwang.org.apache.thrift.protocol.TField schemeField;
       iprot.readStructBegin();
 
@@ -467,12 +467,12 @@ class JavaSerializerGenerator extends CodeGenerator{
 
   }
 
-  def getWriteMethod(struct: Struct,serviceName:String): Elem = {
+  def getWriteMethod(struct: Struct,codecName:String): Elem = {
 
     var index = 0
     <div>
       @Override
-      public void write({serviceName}{toStructName(struct)} bean, TProtocol oprot) throws TException<block>
+      public void write({codecName}{toStructName(struct)} bean, TProtocol oprot) throws TException<block>
 
       validate(bean);
       oprot.writeStructBegin(new com.isuwang.org.apache.thrift.protocol.TStruct("{struct.name}"));
@@ -506,9 +506,9 @@ class JavaSerializerGenerator extends CodeGenerator{
     </div>
   }
 
-  def getValidateMethod(struct: Struct,serviceName:String) : Elem = {
+  def getValidateMethod(struct: Struct,codecName:String) : Elem = {
     <div>
-      public void validate({serviceName}{toStructName(struct)} bean) throws TException<block>
+      public void validate({codecName}{toStructName(struct)} bean) throws TException<block>
       {
       toFieldArrayBuffer(struct.fields).map{(field : Field) =>{
         <div>{
