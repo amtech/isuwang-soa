@@ -32,7 +32,6 @@ class ScalaCodecGenerator extends CodeGenerator {
 
         import com.isuwang.dapeng.core._
         import com.isuwang.org.apache.thrift._
-        import com.isuwang.org.apache.thrift.protocol._
         import com.isuwang.soa.scala.serializer._
 
         /**

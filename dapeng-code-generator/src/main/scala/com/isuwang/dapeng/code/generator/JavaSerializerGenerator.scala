@@ -160,12 +160,12 @@ class JavaSerializerGenerator extends CodeGenerator{
         *  @generated
         **/
 
-        public class GetServiceMetadata_argsSerializer implements TCommonBeanSerializer{lt}getServiceMetadata_args{gt} <block>
+        public class GetServiceMetadata_argsSerializer implements TCommonBeanSerializer{lt}GetServiceMetadata_args{gt} <block>
 
         @Override
-        public getServiceMetadata_args read(TProtocol iprot) throws TException <block>
+        public GetServiceMetadata_args read(TProtocol iprot) throws TException <block>
 
-          getServiceMetadata_args bean =new getServiceMetadata_args();
+          GetServiceMetadata_args bean =new GetServiceMetadata_args();
           com.isuwang.org.apache.thrift.protocol.TField schemeField;
           iprot.readStructBegin();
 
@@ -189,18 +189,18 @@ class JavaSerializerGenerator extends CodeGenerator{
 
 
         @Override
-        public void write(getServiceMetadata_args bean, TProtocol oprot) throws TException <block>
+        public void write(GetServiceMetadata_args bean, TProtocol oprot) throws TException <block>
 
           validate(bean);
-          oprot.writeStructBegin(new com.isuwang.org.apache.thrift.protocol.TStruct("getServiceMetadata_args"));
+          oprot.writeStructBegin(new com.isuwang.org.apache.thrift.protocol.TStruct("GetServiceMetadata_args"));
           oprot.writeFieldStop();
           oprot.writeStructEnd();
         </block>
 
-        public void validate(getServiceMetadata_args bean) throws TException <block></block>
+        public void validate(GetServiceMetadata_args bean) throws TException <block></block>
 
         @Override
-        public String toString(getServiceMetadata_args bean) <block>
+        public String toString(GetServiceMetadata_args bean) <block>
           return bean == null ? "null" : bean.toString();
         </block>
 
@@ -227,11 +227,11 @@ class JavaSerializerGenerator extends CodeGenerator{
         * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
         *  @generated
         **/
-        public class GetServiceMetadata_resultSerializer implements TCommonBeanSerializer{lt}getServiceMetadata_result{gt} <block>
+        public class GetServiceMetadata_resultSerializer implements TCommonBeanSerializer{lt}GetServiceMetadata_result{gt} <block>
         @Override
-        public getServiceMetadata_result read(TProtocol iprot) throws TException <block>
+        public GetServiceMetadata_result read(TProtocol iprot) throws TException <block>
 
-          getServiceMetadata_result bean = new getServiceMetadata_result();
+          GetServiceMetadata_result bean = new GetServiceMetadata_result();
           com.isuwang.org.apache.thrift.protocol.TField schemeField;
           iprot.readStructBegin();
 
@@ -261,10 +261,10 @@ class JavaSerializerGenerator extends CodeGenerator{
         </block>
 
         @Override
-        public void write(getServiceMetadata_result bean, TProtocol oprot) throws TException <block>
+        public void write(GetServiceMetadata_result bean, TProtocol oprot) throws TException <block>
 
           validate(bean);
-          oprot.writeStructBegin(new com.isuwang.org.apache.thrift.protocol.TStruct("getServiceMetadata_result"));
+          oprot.writeStructBegin(new com.isuwang.org.apache.thrift.protocol.TStruct("GetServiceMetadata_result"));
 
           oprot.writeFieldBegin(new com.isuwang.org.apache.thrift.protocol.TField("success", com.isuwang.org.apache.thrift.protocol.TType.STRING, (short) 0));
           oprot.writeString(bean.getSuccess());
@@ -274,14 +274,14 @@ class JavaSerializerGenerator extends CodeGenerator{
           oprot.writeStructEnd();
         </block>
 
-        public void validate(getServiceMetadata_result bean) throws TException <block>
+        public void validate(GetServiceMetadata_result bean) throws TException <block>
 
           if (bean.getSuccess() == null)
           throw new SoaException(SoaBaseCode.NotNull, "success字段不允许为空");
         </block>
 
         @Override
-        public String toString(getServiceMetadata_result bean) <block>
+        public String toString(GetServiceMetadata_result bean) <block>
           return bean == null ? "null" : bean.toString();
         </block>
       </block>
@@ -302,7 +302,7 @@ class JavaSerializerGenerator extends CodeGenerator{
       * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
       *  @generated
       **/
-      public class getServiceMetadata_args  <block>
+      public class GetServiceMetadata_args  <block>
       @Override
       public String toString() <block>
         return "{}";
@@ -321,7 +321,7 @@ class JavaSerializerGenerator extends CodeGenerator{
       * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
       *  @generated
       **/
-      public class getServiceMetadata_result  <block>
+      public class GetServiceMetadata_result  <block>
       private String success;
       public String getSuccess() <block>
       return success;

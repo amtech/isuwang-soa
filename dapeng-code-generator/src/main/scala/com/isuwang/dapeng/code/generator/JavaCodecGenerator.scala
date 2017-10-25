@@ -190,14 +190,14 @@ class JavaCodecGenerator extends CodeGenerator {
         }
         }
 
-        public static class getServiceMetadata{lt}I extends {service.namespace}.{service.name}{gt} extends SoaProcessFunction{lt}I, getServiceMetadata_args, getServiceMetadata_result, GetServiceMetadata_argsSerializer, GetServiceMetadata_resultSerializer{gt} <block>
+        public static class getServiceMetadata{lt}I extends {service.namespace}.{service.name}{gt} extends SoaProcessFunction{lt}I, GetServiceMetadata_args, GetServiceMetadata_result, GetServiceMetadata_argsSerializer, GetServiceMetadata_resultSerializer{gt} <block>
           public getServiceMetadata() <block>
             super("getServiceMetadata", new GetServiceMetadata_argsSerializer(), new GetServiceMetadata_resultSerializer());
           </block>
 
           @Override
-          public getServiceMetadata_result getResult(I iface, getServiceMetadata_args args) throws TException <block>
-            getServiceMetadata_result result = new getServiceMetadata_result();
+          public GetServiceMetadata_result getResult(I iface, GetServiceMetadata_args args) throws TException <block>
+            GetServiceMetadata_result result = new GetServiceMetadata_result();
 
             try (InputStreamReader isr = new InputStreamReader({service.name}Codec.class.getClassLoader().getResourceAsStream("{service.namespace}.{service.name}.xml"));
             BufferedReader in = new BufferedReader(isr)) <block>
@@ -224,8 +224,8 @@ class JavaCodecGenerator extends CodeGenerator {
           </block>
 
           @Override
-          public getServiceMetadata_args getEmptyArgsInstance() <block>
-            return new getServiceMetadata_args();
+          public GetServiceMetadata_args getEmptyArgsInstance() <block>
+            return new GetServiceMetadata_args();
           </block>
 
           @Override

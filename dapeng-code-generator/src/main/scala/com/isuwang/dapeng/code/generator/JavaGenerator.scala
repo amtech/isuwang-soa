@@ -169,17 +169,14 @@ class JavaGenerator extends CodeGenerator {
       metadataResultSerializerWriter.close()
 
       val metadataArgsTemplate = new StringTemplate(javaSerializerGenerator.toMetadataArgsTemplate())
-      val metadataArgsWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.serializer"),s"getServiceMetadata_args.java"), "UTF-8")
+      val metadataArgsWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.serializer"),s"GetServiceMetadata_args.java"), "UTF-8")
       metadataArgsWriter.write(metadataArgsTemplate.toString)
       metadataArgsWriter.close()
 
       val metadataResultTemplate =new StringTemplate(javaSerializerGenerator.toMetadataResultTemplate())
-      val metadataResultWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.serializer"),s"getServiceMetadata_result.java"), "UTF-8")
+      val metadataResultWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.serializer"),s"GetServiceMetadata_result.java"), "UTF-8")
       metadataResultWriter.write(metadataResultTemplate.toString)
       metadataResultWriter.close()
-
-
-
 
       println(s"生成Codec:${service.name}Codec.java")
       val codecTemplate = new StringTemplate(new JavaCodecGenerator().toCodecTemplate(service, namespaces))
@@ -332,8 +329,8 @@ class JavaGenerator extends CodeGenerator {
       public String getServiceMetadata() throws SoaException <block>
         initContext("getServiceMetadata");
         try <block>
-          getServiceMetadata_args getServiceMetadata_args = new GetServiceMetadata_args();
-          getServiceMetadata_result response = sendBase(getServiceMetadata_args, new GetServiceMetadata_argsSerializer(), new GetServiceMetadata_resultSerializer());
+          GetServiceMetadata_args getServiceMetadata_args = new GetServiceMetadata_args();
+          GetServiceMetadata_result response = sendBase(getServiceMetadata_args, new GetServiceMetadata_argsSerializer(), new GetServiceMetadata_resultSerializer());
           return response.getSuccess();
         </block>catch (SoaException e)<block>
           throw e;

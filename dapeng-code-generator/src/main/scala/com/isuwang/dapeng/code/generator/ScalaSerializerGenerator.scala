@@ -233,7 +233,7 @@ class ScalaSerializerGenerator extends CodeGenerator {
         @throws[TException]
         override def write(bean: GetServiceMetadata_result, oproto: TProtocol): Unit = <block>
           validate(bean)
-          oproto.writeStructBegin(new com.isuwang.org.apache.thrift.protocol.TStruct("getServiceMetadata_result"))
+          oproto.writeStructBegin(new com.isuwang.org.apache.thrift.protocol.TStruct("GetServiceMetadata_result"))
 
           oproto.writeFieldBegin(new com.isuwang.org.apache.thrift.protocol.TField("success", com.isuwang.org.apache.thrift.protocol.TType.STRING, 0.asInstanceOf[Short]))
           oproto.writeString(bean.success)
