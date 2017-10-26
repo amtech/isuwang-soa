@@ -62,6 +62,7 @@ class ScalaGenerator extends CodeGenerator {
   override def generate(services: util.List[Service], outDir: String, generateAll:Boolean , structs: util.List[Struct], enums:util.List[TEnum]): Unit = {
 
     val namespaces:util.Set[String] = new util.HashSet[String]()
+    val structNamespaces:util.Set[String] = new util.HashSet[String]()
     for (index <- (0 until services.size())) {
       val service = services.get(index)
       service.setNamespace(service.getNamespace.replace("com.isuwang.soa","com.isuwang.soa.scala"))
@@ -91,6 +92,7 @@ class ScalaGenerator extends CodeGenerator {
         val structDefinition = service.getStructDefinitions.get(structIndex)
         structDefinition.setNamespace(structDefinition.getNamespace.replace("com.isuwang.soa","com.isuwang.soa.scala"))
         namespaces.add(structDefinition.getNamespace)
+        structNamespaces.add(structDefinition.getNamespace)
       }
     }
 
@@ -180,47 +182,17 @@ class ScalaGenerator extends CodeGenerator {
 
 
       println(s"生成serializer")
-      val scalaSerializerGenerator=new ScalaSerializerGenerator();
       toStructArrayBuffer(service.structDefinitions).map{(struct:Struct)=>{
-        val structSerializerTemplate = new StringTemplate(scalaSerializerGenerator.toStructSerializerTemplate(service.name,struct))
-        val structSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.scala.serializer"),s"${struct.name}Serializer.scala"), "UTF-8")
+        val structSerializerTemplate = new StringTemplate(new ScalaCodecGenerator().toStructSerializerTemplate(service.name,struct,structNamespaces))
+        val structSerializerWriter = new PrintWriter(new File(rootDir(outDir, struct.namespace+".serializer."),s"${struct.name}Serializer.scala"), "UTF-8")
         structSerializerWriter.write(structSerializerTemplate.toString)
         structSerializerWriter.close()
+        println(s"生成serializer:${struct.name}Serializer.scala 完成")
       }}
-      toMethodArrayBuffer(service.methods).map{(method: Method)=> {
-        val argsMethodSerializerTemplate = new StringTemplate(scalaSerializerGenerator.toArgsMethodSerializerTemplate(service,method))
-        val argsMethodSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.scala.serializer"),s"${method.name.charAt(0).toUpper + method.name.substring(1)}_argsSerializer.scala"), "UTF-8")
-        argsMethodSerializerWriter.write(argsMethodSerializerTemplate.toString)
-        argsMethodSerializerWriter.close()
 
-        val resultMethodSerializerTemplate = new StringTemplate(scalaSerializerGenerator.toResultMethodSerializerTemplate(service,method))
-        val resultMethodSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.scala.serializer"),s"${method.name.charAt(0).toUpper + method.name.substring(1)}_resultSerializer.scala"), "UTF-8")
-        resultMethodSerializerWriter.write(resultMethodSerializerTemplate.toString)
-        resultMethodSerializerWriter.close()
-
-      }}
-      val metadataArgsSerializerTemplate = new StringTemplate(scalaSerializerGenerator.toMetadataArgsSerializerTemplate(service))
-      val metadataArgsSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.scala.serializer"),s"GetServiceMetadata_argsSerializer.scala"), "UTF-8")
-      metadataArgsSerializerWriter.write(metadataArgsSerializerTemplate.toString)
-      metadataArgsSerializerWriter.close()
-
-      val metadataResultSerializerTemplate = new StringTemplate(scalaSerializerGenerator.toMetadataResultSerializerTemplate(service))
-      val metadataResultSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.scala.serializer"),s"GetServiceMetadata_resultSerializer.scala"), "UTF-8")
-      metadataResultSerializerWriter.write(metadataResultSerializerTemplate.toString)
-      metadataResultSerializerWriter.close()
-
-      val metadataArgsTemplate = new StringTemplate(scalaSerializerGenerator.toMetadataArgsTemplate())
-      val metadataArgsWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.scala.serializer"),s"GetServiceMetadata_args.scala"), "UTF-8")
-      metadataArgsWriter.write(metadataArgsTemplate.toString)
-      metadataArgsWriter.close()
-
-      val metadataResultTemplate =new StringTemplate(scalaSerializerGenerator.toMetadataResultTemplate())
-      val metadataResultWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.scala.serializer"),s"GetServiceMetadata_result.scala"), "UTF-8")
-      metadataResultWriter.write(metadataResultTemplate.toString)
-      metadataResultWriter.close()
 
       println(s"生成Codec:${service.name}Codec.scala")
-      val codecTemplate = new StringTemplate(new ScalaCodecGenerator().toCodecTemplate(service, namespaces))
+      val codecTemplate = new StringTemplate(new ScalaCodecGenerator().toCodecTemplate(service, namespaces,structNamespaces))
       val codecWriter = new PrintWriter(new File(rootDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))), s"${service.name}Codec.scala"), "UTF-8")
       codecWriter.write(codecTemplate.toString())
       codecWriter.close()
@@ -248,7 +220,6 @@ class ScalaGenerator extends CodeGenerator {
         import com.isuwang.dapeng.core._
         import com.isuwang.org.apache.thrift._
         import com.isuwang.dapeng.remoting.BaseCommonServiceClient
-        import com.isuwang.soa.scala.serializer._
         import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + "." + service.name + "Codec._"}
 
         /**
@@ -309,7 +280,7 @@ class ScalaGenerator extends CodeGenerator {
         def getServiceMetadata: String = <block>
           initContext("getServiceMetadata")
           try <block>
-            val _request = new GetServiceMetadata_args()
+            val _request = new getServiceMetadata_args()
             val _response = sendBase(_request, new GetServiceMetadata_argsSerializer(), new GetServiceMetadata_resultSerializer())
             _response.success
           </block>catch<block>
@@ -337,7 +308,6 @@ class ScalaGenerator extends CodeGenerator {
         import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + "." + service.name + "Codec._"}
         import scala.concurrent.<block>Future, Promise</block>
         import java.util.function.BiConsumer
-        import com.isuwang.soa.scala.serializer._
 
         /**
         {notice}

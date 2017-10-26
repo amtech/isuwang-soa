@@ -46,6 +46,7 @@ class JavaGenerator extends CodeGenerator {
   override def generate(services: util.List[Service], outDir: String, generateAll:Boolean , structs: util.List[Struct], enums:util.List[TEnum]): Unit = {
 
     val namespaces:util.Set[String] = new util.HashSet[String]();
+    val structNamespaces:util.Set[String] = new util.HashSet[String]()
     for (index <- (0 until services.size())) {
       val service = services.get(index)
       namespaces.add(service.getNamespace);
@@ -58,7 +59,7 @@ class JavaGenerator extends CodeGenerator {
 
       for(structIndex <- (0 until service.getStructDefinitions.size())) {
         val structDefinition = service.getStructDefinitions.get(structIndex);
-
+        structNamespaces.add(structDefinition.getNamespace)
         namespaces.add(structDefinition.getNamespace)
       }
     }
@@ -139,47 +140,16 @@ class JavaGenerator extends CodeGenerator {
       println(s"生成client:${service.name}Client.java 完成")
 
       println(s"生成serializer")
-      val javaSerializerGenerator=new JavaSerializerGenerator();
       toStructArrayBuffer(service.structDefinitions).map{(struct:Struct)=>{
-        val structSerializerTemplate = new StringTemplate(javaSerializerGenerator.toStructSerializerTemplate(service,struct))
-        val structSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.serializer"),s"${struct.name}Serializer.java"), "UTF-8")
+        val structSerializerTemplate = new StringTemplate(new JavaCodecGenerator().toStructSerializerTemplate(service,struct,structNamespaces))
+        val structSerializerWriter = new PrintWriter(new File(rootDir(outDir, struct.namespace+".serializer."),s"${struct.name}Serializer.java"), "UTF-8")
         structSerializerWriter.write(structSerializerTemplate.toString)
         structSerializerWriter.close()
       }}
-      toMethodArrayBuffer(service.methods).map{(method: Method)=> {
-        val argsMethodSerializerTemplate = new StringTemplate(javaSerializerGenerator.toArgsMethodSerializerTemplate(service,method))
-        val argsMethodSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.serializer"),s"${method.name.charAt(0).toUpper + method.name.substring(1)}_argsSerializer.java"), "UTF-8")
-        argsMethodSerializerWriter.write(argsMethodSerializerTemplate.toString)
-        argsMethodSerializerWriter.close()
 
-        val resultMethodSerializerTemplate = new StringTemplate(javaSerializerGenerator.toResultMethodSerializerTemplate(service,method))
-        val resultMethodSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.serializer"),s"${method.name.charAt(0).toUpper + method.name.substring(1)}_resultSerializer.java"), "UTF-8")
-        resultMethodSerializerWriter.write(resultMethodSerializerTemplate.toString)
-        resultMethodSerializerWriter.close()
-
-      }}
-      val metadataArgsSerializerTemplate = new StringTemplate(javaSerializerGenerator.toMetadataArgsSerializerTemplate(service))
-      val metadataArgsSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.serializer"),s"GetServiceMetadata_argsSerializer.java"), "UTF-8")
-      metadataArgsSerializerWriter.write(metadataArgsSerializerTemplate.toString)
-      metadataArgsSerializerWriter.close()
-
-      val metadataResultSerializerTemplate = new StringTemplate(javaSerializerGenerator.toMetadataResultSerializerTemplate(service))
-      val metadataResultSerializerWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.serializer"),s"GetServiceMetadata_resultSerializer.java"), "UTF-8")
-      metadataResultSerializerWriter.write(metadataResultSerializerTemplate.toString)
-      metadataResultSerializerWriter.close()
-
-      val metadataArgsTemplate = new StringTemplate(javaSerializerGenerator.toMetadataArgsTemplate())
-      val metadataArgsWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.serializer"),s"GetServiceMetadata_args.java"), "UTF-8")
-      metadataArgsWriter.write(metadataArgsTemplate.toString)
-      metadataArgsWriter.close()
-
-      val metadataResultTemplate =new StringTemplate(javaSerializerGenerator.toMetadataResultTemplate())
-      val metadataResultWriter = new PrintWriter(new File(rootDir(outDir, "com.isuwang.soa.serializer"),s"GetServiceMetadata_result.java"), "UTF-8")
-      metadataResultWriter.write(metadataResultTemplate.toString)
-      metadataResultWriter.close()
 
       println(s"生成Codec:${service.name}Codec.java")
-      val codecTemplate = new StringTemplate(new JavaCodecGenerator().toCodecTemplate(service, namespaces))
+      val codecTemplate = new StringTemplate(new JavaCodecGenerator().toCodecTemplate(service, namespaces,structNamespaces))
       val codecWriter = new PrintWriter(new File(rootDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))), s"${service.name}Codec.java"), "UTF-8")
       codecWriter.write(codecTemplate.toString())
       codecWriter.close()
@@ -204,7 +174,6 @@ class JavaGenerator extends CodeGenerator {
     <div>package {service.namespace.substring(0, service.namespace.lastIndexOf("."))};
 
       import com.isuwang.dapeng.core.*;
-      import com.isuwang.soa.serializer.*;
       import com.isuwang.org.apache.thrift.*;
       import com.isuwang.dapeng.remoting.BaseCommonServiceClient;
       import java.util.concurrent.CompletableFuture;
@@ -329,8 +298,8 @@ class JavaGenerator extends CodeGenerator {
       public String getServiceMetadata() throws SoaException <block>
         initContext("getServiceMetadata");
         try <block>
-          GetServiceMetadata_args getServiceMetadata_args = new GetServiceMetadata_args();
-          GetServiceMetadata_result response = sendBase(getServiceMetadata_args, new GetServiceMetadata_argsSerializer(), new GetServiceMetadata_resultSerializer());
+          getServiceMetadata_args getServiceMetadata_args = new getServiceMetadata_args();
+          getServiceMetadata_result response = sendBase(getServiceMetadata_args, new GetServiceMetadata_argsSerializer(), new GetServiceMetadata_resultSerializer());
           return response.getSuccess();
         </block>catch (SoaException e)<block>
           throw e;
