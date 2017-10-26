@@ -16,14 +16,14 @@ import java.io.File;
 @Mojo(name = "thriftGenerator")
 public class GenerateFilePlugin extends AbstractMojo {
 
-    @Parameter(property = "thriftGenerator.sourceFilePath", defaultValue = "src\\main\\resources\\thrift\\")
-    private String sourceFilePath;
-
-    @Parameter(property = "thriftGenerator.targetFilePath", defaultValue = "src\\main\\")
-    private String targetFilePath;
-
     @Parameter(defaultValue = "${project}", readonly = true)
     protected MavenProject project;
+
+    /**
+     * 1、java  2、scala 3、both
+     */
+    @Parameter(property = "thriftGenerator.language", defaultValue = "both")
+    private String language;
 
 
     @Override
@@ -35,21 +35,25 @@ public class GenerateFilePlugin extends AbstractMojo {
         System.out.println(" sourceFilePath: " + sourceFilePath);
         System.out.println(" targetFilePath: " + targetFilePath);
 
-        Scrooge.main(new String[]{"-gen", "java", "-all",
-                "-in", sourceFilePath,
-                "-out", targetFilePath});
-
-        System.out.println( projectPath+"src\\main\\java\\com\\isuwang\\soa\\common");
-
-        File commonFile = new File(projectPath+"src\\main\\java\\com\\isuwang\\soa\\common");
-        if (commonFile.exists()){
-            deleteDir(commonFile);
+        if (language.equals("both")||language.equals("java")) {
+            Scrooge.main(new String[]{"-gen", "java", "-all",
+                    "-in", sourceFilePath,
+                    "-out", targetFilePath});
+            File commonFile = new File(projectPath + "src\\main\\java\\com\\isuwang\\soa\\common");
+            if (commonFile.exists()) {
+                deleteDir(commonFile);
+            }
         }
+        if (language.equals("both")||language.equals("scala")) {
+            Scrooge.main(new String[]{"-gen", "scala", "-all",
+                    "-in", sourceFilePath,
+                    "-out", targetFilePath});
 
-        Scrooge.main(new String[]{"-gen", "scala", "-all",
-                "-in", sourceFilePath,
-                "-out", targetFilePath});
-
+            File scalaCommonFile = new File(projectPath + "src\\main\\scala\\com\\isuwang\\soa\\scala\\common");
+            if (scalaCommonFile.exists()) {
+                deleteDir(scalaCommonFile);
+            }
+        }
 
     }
     private static boolean deleteDir(File dir) {
