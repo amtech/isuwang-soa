@@ -1,10 +1,8 @@
-package com.isuwang.dapeng.remoting.netty;
+package com.isuwang.dapeng.core;
 
-import io.netty.buffer.ByteBuf;
 import com.isuwang.org.apache.thrift.transport.TTransport;
 import com.isuwang.org.apache.thrift.transport.TTransportException;
-
-import java.nio.ByteOrder;
+import io.netty.buffer.ByteBuf;
 
 /**
  * @author craneding

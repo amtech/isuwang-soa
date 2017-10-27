@@ -5,7 +5,6 @@ import com.isuwang.dapeng.core.*;
 import com.isuwang.dapeng.core.metadata.Service;
 import com.isuwang.dapeng.remoting.BaseServiceClient;
 import com.isuwang.dapeng.remoting.netty.SoaClient;
-import com.isuwang.dapeng.remoting.netty.TSoaTransport;
 import com.isuwang.org.apache.thrift.TApplicationException;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.TMessage;
