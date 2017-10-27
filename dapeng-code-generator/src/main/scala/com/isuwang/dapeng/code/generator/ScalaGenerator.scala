@@ -65,7 +65,8 @@ class ScalaGenerator extends CodeGenerator {
     val structNamespaces:util.Set[String] = new util.HashSet[String]()
     for (index <- (0 until services.size())) {
       val service = services.get(index)
-      service.setNamespace(service.getNamespace.replace("com.isuwang.soa","com.isuwang.soa.scala"))
+      if(!service.getNamespace.contains("com.isuwang.soa.scala")){
+      service.setNamespace(service.getNamespace.replace("com.isuwang.soa","com.isuwang.soa.scala"))}
       namespaces.add(service.getNamespace)
 
       //設置method中字段的namespace
@@ -73,24 +74,26 @@ class ScalaGenerator extends CodeGenerator {
         val methodDefinition = service.getMethods.get(methodIndex)
         for(reqFieldIndex <- (0 until methodDefinition.request.fields.size()) ){
           val fieldDefinition=methodDefinition.request.fields.get(reqFieldIndex)
-          if(fieldDefinition.dataType!=null&&fieldDefinition.dataType.qualifiedName!=null){
+          if(fieldDefinition.dataType!=null&&fieldDefinition.dataType.qualifiedName!=null&&(!fieldDefinition.dataType.qualifiedName.contains("com.isuwang.soa.scala"))){
             fieldDefinition.dataType.setQualifiedName(fieldDefinition.dataType.qualifiedName.replace("com.isuwang.soa","com.isuwang.soa.scala"))
         }}
         for(respFieldIndex <- (0 until methodDefinition.response.fields.size()) ){
           val field2Definition=methodDefinition.response.fields.get(respFieldIndex)
-          if(field2Definition.dataType!=null&&field2Definition.dataType.qualifiedName!=null){
+          if(field2Definition.dataType!=null&&field2Definition.dataType.qualifiedName!=null&&(!field2Definition.dataType.qualifiedName.contains("com.isuwang.soa.scala"))){
             field2Definition.dataType.setQualifiedName(field2Definition.dataType.qualifiedName.replace("com.isuwang.soa","com.isuwang.soa.scala"))
         }}
       }
 
       for(enumIndex <- (0 until service.getEnumDefinitions.size())) {
         val enumDefinition = service.getEnumDefinitions.get(enumIndex)
-        enumDefinition.setNamespace(enumDefinition.getNamespace.replace("com.isuwang.soa","com.isuwang.soa.scala"))
+        if(!enumDefinition.getNamespace.contains("com.isuwang.soa.scala")){
+        enumDefinition.setNamespace(enumDefinition.getNamespace.replace("com.isuwang.soa","com.isuwang.soa.scala"))}
         namespaces.add(enumDefinition.getNamespace)
       }
       for(structIndex <- (0 until service.getStructDefinitions.size())) {
         val structDefinition = service.getStructDefinitions.get(structIndex)
-        structDefinition.setNamespace(structDefinition.getNamespace.replace("com.isuwang.soa","com.isuwang.soa.scala"))
+        if(!structDefinition.namespace.contains("com.isuwang.soa.scala")){
+        structDefinition.setNamespace(structDefinition.getNamespace.replace("com.isuwang.soa","com.isuwang.soa.scala"))}
         namespaces.add(structDefinition.getNamespace)
         structNamespaces.add(structDefinition.getNamespace)
       }
@@ -99,8 +102,8 @@ class ScalaGenerator extends CodeGenerator {
     if(generateAll){
       println("=========================================================")
       toStructArrayBuffer(structs).map{(struct: Struct)=>{
-
-        struct.setNamespace(struct.namespace.replace("com.isuwang.soa","com.isuwang.soa.scala"))
+        if(!struct.namespace.contains("com.isuwang.soa.scala")){
+        struct.setNamespace(struct.namespace.replace("com.isuwang.soa","com.isuwang.soa.scala"))}
         println(s"生成struct:${struct.name}.scala")
         val domainTemplate = new StringTemplate(toDomainTemplate(struct))
         val domainWriter = new PrintWriter(new File(rootDir(outDir, struct.getNamespace), s"${struct.name}.scala"), "UTF-8")
@@ -113,7 +116,8 @@ class ScalaGenerator extends CodeGenerator {
       toTEnumArrayBuffer(enums).map{(enum: TEnum)=>{
 
         println(s"生成Enum:${enum.name}.scala")
-        enum.setNamespace(enum.namespace.replaceAll("com.isuwang.soa","com.isuwang.soa.scala"))
+        if(!enum.namespace.contains("com.isuwang.soa","com.isuwang.soa.scala")){
+        enum.setNamespace(enum.namespace.replaceAll("com.isuwang.soa","com.isuwang.soa.scala"))}
         val enumTemplate = new StringTemplate(toEnumTemplate(enum))
         val enumWriter = new PrintWriter(new File(rootDir(outDir, enum.getNamespace), s"${enum.name}.scala"), "UTF-8")
         enumWriter.write(enumTemplate.toString)
