@@ -12,7 +12,7 @@ import io.netty.buffer.Unpooled;
  */
 public class BeanSerializer {
 
-    public <T> ByteBuf serialize(T structBean, TCommonBeanSerializer<T> structSerializer) throws TException {
+    public static <T> ByteBuf serialize(T structBean, TCommonBeanSerializer<T> structSerializer) throws TException {
 
         final ByteBuf byteBuf = Unpooled.directBuffer(8192);
         final TSoaTransport outputSoaTransport = new TSoaTransport(byteBuf);
@@ -22,7 +22,7 @@ public class BeanSerializer {
         return byteBuf;
     }
 
-    public <T> T deserialize(ByteBuf buff, TCommonBeanSerializer<T> structSerializer) throws TException {
+    public static <T> T deserialize(ByteBuf buff, TCommonBeanSerializer<T> structSerializer) throws TException {
 
         final TSoaTransport inputSoaTransport = new TSoaTransport(buff);
 
