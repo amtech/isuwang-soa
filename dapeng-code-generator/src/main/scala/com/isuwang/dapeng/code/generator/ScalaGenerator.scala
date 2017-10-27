@@ -505,11 +505,11 @@ class ScalaGenerator extends CodeGenerator {
       case KIND.SET =>
         return {<div>Set[{toDataTypeTemplate(dataType.getValueType())}]</div>}
       case KIND.ENUM =>
-        val ref = dataType.getQualifiedName
+        val ref = dataType.getQualifiedName.replace("com.isuwang.soa","com.isuwang.soa.scala")
         val enumName = ref.substring(ref.lastIndexOf("."))
         return {<div>{ref}{enumName}</div>}
       case KIND.STRUCT =>
-        val ref = dataType.getQualifiedName()
+        val ref = dataType.getQualifiedName().replace("com.isuwang.soa","com.isuwang.soa.scala")
         return {<div>{ref}</div>}
     }
   }

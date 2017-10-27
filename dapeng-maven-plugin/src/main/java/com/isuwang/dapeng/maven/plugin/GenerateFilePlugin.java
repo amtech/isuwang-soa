@@ -56,17 +56,20 @@ public class GenerateFilePlugin extends AbstractMojo {
         }
 
     }
-    private static boolean deleteDir(File dir) {
+    private static void deleteDir(File dir) {
         if (dir.isDirectory()) {
             String[] children = dir.list();
             for (int i=0; i<children.length; i++) {
-                boolean success = deleteDir(new File(dir, children[i]));
-                if (!success) {
-                    return false;
+                if(!children[i].equals("serializer")) {
+                    deleteDir(new File(dir, children[i]));
+
                 }
             }
         }
-        return dir.delete();
+        if(!dir.getName().equals("serializer")){
+            dir.delete();
+        }
+
     }
 
 }
