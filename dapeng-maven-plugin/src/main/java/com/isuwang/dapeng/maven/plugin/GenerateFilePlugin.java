@@ -16,6 +16,13 @@ import java.io.File;
 @Mojo(name = "thriftGenerator")
 public class GenerateFilePlugin extends AbstractMojo {
 
+    @Parameter(property = "thriftGenerator.sourceFilePath", defaultValue = "src\\main\\resources\\thrift\\")
+    private String sourceFilePath;
+
+    @Parameter(property = "thriftGenerator.targetFilePath", defaultValue = "src\\main\\")
+    private String targetFilePath;
+
+
     @Parameter(defaultValue = "${project}", readonly = true)
     protected MavenProject project;
 
@@ -29,13 +36,13 @@ public class GenerateFilePlugin extends AbstractMojo {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         String projectPath = new File(project.getBuild().getOutputDirectory()).getAbsolutePath().replace("target\\classes", "");
-        String sourceFilePath=projectPath+ "src\\main\\resources\\thrift\\";
-        String targetFilePath=projectPath+"src\\main\\";
+        sourceFilePath = projectPath + sourceFilePath;
+        targetFilePath = projectPath + targetFilePath;
 
         System.out.println(" sourceFilePath: " + sourceFilePath);
         System.out.println(" targetFilePath: " + targetFilePath);
 
-        if (language.equals("both")||language.equals("java")) {
+        if (language.equals("both") || language.equals("java")) {
             Scrooge.main(new String[]{"-gen", "java", "-all",
                     "-in", sourceFilePath,
                     "-out", targetFilePath});
@@ -44,7 +51,7 @@ public class GenerateFilePlugin extends AbstractMojo {
                 deleteDir(commonFile);
             }
         }
-        if (language.equals("both")||language.equals("scala")) {
+        if (language.equals("both") || language.equals("scala")) {
             Scrooge.main(new String[]{"-gen", "scala", "-all",
                     "-in", sourceFilePath,
                     "-out", targetFilePath});
@@ -56,17 +63,18 @@ public class GenerateFilePlugin extends AbstractMojo {
         }
 
     }
+
     private static void deleteDir(File dir) {
         if (dir.isDirectory()) {
             String[] children = dir.list();
-            for (int i=0; i<children.length; i++) {
-                if(!children[i].equals("serializer")) {
+            for (int i = 0; i < children.length; i++) {
+                if (!children[i].equals("serializer")) {
                     deleteDir(new File(dir, children[i]));
 
                 }
             }
         }
-        if(!dir.getName().equals("serializer")){
+        if (!dir.getName().equals("serializer")) {
             dir.delete();
         }
 
