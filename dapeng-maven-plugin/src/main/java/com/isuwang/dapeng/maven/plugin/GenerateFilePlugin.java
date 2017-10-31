@@ -16,10 +16,10 @@ import java.io.File;
 @Mojo(name = "thriftGenerator")
 public class GenerateFilePlugin extends AbstractMojo {
 
-    @Parameter(property = "thriftGenerator.sourceFilePath", defaultValue = "src\\main\\resources\\thrift\\")
+    @Parameter(property = "thriftGenerator.sourceFilePath", defaultValue = "src/main/resources/thrift/")
     private String sourceFilePath;
 
-    @Parameter(property = "thriftGenerator.targetFilePath", defaultValue = "src\\main\\")
+    @Parameter(property = "thriftGenerator.targetFilePath", defaultValue = "src/main/")
     private String targetFilePath;
 
 
@@ -35,7 +35,7 @@ public class GenerateFilePlugin extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        String projectPath = new File(project.getBuild().getOutputDirectory()).getAbsolutePath().replace("target\\classes", "");
+        String projectPath = new File(project.getBuild().getOutputDirectory()).getAbsolutePath().replace("target/classes", "");
         sourceFilePath = projectPath + sourceFilePath;
         targetFilePath = projectPath + targetFilePath;
 
@@ -46,7 +46,7 @@ public class GenerateFilePlugin extends AbstractMojo {
             Scrooge.main(new String[]{"-gen", "java", "-all",
                     "-in", sourceFilePath,
                     "-out", targetFilePath});
-            File commonFile = new File(projectPath + "src\\main\\java\\com\\isuwang\\soa\\common");
+            File commonFile = new File(projectPath + "src/main/java/com/isuwang/soa/common");
             if (commonFile.exists()) {
                 deleteDir(commonFile);
             }
@@ -56,7 +56,7 @@ public class GenerateFilePlugin extends AbstractMojo {
                     "-in", sourceFilePath,
                     "-out", targetFilePath});
 
-            File scalaCommonFile = new File(projectPath + "src\\main\\scala\\com\\isuwang\\soa\\scala\\common");
+            File scalaCommonFile = new File(projectPath + "src/main/scala/com/isuwang/soa/scala/common");
             if (scalaCommonFile.exists()) {
                 deleteDir(scalaCommonFile);
             }
