@@ -158,11 +158,6 @@
         </dependency>
 
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>com.isuwang</groupId>
             <artifactId>dapeng-core</artifactId>
         </dependency>
