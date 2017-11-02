@@ -390,7 +390,7 @@ class ScalaCodecGenerator extends CodeGenerator {
       case KIND.BINARY => <div>iprot.readBinary</div>
       case KIND.BIGDECIMAL => <div>BigDecimal(iprot.readString)</div>
       case KIND.DATE => <div>new java.util.Date(iprot.readI64)</div>
-      case KIND.STRUCT => <div>new {dataType.qualifiedName.substring(dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().read(iprot)</div>
+      case KIND.STRUCT => <div>new {dataType.qualifiedName.substring(0,dataType.qualifiedName.lastIndexOf("."))+".serializer."+dataType.qualifiedName.substring(dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().read(iprot)</div>
       case KIND.ENUM => <div>{dataType.qualifiedName}.findByValue(iprot.readI32)</div>
       case KIND.MAP => <div><block>
         val _map{index} : com.isuwang.org.apache.thrift.protocol.TMap = iprot.readMapBegin
@@ -472,7 +472,7 @@ class ScalaCodecGenerator extends CodeGenerator {
       case KIND.BINARY => <div>oprot.writeBinary(elem{index})</div>
       case KIND.DATE => <div>oprot.writeI64(elem{index}.getTime)</div>
       case KIND.BIGDECIMAL => <div>oprot.writeString(elem{index}.toString)</div>
-      case KIND.STRUCT => <div> new {dataType.qualifiedName.substring(dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().write(elem{index}, oprot)</div>
+      case KIND.STRUCT => <div> new {dataType.qualifiedName.substring(0,dataType.qualifiedName.lastIndexOf("."))+".serializer."+dataType.qualifiedName.substring(dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().write(elem{index}, oprot)</div>
       case KIND.LIST => <div>
         oprot.writeListBegin(new com.isuwang.org.apache.thrift.protocol.TList({toThriftDateType(dataType.valueType)}, elem{index}.size))
         elem{index}.foreach(elem{index+1} => <block>{toScalaWriteElement(dataType.valueType, index+1)}</block>)
@@ -545,13 +545,13 @@ class ScalaCodecGenerator extends CodeGenerator {
             if(!field.isOptional && field.dataType.kind == KIND.STRUCT && field.dataType.kind != DataType.KIND.VOID){
               <div>
                 if(bean.{nameAsId(field.name)} != null)
-                new {field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().validate(bean.{nameAsId(field.name)})
+                new {field.dataType.qualifiedName.substring(0,field.dataType.qualifiedName.lastIndexOf("."))+".serializer."+field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().validate(bean.{nameAsId(field.name)})
               </div>}}</div>
           <div>{
             if(field.isOptional && field.dataType.kind == KIND.STRUCT && field.dataType.kind != DataType.KIND.VOID){
               <div>
                 if(bean.{nameAsId(field.name)}.isDefined)
-                new {field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().validate(bean.{nameAsId(field.name)}.get)
+                new {field.dataType.qualifiedName.substring(0,field.dataType.qualifiedName.lastIndexOf("."))+".serializer."+field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().validate(bean.{nameAsId(field.name)}.get)
               </div>}}</div>
       }
       }

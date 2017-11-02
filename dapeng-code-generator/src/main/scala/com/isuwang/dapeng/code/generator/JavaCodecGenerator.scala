@@ -563,7 +563,7 @@ class JavaCodecGenerator extends CodeGenerator {
       case KIND.BIGDECIMAL => <div>java.math.BigDecimal elem{index} = new java.math.BigDecimal(iprot.readString());</div>
       case KIND.DATE => <div>Long time = iprot.readI64(); java.util.Date elem{index} = new java.util.Date(time);</div>
       case KIND.STRUCT => <div>{dataType.qualifiedName} elem{index} = new {dataType.qualifiedName}();
-        elem{index}=new {dataType.qualifiedName.substring(dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().read(iprot);</div>
+        elem{index}=new {dataType.qualifiedName.substring(0,dataType.qualifiedName.lastIndexOf("."))+".serializer."+dataType.qualifiedName.substring(dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().read(iprot);</div>
       case KIND.ENUM => <div>{dataType.qualifiedName} elem{index} = {dataType.qualifiedName}.findByValue(iprot.readI32());</div>
       case KIND.MAP => <div>com.isuwang.org.apache.thrift.protocol.TMap _map{index} = iprot.readMapBegin();
         java.util.Map{lt}{toJavaDataType(dataType.keyType)},{toJavaDataType(dataType.valueType)}{gt} elem{index} = new java.util.HashMap{lt}{gt}(_map{index}.size);
@@ -661,7 +661,7 @@ class JavaCodecGenerator extends CodeGenerator {
       case KIND.BINARY => <div>oprot.writeBinary(elem{index});</div>
       case KIND.DATE => <div>oprot.writeI64(elem{index}.getTime());</div>
       case KIND.BIGDECIMAL => <div>oprot.writeString(elem{index}.toString());</div>
-      case KIND.STRUCT => <div> new {dataType.qualifiedName.substring(dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().write(elem{index}, oprot);</div>
+      case KIND.STRUCT => <div> new {dataType.qualifiedName.substring(0,dataType.qualifiedName.lastIndexOf("."))+".serializer."+dataType.qualifiedName.substring(dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().write(elem{index}, oprot);</div>
       case KIND.LIST =>
         <div>
           oprot.writeListBegin(new com.isuwang.org.apache.thrift.protocol.TList({toThriftDateType(dataType.valueType)}, elem{index}.size()));
@@ -752,13 +752,13 @@ class JavaCodecGenerator extends CodeGenerator {
             if(!field.isOptional && field.dataType.kind == KIND.STRUCT && field.dataType.kind != DataType.KIND.VOID){
               <div>
                 if(bean.get{field.name.charAt(0).toUpper + field.name.substring(1)}() != null)
-                new {field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().validate(bean.get{field.name.charAt(0).toUpper + field.name.substring(1)}());
+                new {field.dataType.qualifiedName.substring(0,field.dataType.qualifiedName.lastIndexOf("."))+".serializer."+field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().validate(bean.get{field.name.charAt(0).toUpper + field.name.substring(1)}());
               </div>}}</div>
           <div>{
             if(field.isOptional && field.dataType.kind == KIND.STRUCT && field.dataType.kind != DataType.KIND.VOID){
               <div>
                 if(bean.get{field.name.charAt(0).toUpper + field.name.substring(1)}().isPresent())
-                new {field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().validate(bean.get{field.name.charAt(0).toUpper + field.name.substring(1)}().get());
+                new {field.dataType.qualifiedName.substring(0,field.dataType.qualifiedName.lastIndexOf("."))+".serializer."+field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().validate(bean.get{field.name.charAt(0).toUpper + field.name.substring(1)}().get());
               </div>}}</div>
       }
       }
