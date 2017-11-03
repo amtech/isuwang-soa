@@ -391,7 +391,7 @@ class ScalaCodecGenerator extends CodeGenerator {
       case KIND.BIGDECIMAL => <div>BigDecimal(iprot.readString)</div>
       case KIND.DATE => <div>new java.util.Date(iprot.readI64)</div>
       case KIND.STRUCT => <div>new {if (dataType.qualifiedName.contains("com.isuwang.soa.scala")) dataType.qualifiedName.substring(0,dataType.qualifiedName.lastIndexOf("."))+".serializer."+dataType.qualifiedName.substring(dataType.qualifiedName.lastIndexOf(".")+1) else dataType.qualifiedName.substring(0,dataType.qualifiedName.lastIndexOf(".")).replace("com.isuwang.soa","com.isuwang.soa.scala")+".serializer."+dataType.qualifiedName.substring(dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().read(iprot)</div>
-      case KIND.ENUM => <div>{dataType.qualifiedName}.findByValue(iprot.readI32)</div>
+      case KIND.ENUM => <div>{if(dataType.qualifiedName.contains("com.isuwang.soa.scala")) dataType.qualifiedName else dataType.qualifiedName.replace("com.isuwang.soa","com.isuwang.soa.scala")}.findByValue(iprot.readI32)</div>
       case KIND.MAP => <div><block>
         val _map{index} : com.isuwang.org.apache.thrift.protocol.TMap = iprot.readMapBegin
         val _result{index} = (0 until _map{index}.size).map(_ => <block>( {getScalaReadElement(dataType.keyType, index+1)} -> {getScalaReadElement(dataType.valueType, index+2)} )</block>).toMap
@@ -545,13 +545,13 @@ class ScalaCodecGenerator extends CodeGenerator {
             if(!field.isOptional && field.dataType.kind == KIND.STRUCT && field.dataType.kind != DataType.KIND.VOID){
               <div>
                 if(bean.{nameAsId(field.name)} != null)
-                new {field.dataType.qualifiedName.substring(0,field.dataType.qualifiedName.lastIndexOf("."))+".serializer."+field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().validate(bean.{nameAsId(field.name)})
+                new {if(field.dataType.qualifiedName.contains("com.isuwang.soa.scala")) field.dataType.qualifiedName.substring(0,field.dataType.qualifiedName.lastIndexOf("."))+".serializer."+field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1) else field.dataType.qualifiedName.substring(0,field.dataType.qualifiedName.lastIndexOf(".")).replace("com.isuwang.soa","com.isuwang.soa.scala")+".serializer."+field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().validate(bean.{nameAsId(field.name)})
               </div>}}</div>
           <div>{
             if(field.isOptional && field.dataType.kind == KIND.STRUCT && field.dataType.kind != DataType.KIND.VOID){
               <div>
                 if(bean.{nameAsId(field.name)}.isDefined)
-                new {field.dataType.qualifiedName.substring(0,field.dataType.qualifiedName.lastIndexOf("."))+".serializer."+field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().validate(bean.{nameAsId(field.name)}.get)
+                new {if(field.dataType.qualifiedName.contains("com.isuwang.soa.scala")) field.dataType.qualifiedName.substring(0,field.dataType.qualifiedName.lastIndexOf("."))+".serializer."+field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1) else field.dataType.qualifiedName.substring(0,field.dataType.qualifiedName.lastIndexOf(".")).replace("com.isuwang.soa","com.isuwang.soa.scala")+".serializer."+field.dataType.qualifiedName.substring(field.dataType.qualifiedName.lastIndexOf(".")+1)}Serializer().validate(bean.{nameAsId(field.name)}.get)
               </div>}}</div>
       }
       }
