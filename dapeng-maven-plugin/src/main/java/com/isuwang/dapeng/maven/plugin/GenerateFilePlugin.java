@@ -22,10 +22,6 @@ public class GenerateFilePlugin extends AbstractMojo {
     @Parameter(property = "thriftGenerator.targetFilePath")
     private String targetFilePath;
 
-    @Parameter(property = "thriftGenerator.isOpen",defaultValue = "false")
-    private boolean isOpen;
-
-
     @Parameter(defaultValue = "${project}", readonly = true)
     protected MavenProject project;
 
@@ -38,33 +34,32 @@ public class GenerateFilePlugin extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (isOpen) {
-            String separator= System.getProperty("file.separator");
-            String projectPath = new File(project.getBuild().getOutputDirectory()).getAbsolutePath().replace("target"+ System.getProperty("file.separator")+"classes", "");
-            sourceFilePath = projectPath + (sourceFilePath==null?"src"+separator+"main"+separator+"resources"+separator+"thrift"+separator:sourceFilePath);
-            targetFilePath = projectPath + (targetFilePath==null?"src"+separator+"main"+separator:targetFilePath);
 
-            System.out.println(" sourceFilePath: " + sourceFilePath);
-            System.out.println(" targetFilePath: " + targetFilePath);
+        String separator = System.getProperty("file.separator");
+        String projectPath = new File(project.getBuild().getOutputDirectory()).getAbsolutePath().replace("target" + System.getProperty("file.separator") + "classes", "");
+        sourceFilePath = projectPath + (sourceFilePath == null ? "src" + separator + "main" + separator + "resources" + separator + "thrift" + separator : sourceFilePath);
+        targetFilePath = projectPath + (targetFilePath == null ? "src" + separator + "main" + separator : targetFilePath);
 
-            if (language.equals("both") || language.equals("java")) {
-                Scrooge.main(new String[]{"-gen", "java", "-all",
-                        "-in", sourceFilePath,
-                        "-out", targetFilePath});
-                File commonFile = new File(projectPath + "src/main/java/com/isuwang/soa/common");
-                if (commonFile.exists()) {
-                    deleteDir(commonFile);
-                }
+        System.out.println(" sourceFilePath: " + sourceFilePath);
+        System.out.println(" targetFilePath: " + targetFilePath);
+
+        if (language.equals("both") || language.equals("java")) {
+            Scrooge.main(new String[]{"-gen", "java", "-all",
+                    "-in", sourceFilePath,
+                    "-out", targetFilePath});
+            File commonFile = new File(projectPath + "src/main/java/com/isuwang/soa/common");
+            if (commonFile.exists()) {
+                deleteDir(commonFile);
             }
-            if (language.equals("both") || language.equals("scala")) {
-                Scrooge.main(new String[]{"-gen", "scala", "-all",
-                        "-in", sourceFilePath,
-                        "-out", targetFilePath});
+        }
+        if (language.equals("both") || language.equals("scala")) {
+            Scrooge.main(new String[]{"-gen", "scala", "-all",
+                    "-in", sourceFilePath,
+                    "-out", targetFilePath});
 
-                File scalaCommonFile = new File(projectPath + "src/main/scala/com/isuwang/soa/scala/common");
-                if (scalaCommonFile.exists()) {
-                    deleteDir(scalaCommonFile);
-                }
+            File scalaCommonFile = new File(projectPath + "src/main/scala/com/isuwang/soa/scala/common");
+            if (scalaCommonFile.exists()) {
+                deleteDir(scalaCommonFile);
             }
         }
     }

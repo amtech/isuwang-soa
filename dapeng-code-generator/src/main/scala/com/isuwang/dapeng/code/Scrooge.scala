@@ -86,6 +86,7 @@ object Scrooge {
         }
       }
 
+
       if (inDir != null) {
 
         resources = new File(inDir).listFiles(new FilenameFilter {
@@ -104,12 +105,33 @@ object Scrooge {
         }
       }
 
+      var isUpdated = false
+      var scalaXmlCount = 0
+
+      val file = new File(resources(0))
+      val parent = file.getParentFile.getParentFile
+
+      parent.listFiles().foreach {
+        xmlFile =>
+          if (xmlFile.getName.endsWith(".xml") && xmlFile.lastModified() < file.lastModified()) {
+            isUpdated = true
+          }
+          if (xmlFile.getName.contains("scala")) {
+            scalaXmlCount += 1
+          }
+      }
+      if (parent.listFiles().length <= 1 || (language.equals("scala") && scalaXmlCount == 0)) {
+        isUpdated = true
+      }
+
+      println("==========" + isUpdated+" "+scalaXmlCount)
+
       if (outDir == null) // 如果输出路径为空,则默认为当前目录
         outDir = System.getProperty("user.dir")
 
-      if (resources != null && language != "") {
+      if (resources != null && language != "" && isUpdated) {
 
-        val parserLanguage = if(language == "scala") "scala" else "java"
+        val parserLanguage = if (language == "scala") "scala" else "java"
         val services = new ThriftCodeParser(parserLanguage).toServices(resources, version)
         val structs = if (generateAll) new ThriftCodeParser(parserLanguage).getAllStructs(resources) else null
         val enums = if (generateAll) new ThriftCodeParser(parserLanguage).getAllEnums(resources) else null
@@ -122,7 +144,7 @@ object Scrooge {
           case "scala" => new ScalaGenerator().generate(services, outDir, generateAll, structs, enums)
         }
 
-      } else {
+      } else if (resources == null || language == "") {
         throw new RuntimeException("resources is null or language is null")
       }
     }
