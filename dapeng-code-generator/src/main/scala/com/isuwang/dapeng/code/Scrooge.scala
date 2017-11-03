@@ -124,8 +124,6 @@ object Scrooge {
         isUpdated = true
       }
 
-      println("==========" + isUpdated+" "+scalaXmlCount)
-
       if (outDir == null) // 如果输出路径为空,则默认为当前目录
         outDir = System.getProperty("user.dir")
 
