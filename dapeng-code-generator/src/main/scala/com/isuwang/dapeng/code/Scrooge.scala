@@ -46,7 +46,7 @@ object Scrooge {
 
     var outDir: String = null
     var inDir: String = null
-    var resources: Array[String] = null
+    var resources: Array[String] = null //the thrift files
     var language: String = ""
     var version: String = null
     var generateAll: Boolean = false
@@ -105,29 +105,27 @@ object Scrooge {
         }
       }
 
-      var isUpdated = false
-      var scalaXmlCount = 0
-
-      val file = new File(resources(0))
-      val parent = file.getParentFile.getParentFile
-
-      parent.listFiles().foreach {
-        xmlFile =>
-          if (xmlFile.getName.endsWith(".xml") && xmlFile.lastModified() < file.lastModified()) {
-            isUpdated = true
-          }
-          if (xmlFile.getName.contains("scala")) {
-            scalaXmlCount += 1
-          }
-      }
-      if (parent.listFiles().length <= 1 || (language.equals("scala") && scalaXmlCount == 0)) {
-        isUpdated = true
+      //根据时间戳判断是否需要重新生成文件
+      //1. 如果thrift文件修改时间 > xml的时间 => needUpdate
+      //2. 如果没有xml文件 => needUpdate
+      //3. 如果 language equals scala && scalaXmlCount ==0 => needUpdate
+      val resourcePath = new File(resources(0)).getParentFile.getParentFile
+      val thriftModifyTimes = resources.map(file => new File(file).lastModified())
+      val needUpdate = {
+        val xmlFiles = resourcePath.listFiles().filter(_.getName.endsWith(".xml"))
+        if (xmlFiles.exists(xmlFile => thriftModifyTimes.exists(_ > xmlFile.lastModified()))) {
+          true
+        } else if (xmlFiles.size <= 0 || (language.equals("scala") && xmlFiles.filter(_.getName.contains("scala")).size == 0)) {
+          true
+        } else {
+          false
+        }
       }
 
       if (outDir == null) // 如果输出路径为空,则默认为当前目录
         outDir = System.getProperty("user.dir")
 
-      if (resources != null && language != "" && isUpdated) {
+      if (resources != null && language != "" && needUpdate) {
 
         val parserLanguage = if (language == "scala") "scala" else "java"
         val services = new ThriftCodeParser(parserLanguage).toServices(resources, version)
