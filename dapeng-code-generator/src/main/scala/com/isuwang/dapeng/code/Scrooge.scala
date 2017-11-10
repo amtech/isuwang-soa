@@ -115,7 +115,9 @@ object Scrooge {
         val xmlFiles = resourcePath.listFiles().filter(_.getName.endsWith(".xml"))
         if (xmlFiles.exists(xmlFile => thriftModifyTimes.exists(_ > xmlFile.lastModified()))) {
           true
-        } else if (xmlFiles.size <= 0 || (language.equals("scala") && xmlFiles.filter(_.getName.contains("scala")).size == 0)) {
+        } else if (xmlFiles.size <= 0
+          || (language.equals("scala") && xmlFiles.filter(_.getName.contains("scala")).size == 0)
+          || (language.equals("java") && xmlFiles.filterNot(_.getName.contains("scala")).size == 0)) {
           true
         } else {
           false
