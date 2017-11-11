@@ -34,8 +34,8 @@ public class ContainerStartup {
         final long startTime = System.currentTimeMillis();
 
         final List<Container> containers = new ArrayList<>();
-        ServiceLoader<ContainerFilter> filterServiceLoader = ServiceLoader.load(ContainerFilter.class);
-        ServiceLoader<Container> containerServiceLoader = ServiceLoader.load(Container.class);
+        ServiceLoader<ContainerFilter> filterServiceLoader = ServiceLoader.load(ContainerFilter.class,ContainerStartup.class.getClassLoader());
+        ServiceLoader<Container> containerServiceLoader = ServiceLoader.load(Container.class,ContainerStartup.class.getClassLoader());
 
 
         // 本地模式

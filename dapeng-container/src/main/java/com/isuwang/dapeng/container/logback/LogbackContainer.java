@@ -30,9 +30,8 @@ public class LogbackContainer implements Container {
 
             StatusPrinter.printInCaseOfErrorsOrWarnings(lc);
         } catch (Exception e) {
-            e.printStackTrace();
-
-            throw new RuntimeException(e);
+            System.out.println("LogbackContainer failed, ignoring ..." + e.getMessage());
+            // throw new RuntimeException(e);
         }
     }
 
