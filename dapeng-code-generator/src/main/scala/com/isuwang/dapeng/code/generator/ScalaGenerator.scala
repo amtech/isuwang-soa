@@ -235,9 +235,12 @@ class ScalaGenerator extends CodeGenerator {
 
           var isSoaTransactionalProcess = false
           {toMethodArrayBuffer(service.methods).map{(method:Method)=>{
-            if(method.doc != null && method.doc.contains("@IsSoaTransactionProcess"))
-              <div>if(InvocationContext.Factory.getCurrentInstance().getHeader().getMethodName().equals("{method.name}"))
-                      isSoaTransactionalProcess = true</div>
+
+            if(method.doc != null && method.doc.contains("@IsSoaTransactionProcess")){
+              <div>
+                if(InvocationContext.Factory.getCurrentInstance().getHeader().getMethodName().equals("{method.name}"))<block>
+                      isSoaTransactionalProcess = true</block>
+              </div>}
           }}}
           isSoaTransactionalProcess
         </block>
@@ -323,8 +326,10 @@ class ScalaGenerator extends CodeGenerator {
           var isSoaTransactionalProcess = false
           {toMethodArrayBuffer(service.methods).map{(method:Method)=>{
             if(method.doc != null && method.doc.contains("@IsSoaTransactionProcess"))
-              <div>if(InvocationContext.Factory.getCurrentInstance().getHeader().getMethodName().equals("{method.name}"))
-                isSoaTransactionalProcess = true</div>
+              <div>
+                if(InvocationContext.Factory.getCurrentInstance().getHeader().getMethodName().equals("{method.name}"))<block>
+                    isSoaTransactionalProcess = true</block>
+              </div>
           }}}
           isSoaTransactionalProcess
         </block>
@@ -392,10 +397,12 @@ class ScalaGenerator extends CodeGenerator {
         {
         toEnumItemArrayBuffer(enum.enumItems).map{(enumItem: EnumItem)=>{
           if(enumItem.doc != null)
-            <div>val {enumItem.label} = Value({enumItem.value}, "{enumItem.doc.trim}")
+            <div>
+              val {enumItem.label} = Value({enumItem.value}, "{enumItem.doc.trim.replace("*","")}")
             </div>
           else
-            <div>val {enumItem.label} = Value({enumItem.value})
+            <div>
+              val {enumItem.label} = Value({enumItem.value})
             </div>
         }
         }
