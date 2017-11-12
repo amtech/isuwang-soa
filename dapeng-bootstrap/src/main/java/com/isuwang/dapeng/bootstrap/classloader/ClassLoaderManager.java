@@ -11,11 +11,11 @@ import java.util.List;
  */
 public class ClassLoaderManager {
 
-    public static ShareClassLoader shareClassLoader;
+    public static ClassLoader shareClassLoader;
 
-    public static PlatformClassLoader platformClassLoader;
+    public static ClassLoader platformClassLoader;
 
-    public static List<AppClassLoader> appClassLoaders = new ArrayList<>();
+    public static List<ClassLoader> appClassLoaders = new ArrayList<>();
 
-    public static List<PluginClassLoader> pluginClassLoaders = new ArrayList<>();
+    public static List<ClassLoader> pluginClassLoaders = new ArrayList<>();
 }

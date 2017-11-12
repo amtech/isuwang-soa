@@ -28,6 +28,7 @@ public class ApidocContainer implements Container {
                     server = ApiWebSite.createServer(SoaSystemEnvProperties.SOA_APIDOC_PORT);
 
                     server.start();
+                    System.out.println("api-doc server started at port: " + SoaSystemEnvProperties.SOA_APIDOC_PORT);
 
                     server.join();
                 } catch (Exception e) {
