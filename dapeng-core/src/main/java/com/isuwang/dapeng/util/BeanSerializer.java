@@ -1,30 +1,27 @@
 package com.isuwang.dapeng.util;
 
 import com.isuwang.dapeng.core.TCommonBeanSerializer;
-import com.isuwang.dapeng.core.TSoaTransport;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.TCompactProtocol;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 
 /**
  * Created by lihuimin on 2017/10/27.
  */
 public class BeanSerializer {
 
-    public static <T> ByteBuf serialize(T structBean, TCommonBeanSerializer<T> structSerializer) throws TException {
+    public static <T> byte[] serialize(T structBean, TCommonBeanSerializer<T> structSerializer) throws TException {
 
-        final ByteBuf byteBuf = Unpooled.directBuffer(8192);
-        final TSoaTransport outputSoaTransport = new TSoaTransport(byteBuf);
+        byte [] byteBuf = new byte[8192];
+        final TSoaTransport outputSoaTransport = new TSoaTransport(byteBuf, TSoaTransport.Type.Write,0);
 
         TCompactProtocol outputProtocol = new TCompactProtocol(outputSoaTransport);
         structSerializer.write(structBean, outputProtocol);
         return byteBuf;
     }
 
-    public static <T> T deserialize(ByteBuf buff, TCommonBeanSerializer<T> structSerializer) throws TException {
+    public static <T> T deserialize(byte[] buff, TCommonBeanSerializer<T> structSerializer) throws TException {
 
-        final TSoaTransport inputSoaTransport = new TSoaTransport(buff);
+        final TSoaTransport inputSoaTransport = new TSoaTransport(buff, TSoaTransport.Type.Read,0);
 
         TCompactProtocol intputProtocol = new TCompactProtocol(inputSoaTransport);
         T struct = structSerializer.read(intputProtocol);
