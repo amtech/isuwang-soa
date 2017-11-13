@@ -4,10 +4,9 @@ import com.isuwang.dapeng.core.SoaProcessFunction;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.core.TCommonBeanSerializer;
 import com.isuwang.dapeng.message.consumer.api.context.ConsumerContext;
-import kafka.consumer.ConsumerConfig;
-import kafka.consumer.ConsumerIterator;
-import kafka.consumer.KafkaStream;
-import kafka.javaapi.consumer.ConsumerConnector;
+
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +33,7 @@ public class KafkaConsumer extends Thread {
 
     private String zookeeperConnect = SoaSystemEnvProperties.SOA_ZOOKEEPER_KAFKA_HOST;
 
-    protected ConsumerConnector consumer;
+    protected org.apache.kafka.clients.consumer.KafkaConsumer<byte[], byte[]> consumer;
 //    protected final static String ZookeeperSessionTimeoutMs = "40000";
 //    protected final static String ZookeeperSyncTimeMs = "200";
 //    protected final static String AutoCommitIntervalMs = "1000";
@@ -49,12 +48,14 @@ public class KafkaConsumer extends Thread {
         Properties props = new Properties();
         props.put("zookeeper.connect", zookeeperConnect);
         props.put("group.id", groupId);
+        props.put("enable.auto.commit", "true");
+        props.put("auto.commit.interval.ms", "1000");
 
 //        props.put("zookeeper.session.timeout.ms", ZookeeperSessionTimeoutMs);
 //        props.put("zookeeper.sync.time.ms", ZookeeperSyncTimeMs);
 //        props.put("auto.commit.interval.ms", AutoCommitIntervalMs);
+        consumer = new org.apache.kafka.clients.consumer.KafkaConsumer<>(props);
 
-        consumer = kafka.consumer.Consumer.createJavaConsumerConnector(new ConsumerConfig(props));
     }
 
     @Override
@@ -63,17 +64,14 @@ public class KafkaConsumer extends Thread {
         try {
             logger.info("[KafkaConsumer][{}][run] ", groupId + ":" + topic);
 
-            Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
-            topicCountMap.put(topic, new Integer(1));
-
-            Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumer.createMessageStreams(topicCountMap);
-            KafkaStream<byte[], byte[]> stream = consumerMap.get(topic).get(0);
-
-            ConsumerIterator<byte[], byte[]> it = stream.iterator();
-
-            while (it.hasNext()) {
-                receive(it.next().message());
+            consumer.subscribe(Arrays.asList(topic));
+            while (true) {
+                ConsumerRecords<byte[], byte[]> records = consumer.poll(100);
+                for (ConsumerRecord<byte[], byte[]> record : records){
+                    receive(record.value());
+                    System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());}
             }
+
         } catch (Exception e) {
             logger.error("[KafkaConsumer][{}][run] " + e.getMessage(), groupId + ":" + topic, e);
         }
