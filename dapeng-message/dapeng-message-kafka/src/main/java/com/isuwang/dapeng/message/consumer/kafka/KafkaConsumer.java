@@ -33,7 +33,7 @@ public class KafkaConsumer extends Thread {
 
     private String kafkaConnect = SoaSystemEnvProperties.SOA_KAFKA_PORT;
 
-    protected org.apache.kafka.clients.consumer.KafkaConsumer<byte[], byte[]> consumer;
+    protected org.apache.kafka.clients.consumer.KafkaConsumer<String, String> consumer;
 //    protected final static String ZookeeperSessionTimeoutMs = "40000";
 //    protected final static String ZookeeperSyncTimeMs = "200";
 //    protected final static String AutoCommitIntervalMs = "1000";
@@ -50,6 +50,8 @@ public class KafkaConsumer extends Thread {
         props.put("group.id", groupId);
         props.put("enable.auto.commit", "true");
         props.put("auto.commit.interval.ms", "1000");
+        props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 
 //        props.put("zookeeper.session.timeout.ms", ZookeeperSessionTimeoutMs);
 //        props.put("zookeeper.sync.time.ms", ZookeeperSyncTimeMs);
@@ -66,8 +68,8 @@ public class KafkaConsumer extends Thread {
 
             consumer.subscribe(Arrays.asList(topic));
             while (true) {
-                ConsumerRecords<byte[], byte[]> records = consumer.poll(100);
-                for (ConsumerRecord<byte[], byte[]> record : records){
+                ConsumerRecords<String, String> records = consumer.poll(100);
+                for (ConsumerRecord<String, String> record : records){
                     receive(record.value());
                     System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());}
             }
@@ -83,7 +85,7 @@ public class KafkaConsumer extends Thread {
      *
      * @param message
      */
-    private void receive(byte[] message) {
+    private void receive(String message) {
 
         logger.info("KafkaConsumer groupId({}) topic({}) 收到消息", groupId, topic);
         for (ConsumerContext customer : customers) {
@@ -109,7 +111,7 @@ public class KafkaConsumer extends Thread {
     }
 
 
-    private void dealMessage(ConsumerContext customer, byte[] message) {
+    private void dealMessage(ConsumerContext customer, String message) {
 
         SoaProcessFunction<Object, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>> soaProcessFunction = customer.getSoaProcessFunction();
         Object iface = customer.getIface();
@@ -131,7 +133,7 @@ public class KafkaConsumer extends Thread {
         Field field = args.getClass().getDeclaredFields()[0];
         field.setAccessible(true);//暴力访问，取消私有权限,让对象可以访问
 
-        ByteBuffer buf = ByteBuffer.wrap(message);
+        ByteBuffer buf = ByteBuffer.wrap(message.getBytes());
         try {
             field.set(args, buf);
 
