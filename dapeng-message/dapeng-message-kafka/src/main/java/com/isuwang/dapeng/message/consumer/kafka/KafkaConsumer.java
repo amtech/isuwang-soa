@@ -71,7 +71,6 @@ public class KafkaConsumer extends Thread {
             while (true) {
                 ConsumerRecords<ByteBuffer, ByteBuffer> records = consumer.poll(100);
                 for (ConsumerRecord<ByteBuffer, ByteBuffer> record : records) {
-                    System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
                     receive(record.value());
                 }
             }
