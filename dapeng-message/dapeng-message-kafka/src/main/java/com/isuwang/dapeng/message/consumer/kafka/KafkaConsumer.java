@@ -7,6 +7,7 @@ import com.isuwang.dapeng.message.consumer.api.context.ConsumerContext;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +51,8 @@ public class KafkaConsumer extends Thread {
         props.put("group.id", groupId);
         props.put("enable.auto.commit", "true");
         props.put("auto.commit.interval.ms", "1000");
-        props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        props.put("key.deserializer", StringDeserializer.class);
+        props.put("value.deserializer", StringDeserializer.class);
 
 //        props.put("zookeeper.session.timeout.ms", ZookeeperSessionTimeoutMs);
 //        props.put("zookeeper.sync.time.ms", ZookeeperSyncTimeMs);
