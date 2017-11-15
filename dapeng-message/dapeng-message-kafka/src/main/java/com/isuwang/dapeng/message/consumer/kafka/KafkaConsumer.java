@@ -69,11 +69,11 @@ public class KafkaConsumer extends Thread {
             consumer.subscribe(Arrays.asList(topic));
             while (true) {
                 ConsumerRecords<String, String> records = consumer.poll(100);
-                for (ConsumerRecord<String, String> record : records){
+                for (ConsumerRecord<String, String> record : records) {
+                    System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
                     receive(record.value());
-                    System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());}
+                }
             }
-
         } catch (Exception e) {
             logger.error("[KafkaConsumer][{}][run] " + e.getMessage(), groupId + ":" + topic, e);
         }
@@ -89,7 +89,7 @@ public class KafkaConsumer extends Thread {
 
         logger.info("KafkaConsumer groupId({}) topic({}) 收到消息", groupId, topic);
         for (ConsumerContext customer : customers) {
-           dealMessage(customer, message);
+            dealMessage(customer, message);
         }
     }
 
