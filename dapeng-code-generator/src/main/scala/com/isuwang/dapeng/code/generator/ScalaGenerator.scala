@@ -63,41 +63,7 @@ class ScalaGenerator extends CodeGenerator {
 
     val namespaces:util.Set[String] = new util.HashSet[String]()
     val structNamespaces:util.Set[String] = new util.HashSet[String]()
-    for (index <- (0 until services.size())) {
-      val service = services.get(index)
-      if(!service.getNamespace.contains("com.isuwang.soa.scala")){
-      service.setNamespace(service.getNamespace.replace("com.isuwang.soa","com.isuwang.soa.scala"))}
-      namespaces.add(service.getNamespace)
-
-      //設置method中字段的namespace
-      for(methodIndex <-(0 until service.getMethods.size())){
-        val methodDefinition = service.getMethods.get(methodIndex)
-        for(reqFieldIndex <- (0 until methodDefinition.request.fields.size()) ){
-          val fieldDefinition=methodDefinition.request.fields.get(reqFieldIndex)
-          if(fieldDefinition.dataType!=null&&fieldDefinition.dataType.qualifiedName!=null&&(!fieldDefinition.dataType.qualifiedName.contains("com.isuwang.soa.scala"))){
-            fieldDefinition.dataType.setQualifiedName(fieldDefinition.dataType.qualifiedName.replace("com.isuwang.soa","com.isuwang.soa.scala"))
-        }}
-        for(respFieldIndex <- (0 until methodDefinition.response.fields.size()) ){
-          val field2Definition=methodDefinition.response.fields.get(respFieldIndex)
-          if(field2Definition.dataType!=null&&field2Definition.dataType.qualifiedName!=null&&(!field2Definition.dataType.qualifiedName.contains("com.isuwang.soa.scala"))){
-            field2Definition.dataType.setQualifiedName(field2Definition.dataType.qualifiedName.replace("com.isuwang.soa","com.isuwang.soa.scala"))
-        }}
-      }
-
-      for(enumIndex <- (0 until service.getEnumDefinitions.size())) {
-        val enumDefinition = service.getEnumDefinitions.get(enumIndex)
-        if(!enumDefinition.getNamespace.contains("com.isuwang.soa.scala")){
-        enumDefinition.setNamespace(enumDefinition.getNamespace.replace("com.isuwang.soa","com.isuwang.soa.scala"))}
-        namespaces.add(enumDefinition.getNamespace)
-      }
-      for(structIndex <- (0 until service.getStructDefinitions.size())) {
-        val structDefinition = service.getStructDefinitions.get(structIndex)
-        if(!structDefinition.namespace.contains("com.isuwang.soa.scala")){
-        structDefinition.setNamespace(structDefinition.getNamespace.replace("com.isuwang.soa","com.isuwang.soa.scala"))}
-        namespaces.add(structDefinition.getNamespace)
-        structNamespaces.add(structDefinition.getNamespace)
-      }
-    }
+    replaceNamespace(services,namespaces,structNamespaces)
 
     if(generateAll){
       println("=========================================================")
@@ -217,6 +183,62 @@ class ScalaGenerator extends CodeGenerator {
 
   }
 
+  private def replaceNamespace(services: util.List[Service],namespaces:util.Set[String],structNamespaces:util.Set[String]): Unit ={
+    for (index <- (0 until services.size())) {
+      val service = services.get(index)
+      if(!service.getNamespace.contains("com.isuwang.soa.scala")){
+        service.setNamespace(service.getNamespace.replace("com.isuwang.soa","com.isuwang.soa.scala"))}
+      namespaces.add(service.getNamespace)
+
+      //設置method中字段的namespace
+      for(methodIndex <-(0 until service.getMethods.size())){
+        val methodDefinition = service.getMethods.get(methodIndex)
+        for(reqFieldIndex <- (0 until methodDefinition.request.fields.size()) ){
+          val fieldDefinition=methodDefinition.request.fields.get(reqFieldIndex)
+          if(fieldDefinition.dataType!=null&&fieldDefinition.dataType.qualifiedName!=null&&(!fieldDefinition.dataType.qualifiedName.contains("com.isuwang.soa.scala"))){
+            fieldDefinition.dataType.setQualifiedName(fieldDefinition.dataType.qualifiedName.replace("com.isuwang.soa","com.isuwang.soa.scala"))
+          }
+          if(fieldDefinition.dataType!=null&&fieldDefinition.dataType.valueType!=null&&fieldDefinition.dataType.valueType.qualifiedName!=null&&(!fieldDefinition.dataType.valueType.qualifiedName.contains("com.isuwang.soa.scala"))){
+            fieldDefinition.dataType.valueType.setQualifiedName(fieldDefinition.dataType.valueType.qualifiedName.replace("com.isuwang.soa","com.isuwang.soa.scala"))
+          }
+        }
+
+        for(respFieldIndex <- (0 until methodDefinition.response.fields.size()) ){
+          val field2Definition=methodDefinition.response.fields.get(respFieldIndex)
+          if(field2Definition.dataType!=null&&field2Definition.dataType.qualifiedName!=null&&(!field2Definition.dataType.qualifiedName.contains("com.isuwang.soa.scala"))){
+            field2Definition.dataType.setQualifiedName(field2Definition.dataType.qualifiedName.replace("com.isuwang.soa","com.isuwang.soa.scala"))
+          }
+          if(field2Definition.dataType!=null&&field2Definition.dataType.valueType!=null&&field2Definition.dataType.valueType.qualifiedName!=null&&(!field2Definition.dataType.valueType.qualifiedName.contains("com.isuwang.soa.scala"))){
+            field2Definition.dataType.valueType.setQualifiedName(field2Definition.dataType.valueType.qualifiedName.replace("com.isuwang.soa","com.isuwang.soa.scala"))
+          }
+        }
+
+      }
+
+      for(enumIndex <- (0 until service.getEnumDefinitions.size())) {
+        val enumDefinition = service.getEnumDefinitions.get(enumIndex)
+        if(!enumDefinition.getNamespace.contains("com.isuwang.soa.scala")){
+          enumDefinition.setNamespace(enumDefinition.getNamespace.replace("com.isuwang.soa","com.isuwang.soa.scala"))}
+        namespaces.add(enumDefinition.getNamespace)
+      }
+      for(structIndex <- (0 until service.getStructDefinitions.size())) {
+        val structDefinition = service.getStructDefinitions.get(structIndex)
+        if(!structDefinition.namespace.contains("com.isuwang.soa.scala")){
+          structDefinition.setNamespace(structDefinition.getNamespace.replace("com.isuwang.soa","com.isuwang.soa.scala"))}
+        namespaces.add(structDefinition.getNamespace)
+        structNamespaces.add(structDefinition.getNamespace)
+        for(fieldIndex <- (0 until structDefinition.getFields.size())){
+          val fieldDefinition = structDefinition.getFields.get(fieldIndex)
+          if(fieldDefinition.dataType!=null&&fieldDefinition.dataType.qualifiedName!=null&&(!fieldDefinition.dataType.qualifiedName.contains("com.isuwang.soa.scala"))){
+            fieldDefinition.dataType.setQualifiedName(fieldDefinition.dataType.qualifiedName.replace("com.isuwang.soa","com.isuwang.soa.scala"))
+          }
+          if(fieldDefinition.dataType!=null&&fieldDefinition.dataType.valueType!=null&&fieldDefinition.dataType.valueType.qualifiedName!=null&&(!fieldDefinition.dataType.valueType.qualifiedName.contains("com.isuwang.soa.scala"))){
+            fieldDefinition.dataType.valueType.setQualifiedName(fieldDefinition.dataType.valueType.qualifiedName.replace("com.isuwang.soa","com.isuwang.soa.scala"))
+          }
+        }
+      }
+    }
+  }
   private def toClientTemplate(service: Service, namespaces:util.Set[String]): Elem = {
     return {
       <div>package {service.namespace.substring(0, service.namespace.lastIndexOf("."))}
