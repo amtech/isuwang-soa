@@ -23,7 +23,7 @@ public class TSoaServiceProtocol extends TProtocol {
 
     private final boolean isRequestFlag;
 
-    //private TSoaTransport trans;
+    //private TCommonTransport trans;
 
     public TSoaServiceProtocol(TTransport trans, boolean isRequestFlag) {
         super(trans);

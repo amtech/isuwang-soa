@@ -12,18 +12,18 @@ public class BeanSerializer {
     public static <T> byte[] serialize(T structBean, TCommonBeanSerializer<T> structSerializer) throws TException {
 
         byte [] byteBuf = new byte[8192];
-        final TSoaTransport outputSoaTransport = new TSoaTransport(byteBuf, TSoaTransport.Type.Write,0);
+        final TCommonTransport outputCommonTransport = new TCommonTransport(byteBuf, TCommonTransport.Type.Write);
 
-        TCompactProtocol outputProtocol = new TCompactProtocol(outputSoaTransport);
+        TCompactProtocol outputProtocol = new TCompactProtocol(outputCommonTransport);
         structSerializer.write(structBean, outputProtocol);
-        return byteBuf;
+        return outputCommonTransport.getByteBuf();
     }
 
     public static <T> T deserialize(byte[] buff, TCommonBeanSerializer<T> structSerializer) throws TException {
 
-        final TSoaTransport inputSoaTransport = new TSoaTransport(buff, TSoaTransport.Type.Read,0);
+        final TCommonTransport inputCommonTransport = new TCommonTransport(buff, TCommonTransport.Type.Read);
 
-        TCompactProtocol intputProtocol = new TCompactProtocol(inputSoaTransport);
+        TCompactProtocol intputProtocol = new TCompactProtocol(inputCommonTransport);
         T struct = structSerializer.read(intputProtocol);
         return struct;
     }

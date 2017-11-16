@@ -9,7 +9,7 @@ import java.util.Arrays;
  * @author craneding
  * @date 16/1/12
  */
-public class TSoaTransport extends TTransport {
+public class TCommonTransport extends TTransport {
 
     enum Type {
         Read, Write
@@ -17,12 +17,12 @@ public class TSoaTransport extends TTransport {
 
     private Type type;
     private byte[] byteBuf;
-    private int pos;
+    private int pos;    // the next read/write position
 
-    public TSoaTransport(byte[] byteBuf,Type type,int pos) {
+    public TCommonTransport(byte[] byteBuf, Type type) {
         this.byteBuf = byteBuf;
-        this.type=type;
-        this.pos=pos;
+        this.type = type;
+        this.pos = 0;
     }
 
     /**
@@ -53,11 +53,11 @@ public class TSoaTransport extends TTransport {
         if (type == Type.Write)
             throw new TTransportException("try to read from write-only transport");
 
-        int remain = byteBuf.length-pos-1;
+        int remain = byteBuf.length-pos;
         int amtToRead = (len > remain ? remain : len);
         if(amtToRead>0){
             System.arraycopy(byteBuf, pos, buf, off, amtToRead);
-            pos+=len;
+            pos+=amtToRead;
         }
 
         return amtToRead;
@@ -71,12 +71,22 @@ public class TSoaTransport extends TTransport {
                 ((off + len) - buf.length > 0)) {
             throw new IndexOutOfBoundsException();
         }
-        if(byteBuf.length-pos-1<len){
-            grow(pos+1+len);
+        if(byteBuf.length-pos < len){
+            grow(pos + 1 + len);
         }
         System.arraycopy(buf, off, byteBuf, pos, len);
-        pos+=len;
+        pos += len;
 
+    }
+
+    public byte[] getByteBuf(){
+        if(type == Type.Read) return byteBuf;
+        else if(type == Type.Write) {
+            byte[] array = new byte[pos];
+            System.arraycopy(byteBuf, 0, array, 0, pos);
+            return array;
+        }
+        else throw new IllegalStateException();
     }
 
     private void grow(int minCapacity) {
