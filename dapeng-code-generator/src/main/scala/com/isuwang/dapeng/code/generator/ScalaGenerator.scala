@@ -439,9 +439,12 @@ class ScalaGenerator extends CodeGenerator {
               </div>
             }
             }}
-            case _ => UNDEFINED
+            case _ => new {enum.name}(v,"#"+ v)
           </block>
         </block>
+
+        def apply(v: Int) = findByValue(v)
+        def unapply(v: {enum.name}): Option[Int] = Some(v.id)
 
       </block>
       </div>
