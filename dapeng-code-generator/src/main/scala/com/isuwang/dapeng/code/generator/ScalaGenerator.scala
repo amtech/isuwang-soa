@@ -408,36 +408,43 @@ class ScalaGenerator extends CodeGenerator {
     return {
       <div>package {enum.namespace};
 
+        class {enum.name} private(val id: Int, val name: String) extends TEnum(id,name) <block>{}</block>
+
         /**
         {notice}
         * {enum.doc}
         **/
-        object {enum.name} extends Enumeration<block>
-
-        type {enum.name} = Value
+        object {enum.name} <block>
 
         {
         toEnumItemArrayBuffer(enum.enumItems).map{(enumItem: EnumItem)=>{
           if(enumItem.doc != null)
             <div>
-              val {enumItem.label} = Value({enumItem.value}, "{enumItem.doc.trim.replace("*","")}")
+              val {enumItem.label} = new {enum.name}({enumItem.value}, "{enumItem.doc.trim.replace("*","")}")
             </div>
           else
             <div>
-              val {enumItem.label} = Value({enumItem.value})
+              val {enumItem.label} = new {enum.name}({enumItem.value},"")
             </div>
         }
         }
         }
-        <div>val UNDEFINED = Value(-1) // undefined enum
+        <div>val UNDEFINED = new {enum.name}(-1,"UNDEFINED") // undefined enum
         </div>
 
-        def findByValue(v: Int): {enum.name} = try<block>
-            {enum.name}.apply(v)
+        def findByValue(v: Int): {enum.name} = <block>
+          v match <block>
+            {toEnumItemArrayBuffer(enum.enumItems).map { (enumItem: EnumItem) => {
+              <div>case {enumItem.value} => {enumItem.label}
+              </div>
+            }
+            }}
+            case _ => new {enum.name}(v,"#"+ v)
           </block>
-          catch<block>
-            case ex: Throwable => UNDEFINED;
-          </block>
+        </block>
+
+        def apply(v: Int) = findByValue(v)
+        def unapply(v: {enum.name}): Option[Int] = Some(v.id)
 
       </block>
       </div>
