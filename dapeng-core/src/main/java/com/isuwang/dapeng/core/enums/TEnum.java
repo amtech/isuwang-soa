@@ -9,8 +9,8 @@ public class TEnum {
         this.name = name;
     }
 
-    int id;
-    String name;
+    private int id;
+    private String name;
 
     public int getId() {
         return id;
