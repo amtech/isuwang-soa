@@ -2,6 +2,8 @@ package com.isuwang.dapeng.core.enums;
 
 public class TEnum {
 
+    private TEnum() { }
+
     public TEnum(int id, String name) {
         this.id = id;
         this.name = name;
@@ -14,12 +16,12 @@ public class TEnum {
         return id;
     }
 
-    private void setId(int id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
+    }
+
+    private void setId(int id) {
+        this.id = id;
     }
 
     private void setName(String name) {
@@ -33,7 +35,7 @@ public class TEnum {
 
     @Override
     public int hashCode() {
-        return super.hashCode() + id;
+        return super.hashCode() + this.id;
     }
 
     @Override

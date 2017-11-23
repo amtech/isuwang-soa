@@ -404,45 +404,51 @@ class ScalaGenerator extends CodeGenerator {
     }
   }
 
-  private def toEnumTemplate(enum: TEnum): Elem = return {
-    <div>package {enum.namespace};
-      import com.isuwang.dapeng.core.enums.TEnum
+  private def toEnumTemplate(enum: TEnum): Elem = {
+    return {
+      <div>package {enum.namespace};
 
-      class {enum.name} extends TEnum
+        class {enum.name} private(val id: Int, val name: String) extends TEnum(id,name) <block>{}</block>
 
-      /**
-      {notice}
-      * {enum.doc}
-      **/
-      object {enum.name} extends Enumeration<block>
+        /**
+        {notice}
+        * {enum.doc}
+        **/
+        object {enum.name} <block>
 
-      type {enum.name} = Value
+        {
+        toEnumItemArrayBuffer(enum.enumItems).map{(enumItem: EnumItem)=>{
+          if(enumItem.doc != null)
+            <div>
+              val {enumItem.label} = new {enum.name}({enumItem.value}, "{enumItem.doc.trim.replace("*","")}")
+            </div>
+          else
+            <div>
+              val {enumItem.label} = new {enum.name}({enumItem.value},"")
+            </div>
+        }
+        }
+        }
+        <div>val UNDEFINED = new {enum.name}(-1,"UNDEFINED") // undefined enum
+        </div>
 
-      {
-      toEnumItemArrayBuffer(enum.enumItems).map{(enumItem: EnumItem)=>{
-        if(enumItem.doc != null)
-          <div>
-            val {enumItem.label} = Value({enumItem.value}, "{enumItem.doc.trim.replace("*","")}")
-          </div>
-        else
-          <div>
-            val {enumItem.label} = Value({enumItem.value})
-          </div>
-      }
-      }
-      }
-      <div>val UNDEFINED = Value(-1) // undefined enum
+        def findByValue(v: Int): {enum.name} = <block>
+          v match <block>
+            {toEnumItemArrayBuffer(enum.enumItems).map { (enumItem: EnumItem) => {
+              <div>case {enumItem.value} => {enumItem.label}
+              </div>
+            }
+            }}
+            case _ => new {enum.name}(v,"#"+ v)
+          </block>
+        </block>
+
+        def apply(v: Int) = findByValue(v)
+        def unapply(v: {enum.name}): Option[Int] = Some(v.id)
+
+      </block>
       </div>
-
-      def findByValue(v: Int): {enum.name} = try<block>
-          {enum.name}.apply(v)
-        </block>
-        catch<block>
-          case ex: Throwable => UNDEFINED;
-        </block>
-
-    </block>
-    </div>
+    }
   }
 
   private def toDomainTemplate(struct: Struct): Elem = {
