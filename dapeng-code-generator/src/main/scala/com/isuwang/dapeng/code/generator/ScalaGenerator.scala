@@ -404,44 +404,45 @@ class ScalaGenerator extends CodeGenerator {
     }
   }
 
-  private def toEnumTemplate(enum: TEnum): Elem = {
-    return {
-      <div>package {enum.namespace};
+  private def toEnumTemplate(enum: TEnum): Elem = return {
+    <div>package {enum.namespace};
+      import com.isuwang.dapeng.core.enums.TEnum
 
-        /**
-        {notice}
-        * {enum.doc}
-        **/
-        object {enum.name} extends Enumeration<block>
+      class {enum.name} extends TEnum
 
-        type {enum.name} = Value
+      /**
+      {notice}
+      * {enum.doc}
+      **/
+      object {enum.name} extends Enumeration<block>
 
-        {
-        toEnumItemArrayBuffer(enum.enumItems).map{(enumItem: EnumItem)=>{
-          if(enumItem.doc != null)
-            <div>
-              val {enumItem.label} = Value({enumItem.value}, "{enumItem.doc.trim.replace("*","")}")
-            </div>
-          else
-            <div>
-              val {enumItem.label} = Value({enumItem.value})
-            </div>
-        }
-        }
-        }
-        <div>val UNDEFINED = Value(-1) // undefined enum
-        </div>
+      type {enum.name} = Value
 
-        def findByValue(v: Int): {enum.name} = try<block>
-            {enum.name}.apply(v)
-          </block>
-          catch<block>
-            case ex: Throwable => UNDEFINED;
-          </block>
-
-      </block>
+      {
+      toEnumItemArrayBuffer(enum.enumItems).map{(enumItem: EnumItem)=>{
+        if(enumItem.doc != null)
+          <div>
+            val {enumItem.label} = Value({enumItem.value}, "{enumItem.doc.trim.replace("*","")}")
+          </div>
+        else
+          <div>
+            val {enumItem.label} = Value({enumItem.value})
+          </div>
+      }
+      }
+      }
+      <div>val UNDEFINED = Value(-1) // undefined enum
       </div>
-    }
+
+      def findByValue(v: Int): {enum.name} = try<block>
+          {enum.name}.apply(v)
+        </block>
+        catch<block>
+          case ex: Throwable => UNDEFINED;
+        </block>
+
+    </block>
+    </div>
   }
 
   private def toDomainTemplate(struct: Struct): Elem = {
