@@ -23,8 +23,8 @@ public class Bootstrap {
     private static final List<URL> platformURLs = new ArrayList<>();
     private static final List<List<URL>> appURLs = new ArrayList<>();
     private static final List<List<URL>> pluginURLs = new ArrayList<>();
-    private static final String enginePath = System.getProperty("soa.base", new File(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent());
-    private static final String soaRunMode = System.getProperty("soa.run.mode", "maven");
+    private static final String enginePath = System.getProperty("soa.base", new File(new File(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile().getParentFile().getParent() + "\\dapeng-container\\target\\dapeng-container").getPath());
+    private static final String soaRunMode = System.getProperty("soa.run.mode", "local");
 
     public static void main(String[] args) throws MalformedURLException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         System.setProperty("soa.run.mode", soaRunMode);
