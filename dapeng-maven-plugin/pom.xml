@@ -7,7 +7,7 @@
     <parent>
         <artifactId>dapeng-parent</artifactId>
         <groupId>com.isuwang</groupId>
-        <version>1.2.1</version>
+        <version>1.2.2</version>
     </parent>
 
     <groupId>com.isuwang</groupId>
@@ -58,7 +58,7 @@
         <dependency>
             <groupId>com.isuwang</groupId>
             <artifactId>dapeng-code-generator</artifactId>
-            <version>1.2.1</version>
+            <version>1.2.2</version>
         </dependency>
     </dependencies>
 
@@ -95,23 +95,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <!--<plugin>
-                <groupId>com.isuwang</groupId>
-                <artifactId>dapeng-maven-plugin</artifactId>
-                <version>1.2.1</version>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>thriftGenerator</goal>
-                        </goals>
-                        <configuration>
-                            <language>both</language>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>-->
         </plugins>
     </build>
 </project>
