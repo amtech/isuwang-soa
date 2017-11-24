@@ -55,7 +55,7 @@ public class ZookeeperRegistryContainer implements Container {
 
                         ProcessorKey processorKey = new ProcessorKey(processor.getInterfaceClass().getName(), service.version());
                         ProcessorCache.getProcessorMap().put(processorKey, processor);
-                        registryAgent.registerService(processor.getInterfaceClass().getName(), service.version());
+                        registryAgent.registerService(service.name(), service.version());
                         SoaAppClassLoaderCache.getAppClassLoaderMap().put(processorKey,appClassLoaderMap.get(ctx));
                     }
                 }

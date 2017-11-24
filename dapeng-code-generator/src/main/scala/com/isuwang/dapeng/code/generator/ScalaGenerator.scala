@@ -7,6 +7,7 @@ import com.isuwang.dapeng.core.metadata.DataType.KIND
 import com.isuwang.dapeng.core.metadata.TEnum.EnumItem
 import com.isuwang.dapeng.core.metadata._
 
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.xml.Elem
 
@@ -63,7 +64,8 @@ class ScalaGenerator extends CodeGenerator {
 
     val namespaces:util.Set[String] = new util.HashSet[String]()
     val structNamespaces:util.Set[String] = new util.HashSet[String]()
-    replaceNamespace(services,namespaces,structNamespaces)
+
+    val oriNamespaces = replaceNamespace(services,namespaces,structNamespaces)
 
     if(generateAll){
       println("=========================================================")
@@ -102,7 +104,7 @@ class ScalaGenerator extends CodeGenerator {
       println(s"服务名称:${service.name}")
 
       println(s"生成service:${service.name}.scala")
-      val serviceTemplate = new StringTemplate(toServiceTemplate(service))
+      val serviceTemplate = new StringTemplate(toServiceTemplate(service,oriNamespaces.get(service).getOrElse("")))
       val writer = new PrintWriter(new File(rootDir(outDir, service.getNamespace), s"${service.name}.scala"), "UTF-8")
       writer.write(serviceTemplate.toString())
       writer.close()
@@ -183,9 +185,11 @@ class ScalaGenerator extends CodeGenerator {
 
   }
 
-  private def replaceNamespace(services: util.List[Service],namespaces:util.Set[String],structNamespaces:util.Set[String]): Unit ={
+  private def replaceNamespace(services: util.List[Service],namespaces:util.Set[String],structNamespaces:util.Set[String]): Map[Service, String] ={
+    val oriNameSpaces = mutable.HashMap[Service,String]()
     for (index <- (0 until services.size())) {
       val service = services.get(index)
+      oriNameSpaces.put(service, service.namespace)
       if(!service.getNamespace.contains("com.isuwang.soa.scala")){
         service.setNamespace(service.getNamespace.replace("com.isuwang.soa","com.isuwang.soa.scala"))}
       namespaces.add(service.getNamespace)
@@ -238,6 +242,7 @@ class ScalaGenerator extends CodeGenerator {
         }
       }
     }
+    oriNameSpaces.toMap
   }
   private def toClientTemplate(service: Service, namespaces:util.Set[String]): Elem = {
     return {
@@ -475,7 +480,7 @@ class ScalaGenerator extends CodeGenerator {
   val keywords = Set("type") // TODO is there any other keyword need to be escape
   def nameAsId(name: String) = if(keywords contains name) s"`$name`" else name
 
-  private def toServiceTemplate(service:Service): Elem = {
+  private def toServiceTemplate(service:Service, oriNamespace: String): Elem = {
     return {
       <div>
         package {service.namespace}
@@ -487,7 +492,7 @@ class ScalaGenerator extends CodeGenerator {
         {notice}
         * {service.doc}
         **/
-        @Service(version = "{service.meta.version}")
+        @Service(name ="{oriNamespace+"."+service.name}" , version = "{service.meta.version}")
         @Processor(className = "{service.namespace.substring(0, service.namespace.lastIndexOf("service"))}{service.name}Codec$Processor")
         trait {service.name} <block>
         {
