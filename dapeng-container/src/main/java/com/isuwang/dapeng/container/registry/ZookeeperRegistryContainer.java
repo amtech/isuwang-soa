@@ -53,7 +53,7 @@ public class ZookeeperRegistryContainer implements Container {
                     if (processor.getInterfaceClass().getClass() != null) {
                         Service service = processor.getInterfaceClass().getAnnotation(Service.class);
 
-                        ProcessorKey processorKey = new ProcessorKey(processor.getInterfaceClass().getName(), service.version());
+                        ProcessorKey processorKey = new ProcessorKey(service.name(), service.version());
                         ProcessorCache.getProcessorMap().put(processorKey, processor);
                         registryAgent.registerService(service.name(), service.version());
                         SoaAppClassLoaderCache.getAppClassLoaderMap().put(processorKey,appClassLoaderMap.get(ctx));
