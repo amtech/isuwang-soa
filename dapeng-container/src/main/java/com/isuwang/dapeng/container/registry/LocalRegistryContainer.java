@@ -46,7 +46,7 @@ public class LocalRegistryContainer implements Container, RegistryAgent {
                         ProcessorKey processorKey = new ProcessorKey(service.name(), service.version());
                         getProcessorMap().put(processorKey, processor);
 
-                        this.registerService(processor.getInterfaceClass().getName(), service.version());
+                        this.registerService(service.name(), service.version());
                     }
                 }
             } catch (Exception e) {
