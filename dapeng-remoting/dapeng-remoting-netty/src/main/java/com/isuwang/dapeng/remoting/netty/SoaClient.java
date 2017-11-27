@@ -135,7 +135,11 @@ public class SoaClient {
             synchronized (byteBufs) {
                 byteBufs[0] = msg;
 
-                byteBufs.notify();
+                byteBufs = caches.get(String.valueOf(seqid));
+                // if peer wait    byebuffs != null   if peer out of synchornized, bytebuffs == null
+                if(byteBufs != null) {
+                    byteBufs.notify();
+                }
             }
         }
     };
@@ -158,24 +162,20 @@ public class SoaClient {
 
         caches.put(String.valueOf(seqid), byteBufs);
 
-        try {
-            channel.writeAndFlush(request);
+        synchronized (byteBufs) {
+            try {
+                channel.writeAndFlush(request);
 
-            //等待返回结果，soaClientHandler会将结果写入caches并释放锁，此时返回
-            synchronized (byteBufs) {
+                //等待返回结果，soaClientHandler会将结果写入caches并释放锁，此时返回
                 if (byteBufs[0] != null)
                     return byteBufs[0];
 
-                try {
-                    byteBufs.wait(50000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+                byteBufs.wait(50000);
 
-            return byteBufs[0];
-        } finally {
-            caches.remove(String.valueOf(seqid));
+                return byteBufs[0];
+            } finally {
+                caches.remove(String.valueOf(seqid));
+            }
         }
     }
 
