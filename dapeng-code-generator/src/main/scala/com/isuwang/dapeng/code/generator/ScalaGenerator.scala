@@ -548,8 +548,7 @@ class ScalaGenerator extends CodeGenerator {
         if(!dataType.getQualifiedName.contains("com.isuwang.soa.scala")){
           ref=dataType.getQualifiedName.replace("com.isuwang.soa","com.isuwang.soa.scala")
         }
-        val enumName = ref.substring(ref.lastIndexOf("."))
-        return {<div>{ref}{enumName}</div>}
+        return {<div>{ref}</div>}
       case KIND.STRUCT =>
         var ref = dataType.getQualifiedName
         if(!dataType.getQualifiedName.contains("com.isuwang.soa.scala")){
