@@ -77,6 +77,7 @@ public class Bootstrap {
         ClassLoaderManager.platformClassLoader = new PlatformClassLoader(platformURLs.toArray(new URL[platformURLs.size()]));
 
         for (List<URL> appURL : appURLs) {
+            appURL.forEach(x->{System.out.println("appUrl--------"+x.getPath());});
             AppClassLoader appClassLoader = new AppClassLoader(appURL.toArray(new URL[appURL.size()]));
             ClassLoaderManager.appClassLoaders.add(appClassLoader);
         }
