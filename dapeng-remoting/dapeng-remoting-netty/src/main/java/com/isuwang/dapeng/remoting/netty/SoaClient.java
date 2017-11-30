@@ -109,10 +109,7 @@ public class SoaClient {
     private SoaClientHandler.CallBack callBack = msg -> {
         // length(4) stx(1) version(...) protocol(1) seqid(4) header(...) body(...) etx(1)
         int readerIndex = msg.readerIndex();
-        msg.skipBytes(5);
-        int len = msg.readInt();
-        msg.readBytes(new byte[len], 0, len);
-        msg.skipBytes(1);
+        msg.skipBytes(7);
         int seqid = msg.readInt();
 
         msg.readerIndex(readerIndex);

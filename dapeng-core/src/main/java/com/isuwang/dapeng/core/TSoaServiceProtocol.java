@@ -16,12 +16,14 @@ public class TSoaServiceProtocol extends TProtocol {
 
     private final byte STX = 0x02;
     private final byte ETX = 0x03;
-    private final String VERSION = "1.0.0";
+    private final String OLD_VERSION = "1.0.0";
+    private final byte VERSION = 1;
 
     private TProtocol realHeaderProtocol;
     private TProtocol realContentProtocol;
 
     private final boolean isRequestFlag;
+    private boolean isOldVersion = false;
 
     //private TCommonTransport trans;
 
@@ -29,6 +31,14 @@ public class TSoaServiceProtocol extends TProtocol {
         super(trans);
         //this.trans = trans;
         this.isRequestFlag = isRequestFlag;
+    }
+
+    public boolean isOldVersion() {
+        return isOldVersion;
+    }
+
+    public void setOldVersion(boolean oldVersion) {
+        isOldVersion = oldVersion;
     }
 
     @Override
@@ -42,7 +52,11 @@ public class TSoaServiceProtocol extends TProtocol {
         // length(int32) stx(int8) version(string) protocol(int8) seqid(int32) header(struct) body(struct) etx(int8)
 
         realHeaderProtocol.writeByte(STX);
-        realHeaderProtocol.writeString(VERSION);
+        if (isOldVersion) {
+            realHeaderProtocol.writeString(OLD_VERSION);
+        } else {
+            realHeaderProtocol.writeByte(VERSION);
+        }
         realHeaderProtocol.writeByte(context.getCodecProtocol().getCode());
         realHeaderProtocol.writeI32(context.getSeqid());
 
@@ -63,7 +77,9 @@ public class TSoaServiceProtocol extends TProtocol {
 
         new SoaHeaderSerializer().write(context.getHeader(), this);
 
-        realContentProtocol.writeMessageBegin(message);
+        if (isOldVersion) {
+            realContentProtocol.writeMessageBegin(message);
+        }
     }
 
     @Override
@@ -184,9 +200,15 @@ public class TSoaServiceProtocol extends TProtocol {
         }
 
         // version
-        String version = realHeaderProtocol.readString();
-        if (!VERSION.equals(version)) {
-            throw new TException("通讯协议不正确(协议版本号)");
+        byte version = realHeaderProtocol.readByte();
+        if (version != VERSION) {
+            getTransport().flushBack(1);
+            String oldVersion = realHeaderProtocol.readString();
+            if (!OLD_VERSION.equals(oldVersion)) {
+                throw new TException("通讯协议不正确(协议版本号)");
+            } else {
+                this.setOldVersion(true);
+            }
         }
 
         byte protocol = realHeaderProtocol.readByte();
@@ -210,10 +232,15 @@ public class TSoaServiceProtocol extends TProtocol {
 
         context.setSeqid(realHeaderProtocol.readI32());
 
-        SoaHeader soaHeader =new SoaHeaderSerializer().read( this);
+        SoaHeader soaHeader = new SoaHeaderSerializer().read(this);
         context.setHeader(soaHeader);
 
-        return realContentProtocol.readMessageBegin();
+        if (isOldVersion) {
+            return realContentProtocol.readMessageBegin();
+        } else {
+            TMessage tm =new TMessage(null,(byte)0,context.getSeqid());
+            return tm;
+        }
     }
 
     @Override
