@@ -57,7 +57,7 @@
 
         <dependency>
             <groupId>com.isuwang</groupId>
-            <artifactId>dapeng-code-generator</artifactId>
+            <artifactId>dapeng-code-generator_2.11</artifactId>
             <version>1.3.0</version>
         </dependency>
     </dependencies>
