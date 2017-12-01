@@ -184,9 +184,13 @@ public class TSoaServiceProtocol extends TProtocol {
         }
 
         // version
-        String version = realHeaderProtocol.readString();
-        if (!VERSION.equals(version)) {
-            throw new TException("通讯协议不正确(协议版本号)");
+        try {
+            String version = realHeaderProtocol.readString();
+            if (!VERSION.equals(version)) {
+                throw new TException("通讯协议不正确(协议版本号)");
+            }
+        }catch (Exception e){
+            throw new TException("版本不兼容" ,new TVersionException());
         }
 
         byte protocol = realHeaderProtocol.readByte();

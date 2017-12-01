@@ -84,13 +84,13 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
         TSoaTransport inputSoaTransport = null;
 
         boolean intoPool = false, intoProcessRequest = false, isAsync = false;
+        final SoaHeader soaHeader = new SoaHeader();
+        final TransactionContext context = TransactionContext.Factory.getNewInstance();
         try {
             final Long startTime = System.currentTimeMillis();
 
             final int requestLength = getRequestLength(inputBuf);
 
-            final TransactionContext context = TransactionContext.Factory.getNewInstance();
-            final SoaHeader soaHeader = new SoaHeader();
             inputSoaTransport = new TSoaTransport(inputBuf);
             context.setHeader(soaHeader);
             TransactionContext.Factory.setCurrentInstance(context);
@@ -140,7 +140,20 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
                     processRequest(ctx, inputBuf, inputSoaTransport, inputProtocol, context, startTime, processData);
             }
 
-        } finally {
+        }catch(TException e){
+            LogUtil.logError(SoaServerHandler.class,soaHeader,e.getMessage(),e);
+            String errMsg = e.getCause() != null ? e.getCause().toString() : (e.getMessage() != null ? e.getMessage().toString() : e.toString());
+            final ByteBuf outputBuf = ctx.alloc().buffer(8192);
+            final TSoaTransport outputSoaTransport = new TSoaTransport(outputBuf);
+            TSoaServiceProtocol outputProtocol = new TSoaServiceProtocol(outputSoaTransport, false);
+            SoaBaseCode soaBaseCode = SoaBaseCode.UnKnown;
+            if(e.getCause() instanceof TVersionException){
+                soaBaseCode=SoaBaseCode.VersionNotMatch;
+            }
+            writeErrorMessage(ctx, outputBuf, context, soaHeader, outputSoaTransport, outputProtocol, new SoaException(soaBaseCode, errMsg));
+
+        }
+        finally {
             if (!intoPool && !isAsync) {
                 if (inputSoaTransport.isOpen())
                     inputSoaTransport.close();
