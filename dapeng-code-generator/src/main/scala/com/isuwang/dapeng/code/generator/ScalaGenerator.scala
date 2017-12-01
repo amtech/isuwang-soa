@@ -139,14 +139,14 @@ class ScalaGenerator extends CodeGenerator {
       }
 
       println(s"生成client:${service.name}Client.scala")
-      val clientTemplate = new StringTemplate(toClientTemplate(service, namespaces))
+      val clientTemplate = new StringTemplate(toClientTemplate(service,oriNamespaces.get(service).getOrElse("")))
       val clientWriter = new PrintWriter(new File(rootDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))), s"${service.name}Client.scala"), "UTF-8")
       clientWriter.write(clientTemplate.toString())
       clientWriter.close()
       println(s"生成client:${service.name}Client.scala 完成")
 
       println(s"生成client:${service.name}AsyncClient.scala")
-      val asyncClientTemplate = new StringTemplate(toAsyncClientTemplate(service, namespaces))
+      val asyncClientTemplate = new StringTemplate(toAsyncClientTemplate(service, oriNamespaces.get(service).getOrElse("")))
       val asyncClientWriter = new PrintWriter(new File(rootDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))), s"${service.name}AsyncClient.scala"), "UTF-8")
       asyncClientWriter.write(asyncClientTemplate.toString())
       asyncClientWriter.close()
@@ -244,7 +244,7 @@ class ScalaGenerator extends CodeGenerator {
     }
     oriNameSpaces.toMap
   }
-  private def toClientTemplate(service: Service, namespaces:util.Set[String]): Elem = {
+  private def toClientTemplate(service: Service, oriNamespace: String): Elem = {
     return {
       <div>package {service.namespace.substring(0, service.namespace.lastIndexOf("."))}
 
@@ -256,7 +256,7 @@ class ScalaGenerator extends CodeGenerator {
         /**
         {notice}
         **/
-        object {service.name}Client extends BaseCommonServiceClient("{service.namespace}.{service.name}", "{service.meta.version}")<block>
+        object {service.name}Client extends BaseCommonServiceClient("{oriNamespace}.{service.name}", "{service.meta.version}")<block>
 
         override def isSoaTransactionalProcess: Boolean = <block>
 
@@ -332,7 +332,7 @@ class ScalaGenerator extends CodeGenerator {
   }
 
 
-  private def toAsyncClientTemplate(service: Service, namespaces:util.Set[String]): Elem = {
+  private def toAsyncClientTemplate(service: Service, oriNamespace: String): Elem = {
     return {
       <div>package {service.namespace.substring(0, service.namespace.lastIndexOf("."))}
 
@@ -346,7 +346,7 @@ class ScalaGenerator extends CodeGenerator {
         /**
         {notice}
         **/
-        object {service.name}AsyncClient extends BaseCommonServiceClient("{service.namespace}.{service.name}", "{service.meta.version}")<block>
+        object {service.name}AsyncClient extends BaseCommonServiceClient("{oriNamespace}.{service.name}", "{service.meta.version}")<block>
 
         override def isSoaTransactionalProcess: Boolean = <block>
 
