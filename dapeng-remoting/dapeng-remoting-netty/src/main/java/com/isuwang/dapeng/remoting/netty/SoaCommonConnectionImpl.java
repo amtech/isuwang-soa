@@ -68,8 +68,6 @@ public class SoaCommonConnectionImpl implements SoaCommonConnection {
                     TApplicationException x = TApplicationException.read(inputProtocol);
                     inputProtocol.readMessageEnd();
                     throw x;
-                } else if (context.getSeqid() != msg.seqid) {
-                    throw new TApplicationException(4, soaHeader.getMethodName() + " failed: out of sequence response");
                 } else if (SoaBaseCode.VersionNotMatch.getCode().equals(soaHeader.getRespCode().get())) {
                     outputSoaTransport.close();
 
@@ -81,7 +79,9 @@ public class SoaCommonConnectionImpl implements SoaCommonConnection {
                         responseBuf.release();
                     return send(request,requestSerializer,responseSerializer,true);
 
-                } else {
+                } else if (context.getSeqid() != msg.seqid) {
+                    throw new TApplicationException(4, soaHeader.getMethodName() + " failed: out of sequence response");
+                }else {
                     if ("0000".equals(soaHeader.getRespCode().get())) {
                         response = responseSerializer.read(inputProtocol);
                         inputProtocol.readMessageEnd();
