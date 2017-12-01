@@ -29,7 +29,7 @@ public class SoaCommonConnectionImpl implements SoaCommonConnection {
     }
 
     @Override
-    public <REQ, RESP> RESP send(REQ request, TCommonBeanSerializer<REQ> requestSerializer, TCommonBeanSerializer<RESP> responseSerializer) throws TException {
+    public <REQ, RESP> RESP send(REQ request, TCommonBeanSerializer<REQ> requestSerializer, TCommonBeanSerializer<RESP> responseSerializer,boolean isOldVersion) throws TException {
         InvocationContext context = InvocationContext.Factory.getCurrentInstance();
         SoaHeader soaHeader = context.getHeader();
 
@@ -70,6 +70,17 @@ public class SoaCommonConnectionImpl implements SoaCommonConnection {
                     throw x;
                 } else if (context.getSeqid() != msg.seqid) {
                     throw new TApplicationException(4, soaHeader.getMethodName() + " failed: out of sequence response");
+                } else if (SoaBaseCode.VersionNotMatch.getCode().equals(soaHeader.getRespCode().get())) {
+                    outputSoaTransport.close();
+
+                    if (requestBuf.refCnt() > 0)
+                        requestBuf.release();
+
+                    // to see SoaDecoder: ByteBuf msg = in.slice(readerIndex, length + Integer.BYTES).retain();
+                    if (responseBuf != null)
+                        responseBuf.release();
+                    return send(request,requestSerializer,responseSerializer,true);
+
                 } else {
                     if ("0000".equals(soaHeader.getRespCode().get())) {
                         response = responseSerializer.read(inputProtocol);

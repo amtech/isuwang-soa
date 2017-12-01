@@ -24,7 +24,7 @@ import java.util.concurrent.Future;
 public class SoaConnectionImpl implements SoaCommonConnection {
     private static final Logger LOGGER = LoggerFactory.getLogger(SoaConnectionImpl.class);
 
-    public <REQ, RESP> RESP send(REQ request, TCommonBeanSerializer<REQ> requestSerializer, TCommonBeanSerializer<RESP> responseSerializer) throws TException {
+    public <REQ, RESP> RESP send(REQ request, TCommonBeanSerializer<REQ> requestSerializer, TCommonBeanSerializer<RESP> responseSerializer,boolean isOldVersion) throws TException {
         final InvocationContext context = InvocationContext.Factory.getCurrentInstance();
         SoaHeader header = context.getHeader();
         RESP response=null;
