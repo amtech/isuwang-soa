@@ -107,12 +107,18 @@ public class SoaClient {
      * 将结果放入对应的caches中，并释放锁，使得等待的线程返回结果
      */
     private SoaClientHandler.CallBack callBack = msg -> {
-        // length(4) stx(1) version(...) protocol(1) seqid(4) header(...) body(...) etx(1)
+        //v0 length(4) stx(1) version(...) protocol(1) seqid(4) header(...) body(...) etx(1)
+        //v2 length4 stx1 version1 protocol1 seqid4 header body etx
         int readerIndex = msg.readerIndex();
         msg.skipBytes(5);
+
+        // skip the version string 4+N
         int len = msg.readInt();
         msg.readBytes(new byte[len], 0, len);
+
+        // skip protocol
         msg.skipBytes(1);
+
         int seqid = msg.readInt();
 
         msg.readerIndex(readerIndex);
