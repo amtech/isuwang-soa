@@ -151,6 +151,9 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
                 soaBaseCode=SoaBaseCode.VersionNotMatch;
             }
             context.setSeqid((int)Math.random());
+            soaHeader.setServiceName("service");
+            soaHeader.setVersionName("version");
+            soaHeader.setMethodName("method");
             writeErrorMessage(ctx, outputBuf, context, soaHeader, outputSoaTransport, outputProtocol, new SoaException(soaBaseCode, errMsg));
 
         }
