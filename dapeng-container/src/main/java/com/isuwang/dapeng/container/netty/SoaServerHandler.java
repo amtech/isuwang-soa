@@ -150,6 +150,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
             if(e.getCause() instanceof TVersionException){
                 soaBaseCode=SoaBaseCode.VersionNotMatch;
             }
+            context.setSeqid((int)Math.random());
             writeErrorMessage(ctx, outputBuf, context, soaHeader, outputSoaTransport, outputProtocol, new SoaException(soaBaseCode, errMsg));
 
         }
