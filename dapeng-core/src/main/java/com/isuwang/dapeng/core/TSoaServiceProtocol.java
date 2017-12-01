@@ -23,7 +23,7 @@ public class TSoaServiceProtocol extends TProtocol {
     private TProtocol realContentProtocol;
 
     private final boolean isRequestFlag;
-    private boolean isOldVersion = false;
+    private String currentVersion = String.valueOf(VERSION);
 
     //private TCommonTransport trans;
 
@@ -33,12 +33,12 @@ public class TSoaServiceProtocol extends TProtocol {
         this.isRequestFlag = isRequestFlag;
     }
 
-    public boolean isOldVersion() {
-        return isOldVersion;
+    public String getCurrentVersion() {
+        return currentVersion;
     }
 
-    public void setOldVersion(boolean oldVersion) {
-        isOldVersion = oldVersion;
+    public void setCurrentVersion(String currentVersion) {
+        this.currentVersion = currentVersion;
     }
 
     @Override
@@ -52,9 +52,9 @@ public class TSoaServiceProtocol extends TProtocol {
         // length(int32) stx(int8) version(string) protocol(int8) seqid(int32) header(struct) body(struct) etx(int8)
 
         realHeaderProtocol.writeByte(STX);
-        if (isOldVersion) {
+        if (currentVersion.equals(OLD_VERSION)) {
             realHeaderProtocol.writeString(OLD_VERSION);
-        } else {
+        } else if(currentVersion.equals(String.valueOf(VERSION))){
             realHeaderProtocol.writeByte(VERSION);
         }
         realHeaderProtocol.writeByte(context.getCodecProtocol().getCode());
@@ -77,7 +77,7 @@ public class TSoaServiceProtocol extends TProtocol {
 
         new SoaHeaderSerializer().write(context.getHeader(), this);
 
-        if (isOldVersion) {
+        if (currentVersion.equals(OLD_VERSION)) {
             realContentProtocol.writeMessageBegin(message);
         }
     }
@@ -207,7 +207,7 @@ public class TSoaServiceProtocol extends TProtocol {
             if (!OLD_VERSION.equals(oldVersion)) {
                 throw new TException("通讯协议不正确(协议版本号)");
             } else {
-                this.setOldVersion(true);
+                this.setCurrentVersion(OLD_VERSION);
             }
         }
 
@@ -235,7 +235,7 @@ public class TSoaServiceProtocol extends TProtocol {
         SoaHeader soaHeader = new SoaHeaderSerializer().read(this);
         context.setHeader(soaHeader);
 
-        if (isOldVersion) {
+        if (currentVersion.equals(OLD_VERSION)) {
             return realContentProtocol.readMessageBegin();
         } else {
             TMessage tm =new TMessage(null,(byte)0,context.getSeqid());

@@ -174,9 +174,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
 
         final TSoaTransport outputSoaTransport = new TSoaTransport(outputBuf);
         final TSoaServiceProtocol outputProtocol = new TSoaServiceProtocol(outputSoaTransport, false);
-        if(inputProtocol.isOldVersion()){
-            outputProtocol.setOldVersion(true);
-        }
+        outputProtocol.setCurrentVersion(inputProtocol.getCurrentVersion());
 
         try {
             TProcessor<?> soaProcessor = soaProcessors.get(new ProcessorKey(soaHeader.getServiceName(), soaHeader.getVersionName()));
@@ -293,9 +291,8 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
         String responseCode = "-", responseMsg = "-";
         try {
             outputProtocol = new TSoaServiceProtocol(outputSoaTransport, false);
-            if(inputProtocol.isOldVersion()){
-                outputProtocol.setOldVersion(true);
-            }
+            outputProtocol.setCurrentVersion(inputProtocol.getCurrentVersion());
+
             TProcessor<?> soaProcessor = soaProcessors.get(new ProcessorKey(soaHeader.getServiceName(), soaHeader.getVersionName()));
 
             if (soaProcessor == null) {
