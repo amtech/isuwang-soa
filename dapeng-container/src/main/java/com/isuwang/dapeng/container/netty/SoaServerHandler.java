@@ -400,7 +400,8 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
     private void writeErrorMessage(ChannelHandlerContext ctx, ByteBuf outputBuf, TransactionContext context, SoaHeader soaHeader, TSoaTransport outputSoaTransport, TSoaServiceProtocol outputProtocol, SoaException e) {
         if (outputProtocol != null) {
             try {
-                outputBuf.writerIndex(Integer.BYTES);
+                if (outputBuf.writerIndex() > 0)
+                    outputBuf.writerIndex(Integer.BYTES);
 
                 soaHeader.setRespCode(Optional.ofNullable(e.getCode()));
                 soaHeader.setRespMessage(Optional.ofNullable(e.getMsg()));
