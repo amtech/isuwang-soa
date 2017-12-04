@@ -1,7 +1,6 @@
 package com.isuwang.dapeng.bootstrap;
 
 import com.isuwang.dapeng.bootstrap.classloader.*;
-import com.isuwang.dapeng.container.ContainerStartup;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -24,15 +23,12 @@ public class Bootstrap {
     private static final List<URL> platformURLs = new ArrayList<>();
     private static final List<List<URL>> appURLs = new ArrayList<>();
     private static final List<List<URL>> pluginURLs = new ArrayList<>();
-    private static final String enginePath = System.getProperty("soa.base", new File(ContainerStartup.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent()+"\\dapeng-container");
-    private static final String soaRunMode = System.getProperty("soa.run.mode", "local");
+    private static final String enginePath = System.getProperty("soa.base", new File(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParent());
+    private static final String soaRunMode = System.getProperty("soa.run.mode", "maven");
 
     public static void main(String[] args) throws MalformedURLException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         System.setProperty("soa.run.mode", soaRunMode);
         System.setProperty("soa.base", enginePath);
-        System.setProperty("soa.zookeeper.host","192.168.99.100:2181");
-        System.setProperty("soa.kafka.host","192.168.99.100:9092");
-        System.setProperty("soa.transactional.enable","false'");
 
         System.out.println("soa.base:" + enginePath);
         System.out.println("soa.run.mode:" + soaRunMode);
