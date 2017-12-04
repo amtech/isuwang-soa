@@ -149,8 +149,11 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
             SoaBaseCode soaBaseCode = SoaBaseCode.UnKnown;
             if(e.getCause() instanceof TVersionException){
                 soaBaseCode=SoaBaseCode.VersionNotMatch;
+                inputBuf.readerIndex(0);
+                inputBuf.skipBytes(7);
+                int seqId=inputBuf.readInt();
+                context.setSeqid(seqId);
             }
-            context.setSeqid((int)Math.random());
             soaHeader.setServiceName("service");
             soaHeader.setVersionName("version");
             soaHeader.setMethodName("method");
@@ -397,8 +400,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
     private void writeErrorMessage(ChannelHandlerContext ctx, ByteBuf outputBuf, TransactionContext context, SoaHeader soaHeader, TSoaTransport outputSoaTransport, TSoaServiceProtocol outputProtocol, SoaException e) {
         if (outputProtocol != null) {
             try {
-                if (outputBuf.writerIndex() > 0)
-                    outputBuf.writerIndex(Integer.BYTES);
+                outputBuf.writerIndex(Integer.BYTES);
 
                 soaHeader.setRespCode(Optional.ofNullable(e.getCode()));
                 soaHeader.setRespMessage(Optional.ofNullable(e.getMsg()));
