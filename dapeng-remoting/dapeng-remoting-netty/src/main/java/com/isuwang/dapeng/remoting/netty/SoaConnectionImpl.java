@@ -29,7 +29,7 @@ public class SoaConnectionImpl implements SoaConnection {
         }
     }
 
-    public <REQ, RESP> RESP send(REQ request, RESP response, TBeanSerializer<REQ> requestSerializer, TBeanSerializer<RESP> responseSerializer) throws TException {
+    public <REQ, RESP> RESP send(REQ request, RESP response, TBeanSerializer<REQ> requestSerializer, TBeanSerializer<RESP> responseSerializer,boolean isOldVersion) throws TException {
         InvocationContext context = InvocationContext.Factory.getCurrentInstance();
         SoaHeader soaHeader = context.getHeader();
 
@@ -41,6 +41,9 @@ public class SoaConnectionImpl implements SoaConnection {
 
         try {
             outputProtocol = new TSoaServiceProtocol(outputSoaTransport, true);
+            if(isOldVersion){
+                outputProtocol.setCurrentVersion("1.0.0");
+            }
             outputProtocol.writeMessageBegin(new TMessage(soaHeader.getServiceName() + ":" + soaHeader.getMethodName(), TMessageType.CALL, context.getSeqid()));
             requestSerializer.write(request, outputProtocol);
             outputProtocol.writeMessageEnd();
@@ -59,12 +62,23 @@ public class SoaConnectionImpl implements SoaConnection {
                 TSoaServiceProtocol inputProtocol = new TSoaServiceProtocol(inputSoaTransport, true);
 
                 TMessage msg = inputProtocol.readMessageBegin();
-                soaHeader=InvocationContext.Factory.getCurrentInstance().getHeader();
+                    soaHeader=InvocationContext.Factory.getCurrentInstance().getHeader();
                 if (TMessageType.EXCEPTION == msg.type) {
                     TApplicationException x = TApplicationException.read(inputProtocol);
                     inputProtocol.readMessageEnd();
                     throw x;
-                } else if (context.getSeqid() != msg.seqid) {
+                } else if (SoaBaseCode.VersionNotMatch.getCode().equals(soaHeader.getRespCode().get())) {
+                    outputSoaTransport.close();
+
+                    if (requestBuf.refCnt() > 0)
+                        requestBuf.release();
+
+                    // to see SoaDecoder: ByteBuf msg = in.slice(readerIndex, length + Integer.BYTES).retain();
+                    if (responseBuf != null)
+                        responseBuf.release();
+                    return send(request,response,requestSerializer,responseSerializer,true);
+
+                }else if (context.getSeqid() != msg.seqid) {
                     throw new TApplicationException(4, soaHeader.getMethodName() + " failed: out of sequence response");
                 } else {
                     if ("0000".equals(soaHeader.getRespCode().get())) {

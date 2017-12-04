@@ -53,7 +53,7 @@ public class BaseServiceClient extends BaseClient {
             SoaConnection conn = connectionPool.getConnection();
 
             try {
-                RESP resp = conn.send(request, response, requestSerializer, responseSerializer);
+                RESP resp = conn.send(request, response, requestSerializer, responseSerializer,false);
                 chain.setAttribute(StubFilterChain.ATTR_KEY_RESPONSE, resp);
             } catch (SoaException e) {
 
