@@ -150,13 +150,17 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
             if(e.getCause() instanceof TVersionException){
                 soaBaseCode=SoaBaseCode.VersionNotMatch;
                 inputBuf.readerIndex(0);
-                inputBuf.skipBytes(7);
+                inputBuf.skipBytes(6);
+                byte codecProtocol = inputBuf.readByte();
                 int seqId=inputBuf.readInt();
                 context.setSeqid(seqId);
+                TSoaServiceProtocol inputProtocol = new TSoaServiceProtocol(inputSoaTransport, false);
+                SoaHeader header = inputProtocol.readHeader(codecProtocol);
+                soaHeader.setServiceName(header.getServiceName());
+                soaHeader.setVersionName(header.getVersionName());
+                soaHeader.setMethodName(header.getMethodName());
+
             }
-            soaHeader.setServiceName("service");
-            soaHeader.setVersionName("version");
-            soaHeader.setMethodName("method");
             writeErrorMessage(ctx, outputBuf, context, soaHeader, outputSoaTransport, outputProtocol, new SoaException(soaBaseCode, errMsg));
 
         }
