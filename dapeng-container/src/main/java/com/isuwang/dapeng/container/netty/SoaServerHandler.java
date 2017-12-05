@@ -154,9 +154,10 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
                 int seqId=inputBuf.readInt();
                 context.setSeqid(seqId);
             }
-            SoaHeader responseSoaHeader =new SoaHeaderSerializer().read( outputProtocol);
-            context.setHeader(responseSoaHeader);
-            writeErrorMessage(ctx, outputBuf, context, responseSoaHeader, outputSoaTransport, outputProtocol, new SoaException(soaBaseCode, errMsg));
+            soaHeader.setServiceName("service");
+            soaHeader.setVersionName("version");
+            soaHeader.setMethodName("method");
+            writeErrorMessage(ctx, outputBuf, context, soaHeader, outputSoaTransport, outputProtocol, new SoaException(soaBaseCode, errMsg));
 
         }
         finally {
