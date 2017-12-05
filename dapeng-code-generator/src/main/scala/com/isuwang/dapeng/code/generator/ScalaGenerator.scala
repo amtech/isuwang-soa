@@ -164,17 +164,21 @@ class ScalaGenerator extends CodeGenerator {
 
 
       println(s"生成Codec:${service.name}Codec.scala")
-      val codecTemplate = new StringTemplate(new ScalaCodecGenerator().toCodecTemplate(service, namespaces,structNamespaces))
+      val codecTemplate = new StringTemplate(new ScalaCodecGenerator().toCodecTemplate(service,structNamespaces, oriNamespaces.get(service).getOrElse("")))
       val codecWriter = new PrintWriter(new File(rootDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))), s"${service.name}Codec.scala"), "UTF-8")
       codecWriter.write(codecTemplate.toString())
       codecWriter.close()
       println(s"生成Codec:${service.name}Codec.scala 完成")
 
 
-
-      println(s"生成metadata:${service.namespace}.${service.name}.xml")
-      new MetadataGenerator().generateXmlFile(service, resourceDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))));
-      println(s"生成metadata:${service.namespace}.${service.name}.xml 完成")
+      //scala & java client should use the same xml
+      if (!service.namespace.contains("scala")) {
+        println(s"生成metadata:${service.namespace}.${service.name}.xml")
+        new MetadataGenerator().generateXmlFile(service, resourceDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))));
+        println(s"生成metadata:${service.namespace}.${service.name}.xml 完成")
+      } else {
+        println(" skip *.scala.metadata.xml generate....")
+      }
 
       println("==========================================================")
       val t2 = System.currentTimeMillis();
