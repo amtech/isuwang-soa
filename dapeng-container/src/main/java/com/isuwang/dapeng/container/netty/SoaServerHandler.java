@@ -155,7 +155,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
                 int seqId=inputBuf.readInt();
                 context.setSeqid(seqId);
                 TSoaServiceProtocol inputProtocol = new TSoaServiceProtocol(inputSoaTransport, false);
-                SoaHeader header = inputProtocol.readHeader(codecProtocol);
+                SoaHeader header = inputProtocol.readHeader(codecProtocol,context);
                 soaHeader.setServiceName(header.getServiceName());
                 soaHeader.setVersionName(header.getVersionName());
                 soaHeader.setMethodName(header.getMethodName());

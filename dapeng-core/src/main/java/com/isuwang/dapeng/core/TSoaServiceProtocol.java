@@ -194,34 +194,13 @@ public class TSoaServiceProtocol extends TProtocol {
         }
 
         byte protocol = realHeaderProtocol.readByte();
-        context.setCodecProtocol(Context.CodecProtocol.toCodecProtocol(protocol));
-        switch (context.getCodecProtocol()) {
-            case Binary:
-                realContentProtocol = new TBinaryProtocol(getTransport());
-                break;
-            case CompressedBinary:
-                realContentProtocol = new TCompactProtocol(getTransport());
-                break;
-            case Json:
-                realContentProtocol = new TJSONProtocol(getTransport());
-                break;
-            case Xml:
-                //realContentProtocol = null;
-                throw new TException("通讯协议不正确(包体协议)");
-            default:
-                throw new TException("通讯协议不正确(包体协议)");
-        }
 
-        context.setSeqid(realHeaderProtocol.readI32());
-
-        SoaHeader soaHeader =new SoaHeaderSerializer().read( this);
-        context.setHeader(soaHeader);
+        context.setHeader(readHeader(protocol,context));
 
         return realContentProtocol.readMessageBegin();
     }
 
-    public SoaHeader readHeader(byte codecProtocol) throws TException{
-        final Context context = isRequestFlag ? InvocationContext.Factory.getCurrentInstance() : TransactionContext.Factory.getCurrentInstance();
+    public SoaHeader readHeader(byte codecProtocol,Context context) throws TException{
         context.setCodecProtocol(Context.CodecProtocol.toCodecProtocol(codecProtocol));
         switch (context.getCodecProtocol()) {
             case Binary:
