@@ -69,13 +69,6 @@ public class SoaConnectionImpl implements SoaConnection {
                     throw x;
                 } else if (SoaBaseCode.VersionNotMatch.getCode().equals(soaHeader.getRespCode().get())) {
                     outputSoaTransport.close();
-
-                    if (requestBuf.refCnt() > 0)
-                        requestBuf.release();
-
-                    // to see SoaDecoder: ByteBuf msg = in.slice(readerIndex, length + Integer.BYTES).retain();
-                    if (responseBuf != null)
-                        responseBuf.release();
                     return send(request,response,requestSerializer,responseSerializer,true);
 
                 }else if (context.getSeqid() != msg.seqid) {
