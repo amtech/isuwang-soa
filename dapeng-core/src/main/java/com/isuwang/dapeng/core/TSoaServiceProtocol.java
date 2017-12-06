@@ -9,6 +9,8 @@ import java.nio.ByteBuffer;
 /**
  * TSoa服务协议
  *
+ * TODO not extends TProtocol, agggr 2 protocol
+ *
  * @author craneding
  * @date 15/8/5
  */
@@ -16,7 +18,7 @@ public class TSoaServiceProtocol extends TProtocol {
 
     private final byte STX = 0x02;
     private final byte ETX = 0x03;
-    private final String OLD_VERSION = "1.0.0";
+    private final String OLD_VERSION = "1.0.0"; //0
     private final byte VERSION = 1;
 
     private TProtocol realHeaderProtocol;
@@ -41,6 +43,8 @@ public class TSoaServiceProtocol extends TProtocol {
         this.currentVersion = currentVersion;
     }
 
+    // Version0 Length4 STX Version9(String 1.0.0) protocol1 seqid4 head TMessgae body ETX
+    // Version1 Length4 STX Version(1) protocol1 seqid4 head body ETX
     @Override
     public void writeMessageBegin(TMessage message) throws TException {
         final Context context = isRequestFlag ? InvocationContext.Factory.getCurrentInstance() : TransactionContext.Factory.getCurrentInstance();
@@ -56,6 +60,9 @@ public class TSoaServiceProtocol extends TProtocol {
             realHeaderProtocol.writeString(OLD_VERSION);
         } else if(currentVersion.equals(String.valueOf(VERSION))){
             realHeaderProtocol.writeByte(VERSION);
+        }
+        else {
+            // TODO
         }
         realHeaderProtocol.writeByte(context.getCodecProtocol().getCode());
         realHeaderProtocol.writeI32(context.getSeqid());
@@ -75,7 +82,7 @@ public class TSoaServiceProtocol extends TProtocol {
                 break;
         }
 
-        new SoaHeaderSerializer().write(context.getHeader(), this);
+        new SoaHeaderSerializer().write(context.getHeader(), this); // TODO readHeaderProtocol
 
         if (currentVersion.equals(OLD_VERSION)) {
             realContentProtocol.writeMessageBegin(message);
@@ -196,6 +203,7 @@ public class TSoaServiceProtocol extends TProtocol {
 
         byte stx = realHeaderProtocol.readByte();
         if (stx != STX) {// 通讯协议不正确
+            // TODO ?
             throw new TException("通讯协议不正确(起始符)");
         }
 
