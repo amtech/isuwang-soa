@@ -42,7 +42,7 @@ public class SoaConnectionImpl implements SoaConnection {
         try {
             outputProtocol = new TSoaServiceProtocol(outputSoaTransport, true);
             if(isOldVersion){
-                outputProtocol.setCurrentVersion("1.0.0");
+                outputProtocol.setOldVersion(true);
             }
             outputProtocol.writeMessageBegin(new TMessage(soaHeader.getServiceName() + ":" + soaHeader.getMethodName(), TMessageType.CALL, context.getSeqid()));
             requestSerializer.write(request, outputProtocol);

@@ -174,7 +174,9 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
 
         final TSoaTransport outputSoaTransport = new TSoaTransport(outputBuf);
         final TSoaServiceProtocol outputProtocol = new TSoaServiceProtocol(outputSoaTransport, false);
-        outputProtocol.setCurrentVersion(inputProtocol.getCurrentVersion());
+        if (inputProtocol.isOldVersion()) {
+            outputProtocol.setOldVersion(true);
+        }
 
         try {
             TProcessor<?> soaProcessor = soaProcessors.get(new ProcessorKey(soaHeader.getServiceName(), soaHeader.getVersionName()));
@@ -281,7 +283,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
         TransactionContext.Factory.setCurrentInstance(context);
         PlatformProcessDataFactory.setCurrentInstance(processData);
 
-            SoaHeader soaHeader = context.getHeader();
+        SoaHeader soaHeader = context.getHeader();
 
         final TSoaTransport outputSoaTransport = new TSoaTransport(outputBuf);
         TSoaServiceProtocol outputProtocol = null;
@@ -291,7 +293,9 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
         String responseCode = "-", responseMsg = "-";
         try {
             outputProtocol = new TSoaServiceProtocol(outputSoaTransport, false);
-            outputProtocol.setCurrentVersion(inputProtocol.getCurrentVersion());
+            if (inputProtocol.isOldVersion()) {
+                outputProtocol.setOldVersion(true);
+            }
 
             TProcessor<?> soaProcessor = soaProcessors.get(new ProcessorKey(soaHeader.getServiceName(), soaHeader.getVersionName()));
 
@@ -314,7 +318,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
         } catch (SoaException e) {
 
             //LOGGER.error(e.getMessage(), e);
-            LogUtil.logError(SoaServerHandler.class,soaHeader,e.getMessage(),e);
+            LogUtil.logError(SoaServerHandler.class, soaHeader, e.getMessage(), e);
 
             writeErrorMessage(ctx, outputBuf, context, soaHeader, outputSoaTransport, outputProtocol, e);
 
@@ -322,7 +326,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
             responseMsg = e.getMsg();
         } catch (Throwable e) {
             //LOGGER.error(e.getMessage(), e);
-            LogUtil.logError(SoaServerHandler.class,soaHeader,e.getMessage(),e);
+            LogUtil.logError(SoaServerHandler.class, soaHeader, e.getMessage(), e);
             String errMsg = e.getCause() != null ? e.getCause().toString() : (e.getMessage() != null ? e.getMessage().toString() : e.toString());
             writeErrorMessage(ctx, outputBuf, context, soaHeader, outputSoaTransport, outputProtocol, new SoaException(SoaBaseCode.UnKnown, errMsg));
 
