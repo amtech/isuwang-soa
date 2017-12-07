@@ -7,7 +7,7 @@
     <groupId>com.isuwang</groupId>
     <artifactId>dapeng-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.2.2</version>
+    <version>1.3.0</version>
 
     <name>dapeng</name>
     <description>一个简单、易用、多特性的SOA框架</description>
