@@ -47,20 +47,20 @@ public class GenerateFilePlugin extends AbstractMojo {
             Scrooge.main(new String[]{"-gen", "java", "-all",
                     "-in", sourceFilePath,
                     "-out", targetFilePath});
-            File commonFile = new File(projectPath + "src/main/java/com/isuwang/soa/common");
-            if (commonFile.exists()) {
-                deleteDir(commonFile);
-            }
+//            File commonFile = new File(projectPath + "src/main/java/com/isuwang/soa/common");
+//            if (commonFile.exists()) {
+//                deleteDir(commonFile);
+//            }
         }
         if (language.equals("both") || language.equals("scala")) {
             Scrooge.main(new String[]{"-gen", "scala", "-all",
                     "-in", sourceFilePath,
                     "-out", targetFilePath});
 
-            File scalaCommonFile = new File(projectPath + "src/main/scala/com/isuwang/soa/scala/common");
-            if (scalaCommonFile.exists()) {
-                deleteDir(scalaCommonFile);
-            }
+//            File scalaCommonFile = new File(projectPath + "src/main/scala/com/isuwang/soa/scala/common");
+//            if (scalaCommonFile.exists()) {
+//                deleteDir(scalaCommonFile);
+//            }
         }
     }
 
