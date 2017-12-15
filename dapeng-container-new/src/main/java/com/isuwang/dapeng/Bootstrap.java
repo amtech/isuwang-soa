@@ -1,13 +1,10 @@
 package com.isuwang.dapeng;
 
 import com.isuwang.dapeng.api.container.Container;
-import com.isuwang.dapeng.api.container.ContainerManager;
+import com.isuwang.dapeng.api.container.ContainerFactory;
 import com.isuwang.dapeng.api.container.DapengContainer;
 import com.isuwang.dapeng.api.plugins.Plugin;
-import com.isuwang.dapeng.impl.classloader.AppClassLoader;
-import com.isuwang.dapeng.impl.classloader.PlatformClassLoader;
-import com.isuwang.dapeng.impl.classloader.PluginClassLoader;
-import com.isuwang.dapeng.impl.classloader.ShareClassLoader;
+import com.isuwang.dapeng.impl.classloader.*;
 import com.isuwang.dapeng.impl.plugins.NettyPlugin;
 import com.isuwang.dapeng.impl.plugins.SpringAppLoader;
 import com.isuwang.dapeng.impl.plugins.TaskSchedulePlugin;
@@ -33,25 +30,29 @@ public class Bootstrap {
 
         //1. 初始化dapeng容器
         Container dapengContainer = new DapengContainer();
-        ContainerManager.initContainer(dapengContainer);
+        ContainerFactory.initContainer(dapengContainer);
 
         loadAllUrls();
-        PlatformClassLoader platformClassLoader = new PlatformClassLoader(platformURLs.toArray(new URL[platformURLs.size()]));
-        ShareClassLoader shareClassLoader = new ShareClassLoader(shareURLs.toArray(new URL[shareURLs.size()]));
         List<AppClassLoader> appClassLoaders = appURLs.stream().map(i -> new AppClassLoader(i.toArray(new URL[i.size()]))).collect(Collectors.toList());
+
+        PlatformClassLoader platformClassLoader = new PlatformClassLoader(platformURLs.toArray(new URL[platformURLs.size()]));
+        ClassLoaderManager.platformClassLoader = platformClassLoader;
+        ShareClassLoader shareClassLoader = new ShareClassLoader(shareURLs.toArray(new URL[shareURLs.size()]));
+        ClassLoaderManager.shareClassLoader = shareClassLoader;
         List<PluginClassLoader> pluginClassLoaders = pluginURLs.stream().map(i -> new PluginClassLoader(i.toArray(new URL[i.size()]))).collect(Collectors.toList());
+        ClassLoaderManager.pluginClassLoader = pluginClassLoaders;
 
         //3. 初始化appLoader,dapengPlugin
         Plugin springAppLoader = new SpringAppLoader(dapengContainer,appClassLoaders);
         Plugin zookeeperPlugin = new ZookeeperRegistryPlugin(dapengContainer);
         Plugin taskSchedulePlugin = new TaskSchedulePlugin(dapengContainer);
         Plugin nettyPlugin = new NettyPlugin(dapengContainer);
-        ContainerManager.getContainer().registerPlugin(zookeeperPlugin);
-        ContainerManager.getContainer().registerPlugin(taskSchedulePlugin);
-        ContainerManager.getContainer().registerPlugin(nettyPlugin);
+        ContainerFactory.getContainer().registerPlugin(zookeeperPlugin);
+        ContainerFactory.getContainer().registerPlugin(taskSchedulePlugin);
+        ContainerFactory.getContainer().registerPlugin(nettyPlugin);
 
         //4.启动Apploader， plugins
-        ContainerManager.getContainer().getPlugins().forEach(Plugin::start);
+        ContainerFactory.getContainer().getPlugins().forEach(Plugin::start);
 
     }
 

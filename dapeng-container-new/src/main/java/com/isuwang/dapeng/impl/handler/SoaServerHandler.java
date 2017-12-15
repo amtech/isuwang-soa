@@ -1,7 +1,7 @@
 package com.isuwang.dapeng.impl.handler;
 
 import com.isuwang.dapeng.api.container.Application;
-import com.isuwang.dapeng.api.container.ContainerManager;
+import com.isuwang.dapeng.api.container.ContainerFactory;
 import com.isuwang.dapeng.api.extension.Dispatcher;
 import com.isuwang.dapeng.core.ProcessorKey;
 import com.isuwang.dapeng.core.SoaHeader;
@@ -27,7 +27,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
     private Map<ProcessorKey, SoaServiceDefinition<?>> processors;
 
     public SoaServerHandler(){
-        List<Application> apps=ContainerManager.getContainer().getApplications();
+        List<Application> apps= ContainerFactory.getContainer().getApplications();
         for (Application app : apps) {
             processors.putAll(app.getServiceProcessors());
         }
@@ -53,7 +53,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
         //APlugin.markRequestBegin(); // container.registerFilter(...); container.startThread(...);
         SoaServiceDefinition processor = processors.get(new ProcessorKey(soaHeader.getServiceName(),soaHeader.getVersionName()));
 
-        ContainerManager.getContainer().getDispatcher().processRequest(ctx,parser,processor,message);
+        ContainerFactory.getContainer().getDispatcher().processRequest(ctx,parser,processor,message);
     }
 
 

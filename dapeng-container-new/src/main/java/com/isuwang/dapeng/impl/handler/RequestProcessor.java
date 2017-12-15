@@ -1,6 +1,6 @@
 package com.isuwang.dapeng.impl.handler;
 
-import com.isuwang.dapeng.api.container.ContainerManager;
+import com.isuwang.dapeng.api.container.ContainerFactory;
 import com.isuwang.dapeng.api.filters.FilterChain;
 import com.isuwang.dapeng.api.filters.FilterContext;
 import com.isuwang.dapeng.api.filters.HandlerFilter;
@@ -42,7 +42,7 @@ public class RequestProcessor {
             REQ args = soaFunction.getReqSerializer().read(parser.getContentProtocol());
             parser.getContentProtocol().readMessageEnd();
 
-            SharedChain sharedChain = ContainerManager.getContainer().getSharedChain();
+            SharedChain sharedChain = ContainerFactory.getContainer().getSharedChain();
             HandlerFilter dispatchFilter = new HandlerFilter() {
                 @Override
                 public void onEntry(FilterContext ctx, FilterChain next) throws TException {

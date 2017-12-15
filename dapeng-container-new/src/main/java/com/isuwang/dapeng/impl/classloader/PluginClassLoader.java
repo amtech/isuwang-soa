@@ -23,8 +23,7 @@ public class PluginClassLoader extends URLClassLoader {
                 || name.startsWith("com.isuwang.dapeng.transaction.api")
                 || name.startsWith("com.google.gson")
                 || name.startsWith("org.slf4j"))
-            //TODO: return ContainerManager.getContainer().getShareClassLoader().loadClass(name);
-            return null;
+            return ClassLoaderManager.shareClassLoader.loadClass(name);
         return super.loadClass(name, resolve);
     }
 }

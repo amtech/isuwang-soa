@@ -12,8 +12,7 @@ import java.net.URLClassLoader;
 public class PlatformClassLoader extends URLClassLoader {
 
     public PlatformClassLoader(URL[] urls) {
-        super(urls);
-        //TODO: super(urls, ContainerManager.getContainer().getShareClassLoader());
+        super(urls, ClassLoaderManager.shareClassLoader);
     }
 
 }

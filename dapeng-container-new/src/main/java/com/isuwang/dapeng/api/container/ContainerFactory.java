@@ -1,7 +1,7 @@
 package com.isuwang.dapeng.api.container;
 
 
-public class ContainerManager {
+public class ContainerFactory {
 
     private static Container applicationContainer;
 

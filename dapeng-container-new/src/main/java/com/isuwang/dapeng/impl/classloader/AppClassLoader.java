@@ -24,8 +24,7 @@ public class AppClassLoader extends URLClassLoader {
 
         if (name.startsWith("com.isuwang.dapeng.core") || name.startsWith("com.isuwang.org.apache.thrift") || name.startsWith("com.isuwang.dapeng.transaction.api")
                 || name.startsWith("com.google.gson"))
-            //TODO: return ContainerManager.getContainer().getShareClassLoader().loadClass(name);
-            return null;
+            return ClassLoaderManager.shareClassLoader.loadClass(name);
         return super.loadClass(name, resolve);
     }
 }
