@@ -67,7 +67,7 @@ public interface Container {
 
     Map<ProcessorKey, SoaServiceDefinition<?>> getServiceProcessors();
 
-    void setServiceProcessors(Map<ProcessorKey, SoaServiceDefinition<?>> processors);
+    void registerAppProcessors(Map<ProcessorKey, SoaServiceDefinition<?>> processors);
 
 
 

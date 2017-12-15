@@ -6,17 +6,19 @@ import com.isuwang.dapeng.api.container.ServiceInfo;
 import com.isuwang.dapeng.api.events.AppEvent;
 import com.isuwang.dapeng.api.listeners.AppListener;
 import com.isuwang.dapeng.api.plugins.Plugin;
+import com.isuwang.dapeng.registry.RegistryAgent;
+import com.isuwang.dapeng.registry.zookeeper.RegistryAgentImpl;
 
 import java.util.List;
 
 public class ZookeeperRegistryPlugin implements AppListener, Plugin {
 
     final Container container;
+    private final RegistryAgent registryAgent = new RegistryAgentImpl(false);
 
     public ZookeeperRegistryPlugin(Container container) {
         this.container = container;
         container.registerAppListener(this);
-
     }
 
     @Override
@@ -40,6 +42,7 @@ public class ZookeeperRegistryPlugin implements AppListener, Plugin {
 
     @Override
     public void start() {
+
         container.getApplications().forEach(app -> {
             List<ServiceInfo> serviceInfos = app.getServiceInfos();
             serviceInfos.forEach(s -> registerService(s.getServiceName(),s.getVersion()));

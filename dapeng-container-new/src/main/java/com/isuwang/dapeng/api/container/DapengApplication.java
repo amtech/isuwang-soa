@@ -17,6 +17,10 @@ public class DapengApplication implements Application{
     public DapengApplication() {
     }
 
+    public DapengApplication(List<ServiceInfo> serviceInfos) {
+        this.serviceInfos.addAll(serviceInfos);
+    }
+
     @Override
     public List<ServiceInfo> getServiceInfos() {
         return this.serviceInfos;
