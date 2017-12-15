@@ -12,6 +12,7 @@ import com.isuwang.dapeng.impl.filters.SharedChain;
 import com.isuwang.dapeng.impl.handler.SoaServiceDefinition;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -87,6 +88,14 @@ public class DapengContainer implements Container{
 
     @Override
     public Map<ProcessorKey, SoaServiceDefinition<?>> getServiceProcessors() {
-        return null;
+        return this.processors;
+    }
+
+    @Override
+    public void registerAppProcessors(Map<ProcessorKey, SoaServiceDefinition<?>> processors) {
+        if (this.processors == null) {
+            this.processors = new HashMap<>();
+        }
+        this.processors.putAll(processors);
     }
 }
