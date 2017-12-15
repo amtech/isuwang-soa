@@ -3,9 +3,12 @@ package com.isuwang.dapeng.api.container;
 import com.isuwang.dapeng.api.extension.Dispatcher;
 import com.isuwang.dapeng.api.listeners.AppListener;
 import com.isuwang.dapeng.api.plugins.Plugin;
+import com.isuwang.dapeng.core.ProcessorKey;
 import com.isuwang.dapeng.impl.filters.SharedChain;
+import com.isuwang.dapeng.impl.handler.SoaServiceDefinition;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 大鹏容器的主结构，负责管理容器相关的监听器，插件，应用程序。
@@ -61,4 +64,11 @@ public interface Container {
     public SharedChain getSharedChain();
 
     public List<Plugin> getPlugins();
+
+    Map<ProcessorKey, SoaServiceDefinition<?>> getServiceProcessors();
+
+    void setServiceProcessors(Map<ProcessorKey, SoaServiceDefinition<?>> processors);
+
+
+
 }

@@ -1,9 +1,6 @@
 package com.isuwang.dapeng.impl.plugins;
 
-import com.isuwang.dapeng.api.container.Application;
-import com.isuwang.dapeng.api.container.Container;
-import com.isuwang.dapeng.api.container.DapengApplication;
-import com.isuwang.dapeng.api.container.ServiceInfo;
+import com.isuwang.dapeng.api.container.*;
 import com.isuwang.dapeng.api.plugins.Plugin;
 import com.isuwang.dapeng.core.ProcessorKey;
 import com.isuwang.dapeng.core.Service;
@@ -32,6 +29,7 @@ public class SpringAppLoader implements Plugin {
         String configPath = "META-INF/spring/services.xml";
 
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        Map<ProcessorKey, SoaServiceDefinition<?>> processors = new HashMap<>();
         for (ClassLoader appClassLoader : appClassLoaders) {
             try {
 
@@ -50,7 +48,7 @@ public class SpringAppLoader implements Plugin {
 
                 //TODO: 需要构造Application对象
                 //List<ServiceInfo> appInfos = toApplication(context,appClass);
-                Application application = toApplication(context,appClass);
+                Application application = toApplication(context,appClass, processors);
 
                 // IApplication app = new ...
                 if (! application.getServiceInfos().isEmpty()) {
@@ -61,6 +59,7 @@ public class SpringAppLoader implements Plugin {
                 e.printStackTrace();
             }
         }
+        ContainerFactory.getContainer().setServiceProcessors(processors);
     }
 
     @Override
@@ -69,7 +68,7 @@ public class SpringAppLoader implements Plugin {
     }
 
 
-    private Application toApplication(Object context, Class<?> contextClass) throws Exception {
+    private Application toApplication(Object context, Class<?> contextClass,Map<ProcessorKey, SoaServiceDefinition<?>> soaProcessors) throws Exception {
         Method method = contextClass.getMethod("getBeansOfType", Class.class);
         Map<String, SoaServiceDefinition<?>> processorMap = (Map<String, SoaServiceDefinition<?>>) method.invoke(context, contextClass.getClassLoader().loadClass(SoaServiceDefinition.class.getName()));
 
@@ -90,8 +89,7 @@ public class SpringAppLoader implements Plugin {
                 Service service = processor.getIfaceClass().getAnnotation(Service.class);
                 serviceInfo.setServiceName(service.name());
                 serviceInfo.setVersion(service.version());
-
-                serviceApplication.setServiceProcessor(new ProcessorKey(service.name(),service.version()), processor);
+                soaProcessors.put(new ProcessorKey(service.name(),service.version()), processor);
             }
             serviceApplication.addServiceInfo(serviceInfo);
 

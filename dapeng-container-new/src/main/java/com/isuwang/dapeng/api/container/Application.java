@@ -20,12 +20,4 @@ public interface Application {
 
     ServiceInfo getServiceInfo(String name, String version);
 
-    Map<ProcessorKey, SoaServiceDefinition<?>> getServiceProcessors();
-
-    void setServiceProcessors(Map<ProcessorKey, SoaServiceDefinition<?>> processors);
-
-    void setServiceProcessor(ProcessorKey processorKey, SoaServiceDefinition<?> processor);
-
-    SoaServiceDefinition<?> getServiceProcessor(ProcessorKey processorKey);
-
 }

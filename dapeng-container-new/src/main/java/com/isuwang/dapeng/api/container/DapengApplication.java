@@ -43,25 +43,6 @@ public class DapengApplication implements Application{
         return sInfo;
     }
 
-    @Override
-    public Map<ProcessorKey, SoaServiceDefinition<?>> getServiceProcessors() {
-        return processors;
-    }
-
-    @Override
-    public void setServiceProcessors(Map<ProcessorKey, SoaServiceDefinition<?>> processors) {
-        this.processors.putAll(processors);
-    }
-
-    @Override
-    public void setServiceProcessor(ProcessorKey processorKey,SoaServiceDefinition<?> processor) {
-        this.processors.put(processorKey,processor);
-    }
-
-    @Override
-    public SoaServiceDefinition<?> getServiceProcessor(ProcessorKey processorKey) {
-        return this.processors.get(processorKey);
-    }
 
     @Override
     public void start() {

@@ -24,15 +24,6 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
 
     private final Boolean useThreadPool = SoaSystemEnvProperties.SOA_CONTAINER_USETHREADPOOL;
 
-    private Map<ProcessorKey, SoaServiceDefinition<?>> processors;
-
-    public SoaServerHandler(){
-        List<Application> apps= ContainerFactory.getContainer().getApplications();
-        for (Application app : apps) {
-            processors.putAll(app.getServiceProcessors());
-        }
-    }
-
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         readRequestHeader(ctx, (ByteBuf) msg);
@@ -51,7 +42,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
         fillTranscationContex(context);
 
         //APlugin.markRequestBegin(); // container.registerFilter(...); container.startThread(...);
-        SoaServiceDefinition processor = processors.get(new ProcessorKey(soaHeader.getServiceName(),soaHeader.getVersionName()));
+        SoaServiceDefinition processor = ContainerFactory.getContainer().getServiceProcessors().get(new ProcessorKey(soaHeader.getServiceName(),soaHeader.getVersionName()));
 
         ContainerFactory.getContainer().getDispatcher().processRequest(ctx,parser,processor,message);
     }
