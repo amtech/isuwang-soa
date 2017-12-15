@@ -70,7 +70,7 @@ public class ScheduledTaskContainer implements Container {
                                 String cronStr = cron.cron();
 
                                 Service service = processor.getInterfaceClass().getAnnotation(Service.class);
-                                String serviceName = processor.getInterfaceClass().getName();
+                                String serviceName = service.name();
                                 String versionName = service.version();
 
                                 //new quartz job

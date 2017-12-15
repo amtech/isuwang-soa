@@ -43,10 +43,10 @@ public class LocalRegistryContainer implements Container, RegistryAgent {
                     if (processor.getInterfaceClass().getClass() != null) {
                         Service service = processor.getInterfaceClass().getAnnotation(Service.class);
 
-                        ProcessorKey processorKey = new ProcessorKey(processor.getInterfaceClass().getName(), service.version());
+                        ProcessorKey processorKey = new ProcessorKey(service.name(), service.version());
                         getProcessorMap().put(processorKey, processor);
 
-                        this.registerService(processor.getInterfaceClass().getName(), service.version());
+                        this.registerService(service.name(), service.version());
                     }
                 }
             } catch (Exception e) {
@@ -77,7 +77,7 @@ public class LocalRegistryContainer implements Container, RegistryAgent {
             if (null != processor.getInterfaceClass().getClass()) {
                 Service service = processor.getInterfaceClass().getAnnotation(Service.class);
 
-                this.registerService(processor.getInterfaceClass().getName(), service.version());
+                this.registerService(service.name(), service.version());
             }
         }
     }

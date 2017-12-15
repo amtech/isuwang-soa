@@ -6,7 +6,7 @@ import com.isuwang.dapeng.core.Service;
 /**
  * 监控服务
  **/
-@Service(version = "1.0.0")
+@Service(name="com.isuwang.dapeng.monitor.api.service.MonitorService",version = "1.0.0")
 @Processor(className = "com.isuwang.dapeng.monitor.api.MonitorServiceCodec$Processor")
 public interface MonitorService {
 

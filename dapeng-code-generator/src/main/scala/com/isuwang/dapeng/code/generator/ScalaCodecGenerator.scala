@@ -25,7 +25,7 @@ class ScalaCodecGenerator extends CodeGenerator {
   val keywords = Set("type") // TODO is there any other keyword need to be escape
   def nameAsId(name: String) = if(keywords contains name) s"`$name`" else name
 
-  def toCodecTemplate(service:Service, namespaces:util.Set[String],structNamespaces:util.Set[String]): Elem = {
+  def toCodecTemplate(service:Service,structNamespaces:util.Set[String], oriNamespace: String): Elem = {
     //val structNameCache = new util.ArrayList[String]()
 
     return {
@@ -229,7 +229,7 @@ class ScalaCodecGenerator extends CodeGenerator {
       @throws[TException]
       override def getResult(iface: {service.namespace}.{service.name}, args: getServiceMetadata_args): getServiceMetadata_result = <block>
 
-        val source = scala.io.Source.fromInputStream({service.name}Codec.getClass.getClassLoader.getResourceAsStream("{service.namespace}.{service.name}.xml"))
+        val source = scala.io.Source.fromInputStream({service.name}Codec.getClass.getClassLoader.getResourceAsStream("{oriNamespace}.{service.name}.xml"))
         val success = source.mkString
         source.close
         getServiceMetadata_result(success)
@@ -345,8 +345,7 @@ class ScalaCodecGenerator extends CodeGenerator {
         if(!dataType.getQualifiedName.contains("com.isuwang.soa.scala")){
           ref=dataType.getQualifiedName.replace("com.isuwang.soa","com.isuwang.soa.scala")
         }
-        val enumName = ref.substring(ref.lastIndexOf("."))
-        return {<div>{ref}{enumName}</div>}
+        return {<div>{ref}</div>}
       case KIND.STRUCT =>
         var ref = dataType.getQualifiedName
         if(!dataType.getQualifiedName.contains("com.isuwang.soa.scala")){

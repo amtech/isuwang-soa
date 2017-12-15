@@ -432,7 +432,7 @@ class JavaGenerator extends CodeGenerator {
         {notice}
         * {service.doc}
         **/
-        @Service(version = "{service.meta.version}")
+        @Service(name="{s"${service.namespace}.${service.name}"}",version = "{service.meta.version}")
         @Processor(className = "{service.namespace.substring(0, service.namespace.lastIndexOf("service"))}{service.name}Codec$Processor")
         public interface {service.name} <block>
         {
