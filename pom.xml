@@ -52,6 +52,7 @@
         <module>dapeng-tools</module>
         <module>dapeng-message</module>
         <module>dapeng-service-invoke</module>
+        <module>dapeng-container-new</module>
     </modules>
 
     <properties>
