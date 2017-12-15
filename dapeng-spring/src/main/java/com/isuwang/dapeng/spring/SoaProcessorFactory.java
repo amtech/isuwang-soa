@@ -1,9 +1,9 @@
 package com.isuwang.dapeng.spring;
 
+import com.isuwang.dapeng.SoaServiceDefinition;
 import com.isuwang.dapeng.core.Processor;
 import com.isuwang.dapeng.core.Service;
 import com.isuwang.dapeng.core.SoaCommonBaseProcessor;
-import com.isuwang.org.apache.thrift.TProcessor;
 import org.springframework.beans.factory.FactoryBean;
 
 import java.lang.reflect.Constructor;
@@ -18,7 +18,7 @@ import static java.util.stream.Collectors.toList;
  * @author craneding
  * @date 16/1/19
  */
-public class SoaProcessorFactory implements FactoryBean<TProcessor<?>> {
+public class SoaProcessorFactory implements FactoryBean<SoaServiceDefinition<?>> {
 
     private Object serviceRef;
     private String refId;
@@ -30,7 +30,7 @@ public class SoaProcessorFactory implements FactoryBean<TProcessor<?>> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public TProcessor<?> getObject() throws Exception {
+    public SoaServiceDefinition<?> getObject() throws Exception {
         final Class<?> aClass = serviceRef.getClass();
         final List<Class<?>> interfaces = Arrays.asList(aClass.getInterfaces());
 
@@ -47,17 +47,16 @@ public class SoaProcessorFactory implements FactoryBean<TProcessor<?>> {
         Processor processor = interfaceClass.getAnnotation(Processor.class);
 
         Class<?> processorClass = Class.forName(processor.className(), true, interfaceClass.getClassLoader());
-        Constructor<?> constructor = processorClass.getConstructor(interfaceClass);
-        TProcessor tProcessor = (TProcessor) constructor.newInstance(serviceRef);
+        Constructor<?> constructor = processorClass.getConstructor(interfaceClass,Class.class);
+        SoaServiceDefinition tProcessor = (SoaServiceDefinition) constructor.newInstance(serviceRef,interfaceClass.getClass());
 
-        tProcessor.setInterfaceClass(interfaceClass);
-
+        tProcessor.setIfaceClass(interfaceClass);
         return tProcessor;
     }
 
     @Override
     public Class<?> getObjectType() {
-        return SoaCommonBaseProcessor.class;
+        return SoaServiceDefinition.class;
     }
 
     @Override
