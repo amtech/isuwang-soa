@@ -1,4 +1,44 @@
-﻿# dapeng服务端重构
+﻿# 大鹏重构
+
+[TOC]
+
+### 大鹏容器重构
+思路:
+1. 一个大的容器内包含所有容器所需的插件,具体应用项目的信息,
+    1.1. 容器负责加载插件(Zookeeper, Netty, ScheduledTask etc.) 以及 AppLoader（如 Spring）
+    1.2. AppLoader负责加载应用程序(SpringContainer as AppLoader)
+    1.3. 插件基于事件处理特定的逻辑(如 服务注册，卸载)
+2. 容器可以管理 应用程序的注册，卸载， 插件的注册，卸载
+
+<b>基于该思路，dapeng容器架构重新定义以下几个主要的元素</b>
+- 1 IContainer
+- 2 IApplication
+    - 2.1 ServiceInfo
+- 3 AppLoader
+- 4 IPlugin 
+- 5 Event
+- 5.1 AppEvent
+- 5.2 PluginEvent(暂时不需要)
+- 6 Listener
+
+##### 2.1 容器主要元素的类图
+![](https://ws2.sinaimg.cn/large/006tKfTcgy1fmc1j6vui2j31b00isdla.jpg)
+![](https://ws4.sinaimg.cn/large/006tKfTcgy1fmc1e2yavqj310i08875g.jpg)
+![](https://ws1.sinaimg.cn/large/006tKfTcgy1fmc22ui2skj31io0ju0xi.jpg)
+
+##### 2.2 容器初始化的时序图
+该时序图中的Plugin只是列出了两种不同类型的Plugin:
+1: 需要监听AppEvent(ZookeeperRegisterPlugin); 
+2: 不需要监听AppEvent(FilterPlugin)
+实际上在容器初始化的时候还有其他的Plugin，在此就不一一画到时序图中了，大体是一致的.
+>在dapeng框架中, 
+<b>目前监听AppEvent的插件</b>: `ZookeeperRegistryPlugin`, `LocalRegistryPlugin`, `ScheduledTaskPlugin`, `NettyPlugin`.
+<b>不需要监听AppEvent的插件</b>: `LogbackContainer`, `PluginContainer`, `FilterContainer`, `VersionContainer`, `TransactionContainer`
+
+![](https://ws4.sinaimg.cn/large/006tKfTcgy1fmbrd0ils2j31fs0wywi7.jpg)
+
+
+### dapeng服务端重构
 
 标签（空格分隔）： dapeng
 ---
