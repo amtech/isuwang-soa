@@ -2,6 +2,7 @@ package com.isuwang.dapeng.code.generator
 
 import java.util
 
+import com.isuwang.dapeng.core.SoaException
 import com.isuwang.dapeng.core.metadata.DataType.KIND
 import com.isuwang.dapeng.core.metadata._
 
@@ -54,7 +55,7 @@ class JavaCodecGenerator extends CodeGenerator {
 
         {
         toMethodArrayBuffer(service.methods).map{(method: Method)=> {
-
+          //TODO: sayHello_args
           <div>
             public static class {method.name}_args <block>
             {toFieldArrayBuffer(method.request.getFields).map{(field: Field)=>{
@@ -85,7 +86,6 @@ class JavaCodecGenerator extends CodeGenerator {
             </block>
 
           </block>
-
 
             public static class {method.name}_result <block>
 
@@ -177,69 +177,35 @@ class JavaCodecGenerator extends CodeGenerator {
             public String toString({method.name}_result bean) <block> return bean == null ? "null" : bean.toString(); </block>
           </block>
 
-            public static class {method.name}{lt}I extends {service.getNamespace + "." + service.name}{gt} extends SoaProcessFunction{lt}I, {method.name}_args, {method.name}_result, {method.name.charAt(0).toUpper + method.name.substring(1)}_argsSerializer,  {method.name.charAt(0).toUpper + method.name.substring(1)}_resultSerializer{gt}<block>
-            public {method.name}()<block>
-              super("{method.name}", new {method.name.charAt(0).toUpper + method.name.substring(1)}_argsSerializer(),  new {method.name.charAt(0).toUpper + method.name.substring(1)}_resultSerializer());
-            </block>
-            {
-            if(method.doc != null && method.doc.contains("@SoaAsyncFunction") && {toJavaDataType(method.response.getFields.get(0).getDataType)}!= DataType.KIND.VOID)
-              <div>
-                @Override
-                public {method.name}_result getResult(I iface, {method.name}_args args) throws TException<block>
-                return null;
+            public static class {method.name}{lt}I extends {service.getNamespace + "." + service.name}{gt} extends SoaFunctionDefinition{lt}I, {method.name}_args, {method.name}_result{gt}
+            <block>
+              public {method.name}()
+              <block>
+              super("{method.name}", new {method.name.charAt(0).toUpper + method.name.substring(1)}_argsSerializer(),  new {method.name.charAt(0).toUpper + method.name.substring(1)}_resultSerializer(),false);
               </block>
 
-                @Override
-                public Future{lt}{method.name}_result{gt} getResultAsync(I iface, {method.name}_args args) throws TException <block>
-
-                CompletableFuture{lt}{method.name}_result{gt} result = new CompletableFuture{lt}{gt}();
-                {toFieldArrayBuffer(method.getResponse().getFields()).map{(field:Field)=>
-                  <div>
-                    CompletableFuture{lt}{toJavaDataType(method.response.getFields.get(0).getDataType)}{gt} realResult = (CompletableFuture{lt}{toJavaDataType(method.response.getFields.get(0).getDataType)}{gt}) iface.{method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{<div>args.{field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}});
-                  </div>
-                }}
-                realResult.whenComplete((str, ex) -> <block>
-                  if (str != null) <block>
-                    {method.name}_result r = new {method.name}_result();
-                    r.setSuccess(str);
-                    result.complete(r);
-                  </block> else <block>
-                    result.completeExceptionally(ex);
-                  </block>
-                </block>);
-                return result;
-              </block>
-              </div>
-            else <div>
               @Override
-              public {method.name}_result getResult(I iface, {method.name}_args args) throws TException<block>
+              public {method.name}_result apply(I iface, {method.name}_args {method.name}_args)
+              <block>
+
                 {method.name}_result result = new {method.name}_result();
-                {toFieldArrayBuffer(method.getResponse().getFields()).map{(field:Field)=>
-                  if(field.getDataType().getKind() == DataType.KIND.VOID) {
-                    <div>
-                      iface.{method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{<div>args.{field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}});
-                    </div>
-                  } else {
-                    <div>
-                      result.success = iface.{method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{<div>args.{field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}});
-                    </div>
-                  }
-                }}
-                return result;
+
+              try <block>
+                result.success = iface.sayHello{toFieldArrayBuffer(method.getRequest.getFields).map(i => {method.name} + "_args." + i.name).mkString("(",",",")")};
+              </block> catch (SoaException e) <block>
+                e.printStackTrace();
+                result.success = "";
               </block>
-            </div>
-            }
+              return result;
+              </block>
 
-            @Override
-            public {method.name}_args getEmptyArgsInstance()<block>
-              return new {method.name}_args();
-            </block>
+              @Override
+              public CompletableFuture{lt}sayHello_result{gt} applyAsync(I iface, {method.name}_args {method.name}_args) <block>
+              CompletableFuture{lt}sayHello_result{gt} future = CompletableFuture.supplyAsync(() -> apply(iface,{method.name}_args));
+              return future;
+              </block>
 
-            @Override
-            protected boolean isOneway()<block>
-              return false;
             </block>
-          </block>
           </div>
         }
         }
@@ -427,23 +393,24 @@ class JavaCodecGenerator extends CodeGenerator {
         </block>
 
         @SuppressWarnings("unchecked")
-        public static class Processor{lt}I extends {service.getNamespace + "." + service.name}{gt} extends SoaCommonBaseProcessor<block>
-          public Processor(I iface)<block>
-            super(iface, getProcessMap(new java.util.HashMap{lt}{gt}()));
+        public static class Processor{lt}I extends {service.getNamespace + "." + service.name}{gt} extends SoaServiceDefinition{lt}{service.getNamespace + "." + service.name}{gt}
+        <block>
+
+          public Processor({service.getNamespace + "." + service.name} iface, Class{lt}{service.getNamespace + "." + service.name}{gt} ifaceClass)
+          <block>
+            super(iface, ifaceClass, buildMap(new java.util.HashMap{lt}{gt}()));
           </block>
 
           @SuppressWarnings("unchecked")
-          private static {lt}I extends {service.getNamespace + "." + service.name}{gt} java.util.Map{lt}String, SoaProcessFunction{lt}I, ?, ?, ? extends TCommonBeanSerializer{lt}?{gt}, ? extends TCommonBeanSerializer{lt}?{gt}{gt}{gt} getProcessMap(java.util.Map{lt}String, SoaProcessFunction{lt}I, ?, ?, ? extends TCommonBeanSerializer{lt}?{gt}, ? extends TCommonBeanSerializer{lt}?{gt}{gt}{gt} processMap)<block>
+          private static {lt}I extends {service.getNamespace + "." + service.name}{gt} java.util.Map{lt}String, SoaFunctionDefinition{lt}I, ?, ?{gt}{gt} buildMap(java.util.Map{lt}String, SoaFunctionDefinition{lt}I, ?, ?{gt}{gt} processMap)
+          <block>
             {
-            toMethodArrayBuffer(service.getMethods).map{(method: Method)=>{
-              <div>
-                processMap.put("{method.name}", new {method.name}());
-              </div>
+              toMethodArrayBuffer(service.methods).map(method => {
+                <div>
+                  processMap.put("{method.name}", new {method.name}());
+                </div>
+              })
             }
-            }
-            }
-            processMap.put("getServiceMetadata", new getServiceMetadata());
-
             return processMap;
           </block>
         </block>
