@@ -2,6 +2,7 @@ package com.isuwang.dapeng.api.container;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public interface Application {
 
@@ -15,6 +16,6 @@ public interface Application {
 
     void addServiceInfo(ServiceInfo serviceInfo);
 
-    ServiceInfo getServiceInfo(String name, String version);
+    Optional<ServiceInfo> getServiceInfo(String name, String version);
 
 }

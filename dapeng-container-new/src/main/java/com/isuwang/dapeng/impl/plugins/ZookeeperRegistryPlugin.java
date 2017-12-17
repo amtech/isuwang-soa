@@ -28,9 +28,10 @@ public class ZookeeperRegistryPlugin implements AppListener, Plugin {
 
         if (registryAgent != null) {
             DapengApplication application = (DapengApplication) event.getSource();
-            application.getServiceInfos().forEach(serviceInfo -> {
-                registerService(serviceInfo.getServiceName(),serviceInfo.getVersion());
-            });
+            //TODO: zookeeper注册是否允许部分失败？ 对于整个应用来说应该要保证完整性吧
+            application.getServiceInfos().forEach(serviceInfo ->
+                    registerService(serviceInfo.getServiceName(),serviceInfo.getVersion())
+            );
         }
 
         // Monitor ZK's config properties for service
@@ -39,9 +40,9 @@ public class ZookeeperRegistryPlugin implements AppListener, Plugin {
     @Override
     public void appUnRegistered(AppEvent event) {
         DapengApplication application = (DapengApplication) event.getSource();
-        application.getServiceInfos().forEach(serviceInfo -> {
-            unRegisterService(serviceInfo.getServiceName(),serviceInfo.getVersion());
-        });
+        application.getServiceInfos().forEach(serviceInfo ->
+            unRegisterService(serviceInfo.getServiceName(),serviceInfo.getVersion())
+        );
     }
 
     @Override

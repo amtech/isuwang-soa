@@ -6,10 +6,14 @@ import java.util.EventObject;
 
 public class AppEvent extends EventObject {
 
-    private Application application;
+    private AppEventType eventType;
 
-    public AppEvent(Application application) {
+    public AppEvent(Application application, AppEventType eventType) {
         super(application);
-        this.application = application;
+        this.eventType = eventType;
+    }
+
+    public AppEventType getEventType() {
+        return this.eventType;
     }
 }

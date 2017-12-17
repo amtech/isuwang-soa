@@ -1,6 +1,7 @@
 package com.isuwang.dapeng.api.container;
 
 import com.isuwang.dapeng.api.events.AppEvent;
+import com.isuwang.dapeng.api.events.AppEventType;
 import com.isuwang.dapeng.api.extension.Dispatcher;
 import com.isuwang.dapeng.api.listeners.AppListener;
 import com.isuwang.dapeng.api.plugins.Plugin;
@@ -10,6 +11,8 @@ import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.impl.extionsionImpl.ThreadDispatcher;
 import com.isuwang.dapeng.impl.extionsionImpl.ThreadPoolDispatcher;
 import com.isuwang.dapeng.impl.filters.SharedChain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,10 +21,11 @@ import java.util.Map;
 
 public class DapengContainer implements Container{
 
+    private static final Logger logger = LoggerFactory.getLogger(DapengContainer.class);
     private List<AppListener> appListeners = new ArrayList<>();
     private List<Application> applications = new ArrayList<>();
     private List<Plugin> plugins = new ArrayList<>();
-    public static SharedChain sharedChain;
+    private SharedChain sharedChain;
     public Map<ProcessorKey, SoaServiceDefinition<?>> processors;
 
     @Override
@@ -37,13 +41,25 @@ public class DapengContainer implements Container{
     @Override
     public void registerApplication(Application app) {
         this.applications.add(app);
-        this.appListeners.forEach(i -> i.appRegistered(new AppEvent(app)));
+        this.appListeners.forEach(i -> {
+            try {
+                i.appRegistered(new AppEvent(app, AppEventType.REGISTER));
+            } catch (Exception e) {
+                logger.error(" Faild to handler appEvent. listener: {}, eventType: {}",i, AppEventType.REGISTER , e.getStackTrace());
+            }
+        });
     }
 
     @Override
     public void unregisterApplication(Application app) {
         this.applications.remove(app);
-        this.appListeners.forEach(i -> i.appUnRegistered(new AppEvent(app)));
+        this.appListeners.forEach(i -> {
+            try {
+                i.appUnRegistered(new AppEvent(app, AppEventType.UNREGISTER));
+            } catch (Exception e) {
+                logger.error(" Faild to handler appEvent. listener: {}, eventType: {}",i, AppEventType.UNREGISTER , e.getStackTrace());
+            }
+        });
     }
 
     @Override
@@ -72,6 +88,9 @@ public class DapengContainer implements Container{
         }
     }
 
+    public void setSharedChain(SharedChain sharedChain) {
+        this.sharedChain = sharedChain;
+    }
 
     @Override
     public SharedChain getSharedChain() {
@@ -98,4 +117,5 @@ public class DapengContainer implements Container{
         }
         this.processors.putAll(processors);
     }
+
 }

@@ -3,10 +3,7 @@ package com.isuwang.dapeng.api.container;
 import com.isuwang.dapeng.core.ProcessorKey;
 import com.isuwang.dapeng.core.SoaServiceDefinition;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DapengApplication implements Application{
 
@@ -37,14 +34,8 @@ public class DapengApplication implements Application{
     }
 
     @Override
-    public ServiceInfo getServiceInfo(String name, String version) {
-        ServiceInfo sInfo = null;
-        for (ServiceInfo serviceInfo: serviceInfos) {
-            if ((serviceInfo.getServiceName() + serviceInfo.getVersion()).equals(name+version)) {
-                sInfo = serviceInfo;
-            }
-        }
-        return sInfo;
+    public Optional<ServiceInfo> getServiceInfo(String name, String version) {
+        return serviceInfos.stream().filter(i -> name.equals(i.getServiceName()) && version.equals(i.getVersion())).findFirst();
     }
 
 
