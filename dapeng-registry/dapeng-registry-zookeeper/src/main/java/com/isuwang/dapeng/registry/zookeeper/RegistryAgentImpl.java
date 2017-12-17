@@ -1,9 +1,6 @@
 package com.isuwang.dapeng.registry.zookeeper;
 
-import com.isuwang.dapeng.core.InvocationContext;
-import com.isuwang.dapeng.core.ProcessorKey;
-import com.isuwang.dapeng.core.Service;
-import com.isuwang.dapeng.core.SoaSystemEnvProperties;
+import com.isuwang.dapeng.core.*;
 import com.isuwang.dapeng.registry.ConfigKey;
 import com.isuwang.dapeng.registry.RegistryAgent;
 import com.isuwang.dapeng.registry.ServiceInfo;
@@ -38,7 +35,7 @@ public class RegistryAgentImpl implements RegistryAgent {
 
     private ZookeeperWatcher siw, zkfbw;
 
-    private Map<ProcessorKey, TProcessor<?>> processorMap;
+    private Map<ProcessorKey, SoaServiceDefinition<?>> processorMap;
 
     public RegistryAgentImpl() {
         this(true);
@@ -74,11 +71,13 @@ public class RegistryAgentImpl implements RegistryAgent {
     @Override
     public void stop() {
         zooKeeperHelper.destroy();
-        if (siw != null)
+        if (siw != null) {
             siw.destroy();
+        }
 
-        if (zkfbw != null)
+        if (zkfbw != null) {
             zkfbw.destroy();
+        }
     }
 
     @Override
@@ -88,10 +87,12 @@ public class RegistryAgentImpl implements RegistryAgent {
             String data = "";
             zooKeeperHelper.addOrUpdateServerInfo(path, data);
 
-            if (SoaSystemEnvProperties.SOA_ZOOKEEPER_MASTER_ISCONFIG)
+            if (SoaSystemEnvProperties.SOA_ZOOKEEPER_MASTER_ISCONFIG) {
                 zooKeeperMasterHelper.createCurrentNode(ZookeeperHelper.generateKey(serverName, versionName));
-            else
+            }
+            else {
                 zooKeeperHelper.createCurrentNode(ZookeeperHelper.generateKey(serverName, versionName));
+            }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
@@ -99,16 +100,17 @@ public class RegistryAgentImpl implements RegistryAgent {
 
     @Override
     public void registerAllServices() {
-        if (processorMap == null)
+        if (processorMap == null) {
             return;
+        }
 
         Set<ProcessorKey> keys = processorMap.keySet();
 
         for (ProcessorKey key : keys) {
-            TProcessor<?> processor = processorMap.get(key);
+            SoaServiceDefinition<?> processor = processorMap.get(key);
 
-            if (processor.getInterfaceClass().getClass() != null) {
-                Service service = processor.getInterfaceClass().getAnnotation(Service.class);
+            if (processor.getIfaceClass() != null) {
+                Service service = processor.getIfaceClass().getAnnotation(Service.class);
 
                 this.registerService(service.name(), service.version());
             }
@@ -121,12 +123,12 @@ public class RegistryAgentImpl implements RegistryAgent {
     }
 
     @Override
-    public void setProcessorMap(Map<ProcessorKey, TProcessor<?>> processorMap) {
+    public void setProcessorMap(Map<ProcessorKey, SoaServiceDefinition<?>> processorMap) {
         this.processorMap = processorMap;
     }
 
     @Override
-    public Map<ProcessorKey, TProcessor<?>> getProcessorMap() {
+    public Map<ProcessorKey, SoaServiceDefinition<?>> getProcessorMap() {
         return this.processorMap;
     }
 
@@ -170,16 +172,18 @@ public class RegistryAgentImpl implements RegistryAgent {
     public Map<ConfigKey, Object> getConfig(boolean usingFallback, String serviceKey) {
 
         if (usingFallback) {
-            if (zkfbw.getConfigWithKey(serviceKey).entrySet().size() <= 0)
+            if (zkfbw.getConfigWithKey(serviceKey).entrySet().size() <= 0) {
                 return null;
-            else
+            } else {
                 return zkfbw.getConfigWithKey(serviceKey);
+            }
         } else {
 
-            if (siw.getConfigWithKey(serviceKey).entrySet().size() <= 0)
+            if (siw.getConfigWithKey(serviceKey).entrySet().size() <= 0) {
                 return null;
-            else
+            } else {
                 return siw.getConfigWithKey(serviceKey);
+            }
         }
     }
 

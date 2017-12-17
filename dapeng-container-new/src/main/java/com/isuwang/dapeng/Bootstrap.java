@@ -23,7 +23,7 @@ public class Bootstrap {
     private static final List<URL> platformURLs = new ArrayList<>();
     private static final List<List<URL>> appURLs = new ArrayList<>();
     private static final List<List<URL>> pluginURLs = new ArrayList<>();
-    private static final String enginePath = System.getProperty("soa.base", new File(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile().getParent());
+    private static final String enginePath = System.getProperty("soa.base", new File(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile().getParent()+"/dapeng-container/");
 
 
     public static void main(String[] args) throws MalformedURLException {
@@ -47,9 +47,11 @@ public class Bootstrap {
         Plugin zookeeperPlugin = new ZookeeperRegistryPlugin(dapengContainer);
         Plugin taskSchedulePlugin = new TaskSchedulePlugin(dapengContainer);
         Plugin nettyPlugin = new NettyPlugin(dapengContainer);
+
+        ContainerFactory.getContainer().registerPlugin(springAppLoader);
         ContainerFactory.getContainer().registerPlugin(zookeeperPlugin);
         ContainerFactory.getContainer().registerPlugin(taskSchedulePlugin);
-        ContainerFactory.getContainer().registerPlugin(nettyPlugin);
+        //ContainerFactory.getContainer().registerPlugin(nettyPlugin);
 
         //4.启动Apploader， plugins
         ContainerFactory.getContainer().getPlugins().forEach(Plugin::start);

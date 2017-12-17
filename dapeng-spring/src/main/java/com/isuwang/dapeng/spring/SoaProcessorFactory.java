@@ -1,6 +1,6 @@
 package com.isuwang.dapeng.spring;
 
-import com.isuwang.dapeng.SoaServiceDefinition;
+import com.isuwang.dapeng.core.SoaServiceDefinition;
 import com.isuwang.dapeng.core.Processor;
 import com.isuwang.dapeng.core.Service;
 import com.isuwang.dapeng.core.SoaCommonBaseProcessor;
@@ -39,8 +39,9 @@ public class SoaProcessorFactory implements FactoryBean<SoaServiceDefinition<?>>
                 .map(anInterface -> anInterface)
                 .collect(toList());
 
-        if (filterInterfaces.isEmpty())
+        if (filterInterfaces.isEmpty()) {
             throw new RuntimeException("not config @Service & @Processor in " + refId);
+        }
 
         Class<?> interfaceClass = filterInterfaces.get(filterInterfaces.size() - 1);
 

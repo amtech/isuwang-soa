@@ -19,8 +19,9 @@ public class SoaServiceBeanDefinitionParser implements BeanDefinitionParser {
         String id = element.getAttribute("id");
         String ref = element.getAttribute("ref");
 
-        if (StringUtils.isBlank(id))
+        if (StringUtils.isBlank(id)) {
             id = ref + "_SoaProcessor";
+        }
 
         BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(SoaProcessorFactory.class);
         builder.addConstructorArgReference(ref);

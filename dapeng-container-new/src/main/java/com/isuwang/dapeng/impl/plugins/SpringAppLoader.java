@@ -4,8 +4,8 @@ import com.isuwang.dapeng.api.container.*;
 import com.isuwang.dapeng.api.plugins.Plugin;
 import com.isuwang.dapeng.core.ProcessorKey;
 import com.isuwang.dapeng.core.Service;
+import com.isuwang.dapeng.core.SoaServiceDefinition;
 import com.isuwang.dapeng.impl.classloader.AppClassLoader;
-import com.isuwang.dapeng.impl.handler.SoaServiceDefinition;
 import org.springframework.util.CollectionUtils;
 
 import java.io.File;
@@ -43,12 +43,10 @@ public class SpringAppLoader implements Plugin {
                 Thread.currentThread().setContextClassLoader(appClassLoader);
                 Object context = getSpringContext(configPath, appClassLoader,constructor);
 
-                //Start spring context
-                Method startMethod = appClass.getMethod("start");
-                startMethod.invoke(context);
-
                 Method method = appClass.getMethod("getBeansOfType", Class.class);
-                Map<String, SoaServiceDefinition<?>> processorMap = (Map<String, SoaServiceDefinition<?>>) method.invoke(context, appClass.getClassLoader().loadClass(SoaServiceDefinition.class.getName()));
+
+                Map<String, SoaServiceDefinition<?>> processorMap = (Map<String, SoaServiceDefinition<?>>)
+                        method.invoke(context, appClassLoader.loadClass(SoaServiceDefinition.class.getName()));
                 //TODO: 需要构造Application对象
                 Map<String,ServiceInfo> appInfos = toServiceInfos(processorMap);
                 Application application = new DapengApplication(appInfos.values().stream().collect(Collectors.toList()));
@@ -60,6 +58,10 @@ public class SpringAppLoader implements Plugin {
                 if (! application.getServiceInfos().isEmpty()) {
                     container.registerApplication(application);
                 }
+
+                //Start spring context
+                Method startMethod = appClass.getMethod("start");
+                startMethod.invoke(context);
 
             } catch (Exception e) {
                 e.printStackTrace();

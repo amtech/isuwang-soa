@@ -1,19 +1,12 @@
 package com.isuwang.dapeng.impl.handler;
 
-import com.isuwang.dapeng.api.container.Application;
 import com.isuwang.dapeng.api.container.ContainerFactory;
 import com.isuwang.dapeng.api.extension.Dispatcher;
-import com.isuwang.dapeng.core.ProcessorKey;
-import com.isuwang.dapeng.core.SoaHeader;
-import com.isuwang.dapeng.core.SoaSystemEnvProperties;
-import com.isuwang.dapeng.core.TransactionContext;
+import com.isuwang.dapeng.core.*;
 import com.isuwang.org.apache.thrift.TException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by lihuimin on 2017/12/7.

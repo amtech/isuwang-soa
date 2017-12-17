@@ -1,6 +1,4 @@
-package com.isuwang.dapeng.impl.handler;
-
-import com.isuwang.dapeng.core.TCommonBeanSerializer;
+package com.isuwang.dapeng.core;
 
 import java.util.concurrent.CompletableFuture;
 

@@ -4,8 +4,8 @@ import com.isuwang.dapeng.api.extension.Dispatcher;
 import com.isuwang.dapeng.api.listeners.AppListener;
 import com.isuwang.dapeng.api.plugins.Plugin;
 import com.isuwang.dapeng.core.ProcessorKey;
+import com.isuwang.dapeng.core.SoaServiceDefinition;
 import com.isuwang.dapeng.impl.filters.SharedChain;
-import com.isuwang.dapeng.impl.handler.SoaServiceDefinition;
 
 import java.util.List;
 import java.util.Map;

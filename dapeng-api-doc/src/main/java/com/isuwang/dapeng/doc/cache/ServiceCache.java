@@ -57,7 +57,7 @@ public class ServiceCache {
         final Map<String, com.isuwang.dapeng.core.metadata.Service> services = new TreeMap<>();
         urlMappings.clear();
 
-        Map<ProcessorKey, TProcessor<?>> processorMap = RegistryAgentProxy.getCurrentInstance(RegistryAgentProxy.Type.Server).getProcessorMap();
+        Map<ProcessorKey, TProcessor<?>> processorMap =  null;//RegistryAgentProxy.getCurrentInstance(RegistryAgentProxy.Type.Server).getProcessorMap();
 
         Set<ProcessorKey> keys = processorMap.keySet();
         for (ProcessorKey key : keys) {

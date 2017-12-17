@@ -32,7 +32,7 @@ public class ZookeeperRegistryContainer implements Container {
     public void start() {
         RegistryAgentProxy.setCurrentInstance(RegistryAgentProxy.Type.Server, registryAgent);
 
-        registryAgent.setProcessorMap(ProcessorCache.getProcessorMap());
+        //registryAgent.setProcessorMap(ContainerFactory);
         registryAgent.start();
 
         Map<Object, Class<?>> contexts = SpringContainer.getContexts();

@@ -1,9 +1,9 @@
 package com.isuwang.dapeng.impl.extionsionImpl;
 
 import com.isuwang.dapeng.api.extension.Dispatcher;
+import com.isuwang.dapeng.core.SoaServiceDefinition;
 import com.isuwang.dapeng.impl.handler.RequestProcessor;
 import com.isuwang.dapeng.impl.handler.SoaMessageProcessor;
-import com.isuwang.dapeng.impl.handler.SoaServiceDefinition;
 import com.isuwang.org.apache.thrift.TException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -13,7 +13,7 @@ import io.netty.channel.ChannelHandlerContext;
  */
 public class ThreadDispatcher implements Dispatcher {
 
-
+    @Override
     public void processRequest(ChannelHandlerContext ctx, SoaMessageProcessor parser, SoaServiceDefinition processor, ByteBuf message) throws TException {
        RequestProcessor.processRequest(ctx,parser,processor,message);
     }

@@ -1,7 +1,7 @@
 package com.isuwang.dapeng.api.container;
 
 import com.isuwang.dapeng.core.ProcessorKey;
-import com.isuwang.dapeng.impl.handler.SoaServiceDefinition;
+import com.isuwang.dapeng.core.SoaServiceDefinition;
 
 import java.util.ArrayList;
 import java.util.HashMap;
