@@ -1,7 +1,10 @@
 package com.isuwang.dapeng.remoting.netty;
 
+import com.isuwang.dapeng.core.Context;
 import com.isuwang.dapeng.core.SoaServiceDefinition;
+import com.isuwang.dapeng.core.TransactionContext;
 import com.isuwang.org.apache.thrift.TException;
+import com.isuwang.org.apache.thrift.protocol.TProtocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -10,6 +13,6 @@ import io.netty.channel.ChannelHandlerContext;
  */
 public interface Dispatcher {
 
-    public void processRequest(ChannelHandlerContext ctx, SoaMessageProcessor parser, SoaServiceDefinition processor, ByteBuf message)throws TException;
+    public void processRequest(ChannelHandlerContext ctx, TProtocol contentProtocol, SoaServiceDefinition processor, ByteBuf message, Context context)throws TException;
 
 }

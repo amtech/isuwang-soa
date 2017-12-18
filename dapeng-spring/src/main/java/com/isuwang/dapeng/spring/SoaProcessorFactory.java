@@ -1,9 +1,8 @@
 package com.isuwang.dapeng.spring;
 
-import com.isuwang.dapeng.core.SoaServiceDefinition;
 import com.isuwang.dapeng.core.Processor;
 import com.isuwang.dapeng.core.Service;
-import com.isuwang.dapeng.core.SoaCommonBaseProcessor;
+import com.isuwang.dapeng.core.SoaServiceDefinition;
 import org.springframework.beans.factory.FactoryBean;
 
 import java.lang.reflect.Constructor;

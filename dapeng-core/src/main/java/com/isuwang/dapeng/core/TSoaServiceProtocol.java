@@ -16,7 +16,7 @@ public class TSoaServiceProtocol extends TProtocol {
 
     private final byte STX = 0x02;
     private final byte ETX = 0x03;
-    private final String VERSION = "1.0.0";
+    private final byte VERSION = 1;
 
     private TProtocol realHeaderProtocol;
     private TProtocol realContentProtocol;
@@ -42,7 +42,7 @@ public class TSoaServiceProtocol extends TProtocol {
         // length(int32) stx(int8) version(string) protocol(int8) seqid(int32) header(struct) body(struct) etx(int8)
 
         realHeaderProtocol.writeByte(STX);
-        realHeaderProtocol.writeString(VERSION);
+        realHeaderProtocol.writeByte(VERSION);
         realHeaderProtocol.writeByte(context.getCodecProtocol().getCode());
         realHeaderProtocol.writeI32(context.getSeqid());
 
@@ -61,9 +61,9 @@ public class TSoaServiceProtocol extends TProtocol {
                 break;
         }
 
-        new SoaHeaderSerializer().write(context.getHeader(), this);
+        new SoaHeaderSerializer().write(context.getHeader(), realHeaderProtocol);
 
-        realContentProtocol.writeMessageBegin(message);
+       //realContentProtocol.writeMessageBegin(message);
     }
 
     @Override
@@ -184,8 +184,8 @@ public class TSoaServiceProtocol extends TProtocol {
         }
 
         // version
-        String version = realHeaderProtocol.readString();
-        if (!VERSION.equals(version)) {
+        byte version = realHeaderProtocol.readByte();
+        if (VERSION!=version) {
             throw new TException("通讯协议不正确(协议版本号)");
         }
 
@@ -210,10 +210,11 @@ public class TSoaServiceProtocol extends TProtocol {
 
         context.setSeqid(realHeaderProtocol.readI32());
 
-        SoaHeader soaHeader =new SoaHeaderSerializer().read( this);
+        SoaHeader soaHeader =new SoaHeaderSerializer().read( realHeaderProtocol);
         context.setHeader(soaHeader);
 
-        return realContentProtocol.readMessageBegin();
+        //return realContentProtocol.readMessageBegin();
+        return null;
     }
 
     @Override

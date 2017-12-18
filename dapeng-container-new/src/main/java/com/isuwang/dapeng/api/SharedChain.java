@@ -53,7 +53,7 @@ public class SharedChain implements FilterChain {
     @Override
     public void onEntry(FilterContext ctx) throws TException {
         SharedChain next = null;
-        if(index  <= 1 + shared.length)
+        if(index  < 1 + shared.length)
                 next = new SharedChain(head, shared, tail, index+1);
         else next = null;
 

@@ -7,16 +7,19 @@ import com.isuwang.org.apache.thrift.protocol.TBinaryProtocol;
 import com.isuwang.org.apache.thrift.protocol.TCompactProtocol;
 import com.isuwang.org.apache.thrift.protocol.TJSONProtocol;
 import com.isuwang.org.apache.thrift.protocol.TProtocol;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by lihuimin on 2017/12/8.
  */
 public class SoaMessageProcessor {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SoaMessageProcessor.class);
 
     private final byte STX = 0x02;
     private final byte ETX = 0x03;
-    private final String VERSION = "1.0.0";
+    private final byte VERSION = 1;
 
     private TProtocol headerProtocol;
     private TProtocol contentProtocol;
@@ -55,13 +58,12 @@ public class SoaMessageProcessor {
     }
 
 
-    public void buildResponse() throws TException {
-        final Context context = isRequestFlag ? InvocationContext.Factory.getCurrentInstance() : TransactionContext.Factory.getCurrentInstance();
-        if (headerProtocol == null) {
-            headerProtocol = new TBinaryProtocol(transport);
-        }
+    public void buildResponse(Context context) throws TException {
+
+        headerProtocol = new TBinaryProtocol(transport);
+
         headerProtocol.writeByte(STX);
-        headerProtocol.writeString(VERSION);
+        headerProtocol.writeByte(VERSION);
         headerProtocol.writeByte(context.getCodecProtocol().getCode());
         headerProtocol.writeI32(context.getSeqid());
 
@@ -100,8 +102,8 @@ public class SoaMessageProcessor {
         }
 
         // version
-        String version = headerProtocol.readString();
-        if (!VERSION.equals(version)) {
+        byte version = headerProtocol.readByte();
+        if (version!=VERSION) {
             throw new TException("通讯协议不正确(协议版本号)");
         }
 

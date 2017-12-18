@@ -7,13 +7,13 @@ import java.util.*;
 
 public class DapengApplication implements Application{
 
-    List<ServiceInfo> serviceInfos = Collections.unmodifiableList(new ArrayList<>());
+    List<ServiceInfo> serviceInfos;
 
     public DapengApplication() {
     }
 
     public DapengApplication(List<ServiceInfo> serviceInfos) {
-        this.serviceInfos.addAll(serviceInfos);
+        this.serviceInfos=Collections.unmodifiableList(serviceInfos);
     }
 
     @Override
