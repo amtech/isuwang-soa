@@ -1,14 +1,12 @@
 package com.isuwang.dapeng;
 
-import com.isuwang.dapeng.api.container.Container;
-import com.isuwang.dapeng.api.container.ContainerFactory;
-import com.isuwang.dapeng.api.container.DapengContainer;
-import com.isuwang.dapeng.api.plugins.Plugin;
+
+import com.isuwang.dapeng.core.container.Container;
+import com.isuwang.dapeng.core.container.ContainerFactory;
+import com.isuwang.dapeng.core.container.Plugin;
 import com.isuwang.dapeng.impl.classloader.*;
-import com.isuwang.dapeng.impl.plugins.NettyPlugin;
-import com.isuwang.dapeng.impl.plugins.SpringAppLoader;
-import com.isuwang.dapeng.impl.plugins.TaskSchedulePlugin;
-import com.isuwang.dapeng.impl.plugins.ZookeeperRegistryPlugin;
+import com.isuwang.dapeng.impl.container.DapengContainer;
+import com.isuwang.dapeng.impl.plugins.*;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -29,8 +27,9 @@ public class Bootstrap {
     public static void main(String[] args) throws MalformedURLException {
 
         //1. 初始化dapeng容器
-        Container dapengContainer = new DapengContainer();
-        ContainerFactory.initContainer(dapengContainer);
+        DapengContainer dapengContainer = new DapengContainer();
+        ContainerFactory.initDapengContainer(dapengContainer);
+
 
         loadAllUrls();
         List<AppClassLoader> appClassLoaders = appURLs.stream().map(i -> new AppClassLoader(i.toArray(new URL[i.size()]))).collect(Collectors.toList());
@@ -47,11 +46,14 @@ public class Bootstrap {
         Plugin zookeeperPlugin = new ZookeeperRegistryPlugin(dapengContainer);
         Plugin taskSchedulePlugin = new TaskSchedulePlugin(dapengContainer);
         Plugin nettyPlugin = new NettyPlugin(dapengContainer);
+        Plugin apiDocPlugin = new ApiDocPlugin(dapengContainer);
 
-        ContainerFactory.getContainer().registerPlugin(springAppLoader);
-        ContainerFactory.getContainer().registerPlugin(zookeeperPlugin);
-        ContainerFactory.getContainer().registerPlugin(taskSchedulePlugin);
-        //ContainerFactory.getContainer().registerPlugin(nettyPlugin);
+
+        dapengContainer.registerPlugin(springAppLoader);
+        dapengContainer.registerPlugin(zookeeperPlugin);
+        dapengContainer.registerPlugin(taskSchedulePlugin);
+        dapengContainer.registerPlugin(nettyPlugin);
+        dapengContainer.registerPlugin(apiDocPlugin);
 
         //4.启动Apploader， plugins
         ContainerFactory.getContainer().getPlugins().forEach(Plugin::start);

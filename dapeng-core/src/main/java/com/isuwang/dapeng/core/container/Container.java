@@ -1,11 +1,7 @@
-package com.isuwang.dapeng.api.container;
+package com.isuwang.dapeng.core.container;
 
-import com.isuwang.dapeng.api.extension.Dispatcher;
-import com.isuwang.dapeng.api.listeners.AppListener;
-import com.isuwang.dapeng.api.plugins.Plugin;
 import com.isuwang.dapeng.core.ProcessorKey;
 import com.isuwang.dapeng.core.SoaServiceDefinition;
-import com.isuwang.dapeng.impl.filters.SharedChain;
 
 import java.util.List;
 import java.util.Map;
@@ -58,8 +54,6 @@ public interface Container {
      * @return
      */
     public List<Application> getApplications();
-
-    public Dispatcher getDispatcher();
 
     public SharedChain getSharedChain();
 

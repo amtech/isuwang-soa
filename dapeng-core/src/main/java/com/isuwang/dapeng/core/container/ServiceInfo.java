@@ -1,4 +1,4 @@
-package com.isuwang.dapeng.api.container;
+package com.isuwang.dapeng.core.container;
 
 public class ServiceInfo {
 

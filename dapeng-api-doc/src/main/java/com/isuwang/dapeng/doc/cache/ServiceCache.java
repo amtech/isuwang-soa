@@ -2,16 +2,15 @@ package com.isuwang.dapeng.doc.cache;
 
 
 import com.google.common.collect.TreeMultimap;
-import com.isuwang.dapeng.core.ProcessorKey;
-import com.isuwang.dapeng.core.Service;
+import com.isuwang.dapeng.core.container.Application;
+import com.isuwang.dapeng.core.container.ContainerFactory;
+import com.isuwang.dapeng.core.container.ServiceInfo;
 import com.isuwang.dapeng.core.metadata.Field;
 import com.isuwang.dapeng.core.metadata.Method;
 import com.isuwang.dapeng.core.metadata.Struct;
 import com.isuwang.dapeng.core.metadata.TEnum;
-import com.isuwang.dapeng.registry.RegistryAgentProxy;
 import com.isuwang.dapeng.remoting.fake.metadata.MetadataClient;
 import com.isuwang.org.apache.thrift.TException;
-import com.isuwang.org.apache.thrift.TProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +18,6 @@ import javax.xml.bind.JAXB;
 import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -57,26 +55,17 @@ public class ServiceCache {
         final Map<String, com.isuwang.dapeng.core.metadata.Service> services = new TreeMap<>();
         urlMappings.clear();
 
-        Map<ProcessorKey, TProcessor<?>> processorMap =  null;//RegistryAgentProxy.getCurrentInstance(RegistryAgentProxy.Type.Server).getProcessorMap();
+        List<Application> applications = ContainerFactory.getContainer().getApplications();
 
-        Set<ProcessorKey> keys = processorMap.keySet();
-        for (ProcessorKey key : keys) {
-            TProcessor<?> processor = processorMap.get(key);
-            if (processor.getInterfaceClass().getClass() != null) {
-
-                Service service = processor.getInterfaceClass().getAnnotation(Service.class);
-
-                String serviceName = service.name();
-                String version = service.version();
-
-
+        applications.stream().forEach(application -> {
+            List<ServiceInfo> serviceInfos = application.getServiceInfos();
+            serviceInfos.forEach(s -> {
                 String metadata = "";
                 try {
-                    metadata = new MetadataClient(serviceName, version).getServiceMetadata();
+                    metadata = new MetadataClient(s.getServiceName(), s.getVersion()).getServiceMetadata();
                 } catch (TException e) {
                     LOGGER.error(e.getMessage(), e);
                 }
-
                 if (metadata != null) {
                     try (StringReader reader = new StringReader(metadata)) {
                         com.isuwang.dapeng.core.metadata.Service serviceData = JAXB.unmarshal(reader, com.isuwang.dapeng.core.metadata.Service.class);
@@ -85,9 +74,10 @@ public class ServiceCache {
                         LOGGER.error("生成SERVICE出错", e);
                     }
                 }
-            }
-        }
-        this.services = services;
+            });
+        });
+
+        ServiceCache.services = services;
 
         LOGGER.info("size of urlMapping: " + urlMappings.size());
     }
@@ -134,10 +124,11 @@ public class ServiceCache {
 
     public com.isuwang.dapeng.core.metadata.Service getService(String name, String version) {
 
-        if (name.contains("."))
+        if (name.contains(".")) {
             return fullNameService.get(getKey(name, version));
-        else
+        } else {
             return services.get(getKey(name, version));
+        }
     }
 
     private String getKey(com.isuwang.dapeng.core.metadata.Service service) {

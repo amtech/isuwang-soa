@@ -1,16 +1,12 @@
-package com.isuwang.dapeng.api.container;
+package com.isuwang.dapeng.impl.container;
 
-import com.isuwang.dapeng.api.events.AppEvent;
-import com.isuwang.dapeng.api.events.AppEventType;
-import com.isuwang.dapeng.api.extension.Dispatcher;
-import com.isuwang.dapeng.api.listeners.AppListener;
-import com.isuwang.dapeng.api.plugins.Plugin;
 import com.isuwang.dapeng.core.ProcessorKey;
 import com.isuwang.dapeng.core.SoaServiceDefinition;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
+import com.isuwang.dapeng.core.container.*;
 import com.isuwang.dapeng.impl.extionsionImpl.ThreadDispatcher;
 import com.isuwang.dapeng.impl.extionsionImpl.ThreadPoolDispatcher;
-import com.isuwang.dapeng.impl.filters.SharedChain;
+import com.isuwang.dapeng.remoting.netty.Dispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,15 +74,15 @@ public class DapengContainer implements Container{
     }
 
 
-    @Override
-    public Dispatcher getDispatcher() {
-        Boolean useThreadPool = SoaSystemEnvProperties.SOA_CONTAINER_USETHREADPOOL;
-        if(useThreadPool){
-            return new ThreadPoolDispatcher();
-        }else{
-            return new ThreadDispatcher();
-        }
-    }
+    //TODO: 考虑如何把该接口从Container 解耦
+//    public Dispatcher getDispatcher() {
+//        Boolean useThreadPool = SoaSystemEnvProperties.SOA_CONTAINER_USETHREADPOOL;
+//        if(useThreadPool){
+//            return new ThreadPoolDispatcher();
+//        }else{
+//            return new ThreadDispatcher();
+//        }
+//    }
 
     public void setSharedChain(SharedChain sharedChain) {
         this.sharedChain = sharedChain;

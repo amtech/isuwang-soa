@@ -1,7 +1,6 @@
-package com.isuwang.dapeng.api.extension;
+package com.isuwang.dapeng.remoting.netty;
 
 import com.isuwang.dapeng.core.SoaServiceDefinition;
-import com.isuwang.dapeng.impl.handler.SoaMessageProcessor;
 import com.isuwang.org.apache.thrift.TException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

@@ -1,9 +1,10 @@
 package com.isuwang.dapeng.impl.filters;
 
-import com.isuwang.dapeng.api.filters.FilterChain;
-import com.isuwang.dapeng.api.filters.FilterContext;
-import com.isuwang.dapeng.api.filters.HandlerFilter;
+
 import com.isuwang.dapeng.core.TransactionContext;
+import com.isuwang.dapeng.core.container.FilterChain;
+import com.isuwang.dapeng.core.container.FilterContext;
+import com.isuwang.dapeng.core.container.HandlerFilter;
 import com.isuwang.org.apache.thrift.TException;
 
 import java.lang.reflect.InvocationTargetException;
@@ -22,8 +23,9 @@ public class FilterChainDemo {
         public ChainNode(HandlerFilter filter, ChainNode next) {
             this.filter = filter;
             this.next = next;
-            if(next != null)
+            if(next != null) {
                 next.prev = this;
+            }
         }
 
         @Override
@@ -67,9 +69,12 @@ public class FilterChainDemo {
                 //
                 onExit(ctx);
             }
+
+            @Override
             public void onExit(FilterContext ctx)throws TException{
-                if(prev != null)
+                if(prev != null) {
                     prev.onExit(ctx);
+                }
             }
         };
 

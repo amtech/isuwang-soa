@@ -1,8 +1,10 @@
 package com.isuwang.dapeng.impl.handler;
 
-import com.isuwang.dapeng.api.container.ContainerFactory;
-import com.isuwang.dapeng.api.extension.Dispatcher;
 import com.isuwang.dapeng.core.*;
+import com.isuwang.dapeng.core.container.ContainerFactory;
+import com.isuwang.dapeng.remoting.netty.Dispatcher;
+import com.isuwang.dapeng.remoting.netty.SoaMessageProcessor;
+import com.isuwang.dapeng.remoting.netty.TSoaTransport;
 import com.isuwang.org.apache.thrift.TException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -37,7 +39,8 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
         //APlugin.markRequestBegin(); // container.registerFilter(...); container.startThread(...);
         SoaServiceDefinition processor = ContainerFactory.getContainer().getServiceProcessors().get(new ProcessorKey(soaHeader.getServiceName(),soaHeader.getVersionName()));
 
-        ContainerFactory.getContainer().getDispatcher().processRequest(ctx,parser,processor,message);
+        //TODO: 需要从netty 提供接口
+       // ContainerFactory.getContainer().getDispatcher().processRequest(ctx,parser,processor,message);
     }
 
 

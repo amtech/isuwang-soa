@@ -1,7 +1,6 @@
-package com.isuwang.dapeng.api.container;
+package com.isuwang.dapeng.core.container;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 public interface Application {

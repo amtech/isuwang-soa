@@ -1,4 +1,4 @@
-package com.isuwang.dapeng.api.plugins;
+package com.isuwang.dapeng.core.container;
 
 public interface Plugin {
 

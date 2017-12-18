@@ -1,10 +1,10 @@
 package com.isuwang.dapeng.impl.extionsionImpl;
 
-import com.isuwang.dapeng.api.extension.Dispatcher;
 import com.isuwang.dapeng.core.SoaServiceDefinition;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.impl.handler.RequestProcessor;
-import com.isuwang.dapeng.impl.handler.SoaMessageProcessor;
+import com.isuwang.dapeng.remoting.netty.Dispatcher;
+import com.isuwang.dapeng.remoting.netty.SoaMessageProcessor;
 import com.isuwang.org.apache.thrift.TException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -30,12 +30,15 @@ public class ThreadPoolDispatcher implements Dispatcher {
             namePrefix = "trans-pool-" + poolNumber.getAndIncrement() + "-thread-";
         }
 
+        @Override
         public Thread newThread(Runnable r) {
             Thread t = new Thread(group, r, namePrefix + threadNumber.getAndIncrement(), 0);
-            if (t.isDaemon())
+            if (t.isDaemon()) {
                 t.setDaemon(false);
-            if (t.getPriority() != Thread.NORM_PRIORITY)
+            }
+            if (t.getPriority() != Thread.NORM_PRIORITY) {
                 t.setPriority(Thread.NORM_PRIORITY);
+            }
             return t;
         }
     }

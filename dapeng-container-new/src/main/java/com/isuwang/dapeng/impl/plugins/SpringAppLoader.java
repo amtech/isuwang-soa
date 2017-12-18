@@ -1,11 +1,11 @@
 package com.isuwang.dapeng.impl.plugins;
 
-import com.isuwang.dapeng.api.container.*;
-import com.isuwang.dapeng.api.plugins.Plugin;
 import com.isuwang.dapeng.core.ProcessorKey;
 import com.isuwang.dapeng.core.Service;
 import com.isuwang.dapeng.core.SoaServiceDefinition;
+import com.isuwang.dapeng.core.container.*;
 import com.isuwang.dapeng.impl.classloader.AppClassLoader;
+import com.isuwang.dapeng.impl.container.DapengApplication;
 import org.springframework.util.CollectionUtils;
 
 import java.io.File;
@@ -60,6 +60,7 @@ public class SpringAppLoader implements Plugin {
                 }
 
                 //Start spring context
+                Thread.currentThread().setContextClassLoader(classLoader);
                 Method startMethod = appClass.getMethod("start");
                 startMethod.invoke(context);
 
