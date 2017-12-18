@@ -1,17 +1,13 @@
 package com.isuwang.dapeng.impl.container;
 
-import com.isuwang.dapeng.core.ProcessorKey;
-import com.isuwang.dapeng.core.SoaServiceDefinition;
-import com.isuwang.dapeng.core.container.Application;
-import com.isuwang.dapeng.core.container.ServiceInfo;
+import com.isuwang.dapeng.api.Application;
+import com.isuwang.dapeng.api.ServiceInfo;
 
 import java.util.*;
 
 public class DapengApplication implements Application{
 
-    List<ServiceInfo> serviceInfos = new ArrayList<>();
-
-    Map<ProcessorKey, SoaServiceDefinition<?>> processors = new HashMap<>();
+    List<ServiceInfo> serviceInfos = Collections.unmodifiableList(new ArrayList<>());
 
     public DapengApplication() {
     }

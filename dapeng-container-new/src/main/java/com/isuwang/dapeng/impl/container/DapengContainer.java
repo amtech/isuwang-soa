@@ -1,28 +1,22 @@
 package com.isuwang.dapeng.impl.container;
 
+import com.isuwang.dapeng.api.*;
 import com.isuwang.dapeng.core.ProcessorKey;
 import com.isuwang.dapeng.core.SoaServiceDefinition;
-import com.isuwang.dapeng.core.SoaSystemEnvProperties;
-import com.isuwang.dapeng.core.container.*;
-import com.isuwang.dapeng.impl.extionsionImpl.ThreadDispatcher;
-import com.isuwang.dapeng.impl.extionsionImpl.ThreadPoolDispatcher;
-import com.isuwang.dapeng.remoting.netty.Dispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class DapengContainer implements Container{
+public class DapengContainer implements Container {
 
     private static final Logger logger = LoggerFactory.getLogger(DapengContainer.class);
-    private List<AppListener> appListeners = new ArrayList<>();
-    private List<Application> applications = new ArrayList<>();
+    private List<AppListener> appListeners = new Vector<>();
+    private List<Application> applications = new Vector<>();
     private List<Plugin> plugins = new ArrayList<>();
     private SharedChain sharedChain;
-    public Map<ProcessorKey, SoaServiceDefinition<?>> processors;
+    public Map<ProcessorKey, SoaServiceDefinition<?>> processors = new ConcurrentHashMap<>();
 
     @Override
     public void registerAppListener(AppListener listener) {
@@ -108,9 +102,6 @@ public class DapengContainer implements Container{
 
     @Override
     public void registerAppProcessors(Map<ProcessorKey, SoaServiceDefinition<?>> processors) {
-        if (this.processors == null) {
-            this.processors = new HashMap<>();
-        }
         this.processors.putAll(processors);
     }
 

@@ -1,4 +1,4 @@
-package com.isuwang.dapeng.impl.handler;
+package com.isuwang.dapeng.impl.plugins.netty;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;

@@ -1,7 +1,7 @@
 package com.isuwang.dapeng.impl.extionsionImpl;
 
 import com.isuwang.dapeng.core.SoaServiceDefinition;
-import com.isuwang.dapeng.impl.handler.RequestProcessor;
+import com.isuwang.dapeng.impl.plugins.netty.RequestProcessor;
 import com.isuwang.dapeng.remoting.netty.Dispatcher;
 import com.isuwang.dapeng.remoting.netty.SoaMessageProcessor;
 import com.isuwang.org.apache.thrift.TException;

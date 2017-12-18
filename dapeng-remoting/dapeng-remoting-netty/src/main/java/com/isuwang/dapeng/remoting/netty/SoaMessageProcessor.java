@@ -85,7 +85,7 @@ public class SoaMessageProcessor {
         //contentProtocol.writeMessageBegin(message);
     }
 
-    public void parseSoaMessage() throws TException{
+    public SoaHeader parseSoaMessage() throws TException{
         final Context context = isRequestFlag ? InvocationContext.Factory.getCurrentInstance() : TransactionContext.Factory.getCurrentInstance();
 
         if (headerProtocol == null) {
@@ -127,7 +127,7 @@ public class SoaMessageProcessor {
         context.setSeqid(headerProtocol.readI32());
         SoaHeader soaHeader =new SoaHeaderSerializer().read( headerProtocol);
         context.setHeader(soaHeader);
-
+        return soaHeader;
     }
 
     public void writeMessageEnd() throws TException {
