@@ -194,7 +194,6 @@ class JavaCodecGenerator extends CodeGenerator {
                 result.success = iface.sayHello{toFieldArrayBuffer(method.getRequest.getFields).map(i => {method.name} + "_args." + i.name).mkString("(",",",")")};
               </block> catch (SoaException e) <block>
                 e.printStackTrace();
-                result.success = "";
               </block>
               return result;
               </block>
