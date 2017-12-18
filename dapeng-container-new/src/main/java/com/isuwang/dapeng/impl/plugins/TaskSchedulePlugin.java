@@ -3,6 +3,10 @@ package com.isuwang.dapeng.impl.plugins;
 
 
 import com.isuwang.dapeng.api.*;
+import com.isuwang.dapeng.core.AppListener;
+import com.isuwang.dapeng.core.Application;
+import com.isuwang.dapeng.core.ServiceInfo;
+import com.isuwang.dapeng.core.events.AppEvent;
 
 import java.util.List;
 

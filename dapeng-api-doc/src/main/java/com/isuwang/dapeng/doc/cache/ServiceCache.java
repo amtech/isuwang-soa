@@ -2,9 +2,10 @@ package com.isuwang.dapeng.doc.cache;
 
 
 import com.google.common.collect.TreeMultimap;
-import com.isuwang.dapeng.core.container.Application;
-import com.isuwang.dapeng.core.container.ContainerFactory;
-import com.isuwang.dapeng.core.container.ServiceInfo;
+import com.isuwang.dapeng.core.AppListener;
+import com.isuwang.dapeng.core.Application;
+import com.isuwang.dapeng.core.ServiceInfo;
+import com.isuwang.dapeng.core.events.AppEvent;
 import com.isuwang.dapeng.core.metadata.Field;
 import com.isuwang.dapeng.core.metadata.Method;
 import com.isuwang.dapeng.core.metadata.Struct;
@@ -26,7 +27,7 @@ import java.util.TreeMap;
  * @author craneding
  * @date 15/4/26
  */
-public class ServiceCache {
+public class ServiceCache implements AppListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceCache.class);
 
@@ -36,48 +37,45 @@ public class ServiceCache {
 
     public static TreeMultimap<String, String> urlMappings = TreeMultimap.create();
 
-    public void init() {
-        new Thread() {
-            @Override
-            public void run() {
-                // 延迟10秒
-                try {
-                    Thread.sleep(10 * 1000);
-                } catch (InterruptedException e) {
-                }
-
-                reloadServices();
-            }
-        }.start();
+    @Override
+    public void appRegistered(AppEvent event) {
+        Application application = (Application)event.getSource();
+        loadServices(application);
     }
 
-    public void reloadServices() {
-        final Map<String, com.isuwang.dapeng.core.metadata.Service> services = new TreeMap<>();
+    @Override
+    public void appUnRegistered(AppEvent event) {
+        //TODO: invoke unloadServices
+    }
+
+
+    public void unloadServices(Application application) {
+        //Some specific logic here
+    }
+
+
+    public void loadServices(Application application) {
+
         urlMappings.clear();
 
-        List<Application> applications = ContainerFactory.getContainer().getApplications();
-
-        applications.stream().forEach(application -> {
-            List<ServiceInfo> serviceInfos = application.getServiceInfos();
-            serviceInfos.forEach(s -> {
-                String metadata = "";
-                try {
-                    metadata = new MetadataClient(s.getServiceName(), s.getVersion()).getServiceMetadata();
-                } catch (TException e) {
-                    LOGGER.error(e.getMessage(), e);
+        List<ServiceInfo> serviceInfos = application.getServiceInfos();
+        serviceInfos.forEach(s -> {
+            String metadata = "";
+            try {
+                metadata = new MetadataClient(s.getServiceName(), s.getVersion()).getServiceMetadata();
+            } catch (TException e) {
+                LOGGER.error(e.getMessage(), e);
+            }
+            if (metadata != null) {
+                try (StringReader reader = new StringReader(metadata)) {
+                    com.isuwang.dapeng.core.metadata.Service serviceData = JAXB.unmarshal(reader, com.isuwang.dapeng.core.metadata.Service.class);
+                    Map<String, com.isuwang.dapeng.core.metadata.Service> serviceInfo = loadResource(serviceData);
+                    ServiceCache.services.putAll(serviceInfo);
+                } catch (Exception e) {
+                    LOGGER.error("生成SERVICE出错", e);
                 }
-                if (metadata != null) {
-                    try (StringReader reader = new StringReader(metadata)) {
-                        com.isuwang.dapeng.core.metadata.Service serviceData = JAXB.unmarshal(reader, com.isuwang.dapeng.core.metadata.Service.class);
-                        loadResource(serviceData, services);
-                    } catch (Exception e) {
-                        LOGGER.error("生成SERVICE出错", e);
-                    }
-                }
-            });
+            }
         });
-
-        ServiceCache.services = services;
 
         LOGGER.info("size of urlMapping: " + urlMappings.size());
     }
@@ -86,7 +84,9 @@ public class ServiceCache {
         services.clear();
     }
 
-    public void loadResource(com.isuwang.dapeng.core.metadata.Service service, Map<String, com.isuwang.dapeng.core.metadata.Service> services) {
+    public Map<String, com.isuwang.dapeng.core.metadata.Service> loadResource(com.isuwang.dapeng.core.metadata.Service service) {
+
+        final Map<String, com.isuwang.dapeng.core.metadata.Service> services = new TreeMap<>();
 
         String key = getKey(service);
         services.put(key, service);
@@ -120,6 +120,7 @@ public class ServiceCache {
             urlMappings.put(tEnum.name, "api/enum/" + service.name + "/" + service.meta.version + "/" + tEnum.namespace + "." + tEnum.name + ".htm");
         }
 
+        return services;
     }
 
     public com.isuwang.dapeng.core.metadata.Service getService(String name, String version) {

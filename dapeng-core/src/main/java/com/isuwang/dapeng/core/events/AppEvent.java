@@ -1,4 +1,6 @@
-package com.isuwang.dapeng.api;
+package com.isuwang.dapeng.core.events;
+
+import com.isuwang.dapeng.core.Application;
 
 import java.util.EventObject;
 

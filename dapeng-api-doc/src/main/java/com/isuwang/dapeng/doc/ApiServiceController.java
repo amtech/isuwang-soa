@@ -182,9 +182,9 @@ public class ApiServiceController {
     @RequestMapping(value = "findServiceAfterRefresh/{serviceName}/{version}/{refresh}", method = RequestMethod.GET)
     @ResponseBody
     public Service findService(@PathVariable String serviceName, @PathVariable String version, @PathVariable boolean refresh) {
-        if (refresh) {
-            serviceCache.reloadServices();
-        }
+//        if (refresh) {
+//            serviceCache.reloadServices();
+//        }
         Service service = serviceCache.getService(serviceName, version);
         return service;
     }

@@ -48,12 +48,12 @@ public class Bootstrap {
         Plugin nettyPlugin = new NettyPlugin(dapengContainer);
         Plugin apiDocPlugin = new ApiDocPlugin(dapengContainer);
 
-
+        //ApiDocPlugin优先启动(为了Spring触发注册事件时，ServiceCache已经实例化，能收到消息)
+        dapengContainer.registerPlugin(apiDocPlugin);
         dapengContainer.registerPlugin(springAppLoader);
         dapengContainer.registerPlugin(zookeeperPlugin);
         dapengContainer.registerPlugin(taskSchedulePlugin);
         dapengContainer.registerPlugin(nettyPlugin);
-        dapengContainer.registerPlugin(apiDocPlugin);
 
         //4.启动Apploader， plugins
         ContainerFactory.getContainer().getPlugins().forEach(Plugin::start);

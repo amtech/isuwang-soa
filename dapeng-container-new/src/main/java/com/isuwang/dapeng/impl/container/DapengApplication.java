@@ -1,11 +1,12 @@
 package com.isuwang.dapeng.impl.container;
 
-import com.isuwang.dapeng.api.Application;
-import com.isuwang.dapeng.api.ServiceInfo;
+
+import com.isuwang.dapeng.core.Application;
+import com.isuwang.dapeng.core.ServiceInfo;
 
 import java.util.*;
 
-public class DapengApplication implements Application{
+public class DapengApplication implements Application {
 
     List<ServiceInfo> serviceInfos;
 
