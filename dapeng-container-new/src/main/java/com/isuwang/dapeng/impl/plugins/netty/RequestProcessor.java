@@ -6,6 +6,8 @@ import com.isuwang.dapeng.api.FilterContext;
 import com.isuwang.dapeng.api.HandlerFilter;
 import com.isuwang.dapeng.api.SharedChain;
 import com.isuwang.dapeng.core.*;
+import com.isuwang.dapeng.core.definition.SoaFunctionDefinition;
+import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
 import com.isuwang.dapeng.impl.filters.HandlerFilterContext;
 import com.isuwang.dapeng.impl.filters.TimeoutFilter;
 import com.isuwang.dapeng.remoting.netty.SoaMessageProcessor;
@@ -31,14 +33,14 @@ public class RequestProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestProcessor.class);
 
 
-    public static <I,REQ,RESP> void processRequest(ChannelHandlerContext channelHandlerContext, TProtocol contentProtocol, SoaServiceDefinition<I> processor, ByteBuf message,Context context) throws TException {
+    public static <I,REQ,RESP> void processRequest(ChannelHandlerContext channelHandlerContext, TProtocol contentProtocol, SoaServiceDefinition<I> processor, ByteBuf message, Context context) throws TException {
 
             SoaHeader soaHeader = context.getHeader();
 
             SoaFunctionDefinition<I,REQ, RESP> soaFunction = (SoaFunctionDefinition<I,REQ, RESP>)processor.getFunctins().get(soaHeader.getMethodName());
             REQ args = soaFunction.getReqSerializer().read(contentProtocol);
             contentProtocol.readMessageEnd();
-            I iface = processor.getIface();
+            I iface = processor.getIface();  //
 
             SharedChain sharedChain = new SharedChain(new TimeoutFilter(),new HandlerFilter[0],null,0);
             HandlerFilter dispatchFilter = new HandlerFilter() {

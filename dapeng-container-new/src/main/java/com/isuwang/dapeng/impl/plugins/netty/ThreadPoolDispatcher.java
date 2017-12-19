@@ -1,12 +1,8 @@
 package com.isuwang.dapeng.impl.plugins.netty;
 
 import com.isuwang.dapeng.core.Context;
-import com.isuwang.dapeng.core.SoaServiceDefinition;
+import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
-import com.isuwang.dapeng.core.TransactionContext;
-import com.isuwang.dapeng.impl.plugins.netty.RequestProcessor;
-import com.isuwang.dapeng.remoting.netty.Dispatcher;
-import com.isuwang.dapeng.remoting.netty.SoaMessageProcessor;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.TProtocol;
 import io.netty.buffer.ByteBuf;

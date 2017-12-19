@@ -1,4 +1,4 @@
-package com.isuwang.dapeng.core;
+package com.isuwang.dapeng.core.definition;
 
 import java.util.Map;
 

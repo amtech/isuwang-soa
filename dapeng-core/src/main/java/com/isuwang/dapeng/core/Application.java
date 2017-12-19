@@ -19,6 +19,8 @@ public interface Application {
 
     default void info(String message) {
 
+
+
     }
 
     default void error(String message, Throwable exception) {

@@ -3,6 +3,7 @@ package com.isuwang.dapeng.impl.plugins;
 import com.isuwang.dapeng.api.Container;
 import com.isuwang.dapeng.api.Plugin;
 import com.isuwang.dapeng.core.*;
+import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
 import com.isuwang.dapeng.impl.classloader.AppClassLoader;
 import com.isuwang.dapeng.impl.container.DapengApplication;
 

@@ -2,16 +2,14 @@ package com.isuwang.dapeng.impl.plugins.netty;
 
 import com.isuwang.dapeng.core.*;
 import com.isuwang.dapeng.api.ContainerFactory;
+import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
 import com.isuwang.dapeng.remoting.netty.SoaMessageProcessor;
 import com.isuwang.dapeng.remoting.netty.TSoaTransport;
-import com.isuwang.org.apache.thrift.TException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.Executor;
 
 /**
  * Created by lihuimin on 2017/12/7.

@@ -1,9 +1,8 @@
 package com.isuwang.dapeng.registry;
 
 import com.isuwang.dapeng.core.ProcessorKey;
-import com.isuwang.dapeng.core.SoaServiceDefinition;
+import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
 import com.isuwang.dapeng.route.Route;
-import com.isuwang.org.apache.thrift.TProcessor;
 
 import java.util.List;
 import java.util.Map;

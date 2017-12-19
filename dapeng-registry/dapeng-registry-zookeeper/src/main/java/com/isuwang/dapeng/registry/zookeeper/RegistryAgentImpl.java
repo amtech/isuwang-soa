@@ -1,13 +1,13 @@
 package com.isuwang.dapeng.registry.zookeeper;
 
 import com.isuwang.dapeng.core.*;
+import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
 import com.isuwang.dapeng.registry.ConfigKey;
 import com.isuwang.dapeng.registry.RegistryAgent;
 import com.isuwang.dapeng.registry.ServiceInfo;
 import com.isuwang.dapeng.registry.ServiceInfos;
 import com.isuwang.dapeng.route.Route;
 import com.isuwang.dapeng.route.RouteExecutor;
-import com.isuwang.org.apache.thrift.TProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * RegistryAgent using Synchronous zookeeper requesting
