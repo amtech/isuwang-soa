@@ -79,19 +79,18 @@ public class SpringAppLoader implements Plugin {
         for (Map.Entry<String, SoaServiceDefinition<?>> processorEntry : processorMap.entrySet()) {
             String processorKey = processorEntry.getKey();
             SoaServiceDefinition<?> processor = processorEntry.getValue();
-            ServiceInfo serviceInfo = new ServiceInfo();
+
             long count = new ArrayList<>(Arrays.asList(processor.getIface().getClass().getInterfaces()))
                     .stream()
                     .filter(m -> m.getName().equals("org.springframework.aop.framework.Advised"))
                     .count();
 
             Class<?> ifaceClass = (Class) (count > 0 ? processor.getIface().getClass().getMethod("getTargetClass").invoke(processor.getIface()) : processor.getIface().getClass());
-            serviceInfo.setIfaceClass(ifaceClass);
-            if (processor.getIface().getClass() != null) {
-                Service service = processor.getIfaceClass().getAnnotation(Service.class);
-                serviceInfo.setServiceName(service.name());
-                serviceInfo.setVersion(service.version());
-            }
+
+            Service service = processor.getIfaceClass().getAnnotation(Service.class);
+            assert(service != null); // TODO
+
+            ServiceInfo serviceInfo = new ServiceInfo(service.name(), service.version(), "service", ifaceClass);
             serviceInfoMap.put(processorKey,serviceInfo);
         }
 
@@ -103,7 +102,7 @@ public class SpringAppLoader implements Plugin {
     private Map<ProcessorKey, SoaServiceDefinition<?>> toSoaServiceDefinitionMap(Map<String,ServiceInfo> serviceInfoMap, Map<String, SoaServiceDefinition<?>> processorMap) {
         Map<ProcessorKey, SoaServiceDefinition<?>>  serviceDefinitions = new HashMap<>();
         serviceInfoMap.entrySet().forEach(i -> {
-            serviceDefinitions.put(new ProcessorKey(i.getValue().getServiceName(),i.getValue().getVersion()), processorMap.get(i.getKey()));
+            serviceDefinitions.put(new ProcessorKey(i.getValue().serviceName,i.getValue().version), processorMap.get(i.getKey()));
         });
         return serviceDefinitions;
     }

@@ -66,14 +66,17 @@ public class RequestProcessor {
                     } else {
                         ByteBuf byteBuf = channelHandlerContext.alloc().buffer(8192);
                         TSoaTransport transport = new TSoaTransport(byteBuf);
-                        SoaMessageProcessor builder = new SoaMessageProcessor(false, transport);
+
                         RESP result = null;
                         result =  soaFunction.apply(processor.getIface(), args);
                         context.getHeader().setRespCode(Optional.of("0000"));
-                        context.getHeader().setRespMessage(Optional.of("成功"));
+                        context.getHeader().setRespMessage(Optional.of("ok"));
+
+                        SoaMessageProcessor builder = new SoaMessageProcessor(false, transport);
                         builder.buildResponse(context);
                         soaFunction.getRespSerializer().write(result, new TCompactProtocol(transport));
                         builder.writeMessageEnd();
+
                         transport.flush();
                         channelHandlerContext.writeAndFlush(byteBuf);
                     }
@@ -102,6 +105,7 @@ public class RequestProcessor {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
+        // XX XX XX XX XX XX XX XX  XX XX XX XX XX XX XX XX  ASCII....
         System.out.println("=======[");
         int i = 0;
         for(; i<availabe; i++){
