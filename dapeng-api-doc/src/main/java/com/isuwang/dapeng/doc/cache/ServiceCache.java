@@ -62,7 +62,7 @@ public class ServiceCache implements AppListener {
         serviceInfos.forEach(s -> {
             String metadata = "";
             try {
-                metadata = new MetadataClient(s.getServiceName(), s.getVersion()).getServiceMetadata();
+                metadata = new MetadataClient(s.serviceName, s.version).getServiceMetadata();
             } catch (TException e) {
                 LOGGER.error(e.getMessage(), e);
             }

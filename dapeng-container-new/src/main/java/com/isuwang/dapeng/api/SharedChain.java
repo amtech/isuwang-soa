@@ -66,7 +66,6 @@ public class SharedChain implements FilterChain {
         else if(index == shared.length+1) {
             tail.onEntry(ctx, next);
         }
-        index++;
     }
 
     @Override
@@ -85,6 +84,5 @@ public class SharedChain implements FilterChain {
         else if(index == shared.length+1) {
             tail.onEntry(ctx, prev);
         }
-        index--;
     }
 }

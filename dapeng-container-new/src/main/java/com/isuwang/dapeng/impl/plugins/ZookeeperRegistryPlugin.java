@@ -29,7 +29,7 @@ public class ZookeeperRegistryPlugin implements AppListener, Plugin {
             DapengApplication application = (DapengApplication) event.getSource();
             //TODO: zookeeper注册是否允许部分失败？ 对于整个应用来说应该要保证完整性吧
             application.getServiceInfos().forEach(serviceInfo ->
-                    registerService(serviceInfo.getServiceName(),serviceInfo.getVersion())
+                    registerService(serviceInfo.serviceName,serviceInfo.version)
             );
         }
 
@@ -40,7 +40,7 @@ public class ZookeeperRegistryPlugin implements AppListener, Plugin {
     public void appUnRegistered(AppEvent event) {
         DapengApplication application = (DapengApplication) event.getSource();
         application.getServiceInfos().forEach(serviceInfo ->
-            unRegisterService(serviceInfo.getServiceName(),serviceInfo.getVersion())
+            unRegisterService(serviceInfo.serviceName,serviceInfo.version)
         );
     }
 
@@ -56,7 +56,7 @@ public class ZookeeperRegistryPlugin implements AppListener, Plugin {
 
         container.getApplications().forEach(app -> {
             List<ServiceInfo> serviceInfos = app.getServiceInfos();
-            serviceInfos.forEach(s -> registerService(s.getServiceName(),s.getVersion()));
+            serviceInfos.forEach(s -> registerService(s.serviceName,s.version));
         });
     }
 
@@ -64,7 +64,7 @@ public class ZookeeperRegistryPlugin implements AppListener, Plugin {
     public void stop() {
         container.getApplications().forEach(app -> {
             List<ServiceInfo> serviceInfos = app.getServiceInfos();
-            serviceInfos.forEach(s -> unRegisterService(s.getServiceName(),s.getVersion()));
+            serviceInfos.forEach(s -> unRegisterService(s.serviceName,s.version));
         });
     }
 

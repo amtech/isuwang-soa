@@ -34,7 +34,7 @@ public class DapengApplication implements Application {
 
     @Override
     public Optional<ServiceInfo> getServiceInfo(String name, String version) {
-        return serviceInfos.stream().filter(i -> name.equals(i.getServiceName()) && version.equals(i.getVersion())).findFirst();
+        return serviceInfos.stream().filter(i -> name.equals(i.serviceName) && version.equals(i.version)).findFirst();
     }
 
 

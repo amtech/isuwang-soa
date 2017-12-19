@@ -22,8 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by lihuimin on 2017/12/8.
  */
-public class ThreadPoolDispatcher implements Dispatcher {
-
+public class ThreadPoolDispatcher {
     private static final Logger LOGGER = LoggerFactory.getLogger(ThreadPoolDispatcher.class);
     static class ServerThreadFactory implements ThreadFactory {
         private static final AtomicInteger poolNumber = new AtomicInteger(1);
@@ -55,7 +54,6 @@ public class ThreadPoolDispatcher implements Dispatcher {
 
 
     //统一同步和异步的处理
-    @Override
     public void processRequest(ChannelHandlerContext ctx, TProtocol contentProtocol, SoaServiceDefinition processor, ByteBuf message, Context context){
 
         executorService.execute(() -> {
