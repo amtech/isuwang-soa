@@ -9,6 +9,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collection;
 
 /**
  * Created by tangliu on 2016/3/3.
@@ -19,7 +20,7 @@ public class ApiWebSite {
 
     private static final String CONTEXT = "/";
 
-    public static Server createServer(int port) throws MalformedURLException, URISyntaxException {
+    public static Server createServer(int port, Collection<Object> extensionBeans) throws MalformedURLException, URISyntaxException {
         Server server = new Server();
         server.setStopAtShutdown(true);
 
@@ -34,6 +35,8 @@ public class ApiWebSite {
         webContext.setClassLoader(ApiWebSite.class.getClassLoader());
 
         server.setHandler(webContext);
+
+        server.setBeans(extensionBeans);
 
         return server;
     }

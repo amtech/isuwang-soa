@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.mvc.Controller;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class ApiDocPlugin implements AppListener, Plugin {
@@ -49,7 +50,11 @@ public class ApiDocPlugin implements AppListener, Plugin {
             @Override
             public void run() {
                 try {
-                    server = ApiWebSite.createServer(SoaSystemEnvProperties.SOA_APIDOC_PORT);
+
+                    List<Object> extensionBeans = new ArrayList<>();
+                    extensionBeans.add(serviceCache);
+
+                    server = ApiWebSite.createServer(SoaSystemEnvProperties.SOA_APIDOC_PORT, extensionBeans);
 
                     server.start();
                     System.out.println("api-doc server started at port: " + SoaSystemEnvProperties.SOA_APIDOC_PORT);
