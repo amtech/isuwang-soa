@@ -24,13 +24,13 @@ public class BaseController {
 
     private static JSONPost jsonPost;
 
-    static{
+    static {
         if (!SoaSystemEnvProperties.SOA_REMOTING_MODE.equals("local")) {
-            try  {
+            try {
 
-                ServiceLoader<RegistryAgent> registryAgentLoader = ServiceLoader.load(RegistryAgent.class,BaseClient.class.getClassLoader());
+                ServiceLoader<RegistryAgent> registryAgentLoader = ServiceLoader.load(RegistryAgent.class, BaseClient.class.getClassLoader());
                 for (RegistryAgent registryAgent : registryAgentLoader) {
-                    RegistryAgentProxy.setCurrentInstance(RegistryAgentProxy.Type.Client,registryAgent);
+                    RegistryAgentProxy.setCurrentInstance(RegistryAgentProxy.Type.Client, registryAgent);
                     RegistryAgentProxy.getCurrentInstance(RegistryAgentProxy.Type.Client).start();
                     ApiServices.init();
                     new ZookeeperWatcher(true).init();
@@ -45,11 +45,18 @@ public class BaseController {
     }
 
 
-    public static String invoke(BaseRequest baseRequest){
-        JsonObject jsonObjectParameter = new JsonParser().parse(baseRequest.getJsonParameter()).getAsJsonObject();
+    public static String invoke(BaseRequest baseRequest) {
+        if (baseRequest.getServiceName() == null || baseRequest.getVersionName() == null || baseRequest.getMethodName() == null) {
+            return String.format("{\"responseCode\":\"%s\", \"responseMsg\":\"%s\", \"success\":\"%s\"}", "Err-Core-098", "serviceName、versionName、methodName信息不能为null", "{}");
+        }
+
+        JsonObject jsonObjectParameter = new JsonObject();
+        if (baseRequest.getJsonParameter() != null) {
+            jsonObjectParameter = new JsonParser().parse(baseRequest.getJsonParameter()).getAsJsonObject();
+        }
         com.isuwang.dapeng.core.metadata.Service service = ApiServices.getService(baseRequest.getServiceName(), baseRequest.getVersionName());
 
-        String callerInfo = LoadBalanceFilter.getCallerInfo(baseRequest.getServiceName() , baseRequest.getVersionName(), baseRequest.getVersionName());
+        String callerInfo = LoadBalanceFilter.getCallerInfo(baseRequest.getServiceName(), baseRequest.getVersionName(), baseRequest.getVersionName());
 
         SoaHeader header = new SoaHeader();
         header.setServiceName(baseRequest.getServiceName());
