@@ -108,8 +108,8 @@ public class RegistryAgentImpl implements RegistryAgent {
         for (ProcessorKey key : keys) {
             SoaServiceDefinition<?> processor = processorMap.get(key);
 
-            if (processor.getIfaceClass() != null) {
-                Service service = processor.getIfaceClass().getAnnotation(Service.class);
+            if (processor.ifaceClass!= null) {
+                Service service = processor.ifaceClass.getAnnotation(Service.class);
 
                 this.registerService(service.name(), service.version());
             }

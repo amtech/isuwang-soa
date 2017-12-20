@@ -48,9 +48,8 @@ public class SoaProcessorFactory implements FactoryBean<SoaServiceDefinition<?>>
 
         Class<?> processorClass = Class.forName(processor.className(), true, interfaceClass.getClassLoader());
         Constructor<?> constructor = processorClass.getConstructor(interfaceClass,Class.class);
-        SoaServiceDefinition tProcessor = (SoaServiceDefinition) constructor.newInstance(serviceRef,interfaceClass.getClass());
+        SoaServiceDefinition tProcessor = (SoaServiceDefinition) constructor.newInstance(serviceRef,interfaceClass);
 
-        tProcessor.setIfaceClass(interfaceClass);
         return tProcessor;
     }
 

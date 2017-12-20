@@ -81,14 +81,14 @@ public class SpringAppLoader implements Plugin {
             String processorKey = processorEntry.getKey();
             SoaServiceDefinition<?> processor = processorEntry.getValue();
 
-            long count = new ArrayList<>(Arrays.asList(processor.getIface().getClass().getInterfaces()))
+            long count = new ArrayList<>(Arrays.asList(processor.iface.getClass().getInterfaces()))
                     .stream()
                     .filter(m -> m.getName().equals("org.springframework.aop.framework.Advised"))
                     .count();
 
-            Class<?> ifaceClass = (Class) (count > 0 ? processor.getIface().getClass().getMethod("getTargetClass").invoke(processor.getIface()) : processor.getIface().getClass());
+            Class<?> ifaceClass = (Class) (count > 0 ? processor.iface.getClass().getMethod("getTargetClass").invoke(processor.iface) : processor.iface.getClass());
 
-            Service service = processor.getIfaceClass().getAnnotation(Service.class);
+            Service service = processor.ifaceClass.getAnnotation(Service.class);
             assert(service != null); // TODO
 
             ServiceInfo serviceInfo = new ServiceInfo(service.name(), service.version(), "service", ifaceClass);
@@ -111,7 +111,7 @@ public class SpringAppLoader implements Plugin {
 
     private Object getSpringContext(String configPath, ClassLoader appClassLoader, Constructor<?> constructor) throws Exception{
         List<String> xmlPaths = new ArrayList<>();
-        File file = new File(configPath);
+
 
         Enumeration<URL> resources = appClassLoader.getResources(configPath);
 

@@ -153,11 +153,11 @@ public class SoaCommonConnectionImpl implements SoaCommonConnection {
                     try {
                         TMessage msg = inputProtocol.readMessageBegin();
                         SoaHeader resultSoaHeader = InvocationContext.Factory.getCurrentInstance().getHeader();
-                        if (TMessageType.EXCEPTION == msg.type) {
+                        if (msg!=null&&TMessageType.EXCEPTION == msg.type) {
                             TApplicationException x = TApplicationException.read(inputProtocol);
                             inputProtocol.readMessageEnd();
                             throw x;
-                        } else if (context.getSeqid() != msg.seqid) {
+                        } else if (msg!=null&&context.getSeqid() != msg.seqid) {
                             throw new TApplicationException(4, resultSoaHeader.getMethodName() + " failed: out of sequence response");
                         } else {
                             if ("0000".equals(resultSoaHeader.getRespCode().get())) {

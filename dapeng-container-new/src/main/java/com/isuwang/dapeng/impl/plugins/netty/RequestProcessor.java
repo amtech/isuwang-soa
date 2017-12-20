@@ -33,26 +33,27 @@ public class RequestProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestProcessor.class);
 
 
-    public static <I,REQ,RESP> void processRequest(ChannelHandlerContext channelHandlerContext, TProtocol contentProtocol, SoaServiceDefinition<I> processor, ByteBuf message, Context context) throws TException {
+    public static <I,REQ,RESP> void processRequest(ChannelHandlerContext channelHandlerContext, TProtocol contentProtocol, SoaServiceDefinition<I> serviceDef, ByteBuf message, Context context) throws TException {
 
             SoaHeader soaHeader = context.getHeader();
 
-            SoaFunctionDefinition<I,REQ, RESP> soaFunction = (SoaFunctionDefinition<I,REQ, RESP>)processor.getFunctins().get(soaHeader.getMethodName());
-            REQ args = soaFunction.getReqSerializer().read(contentProtocol);
+            SoaFunctionDefinition<I,REQ, RESP> soaFunction = (SoaFunctionDefinition<I,REQ, RESP>)serviceDef.functions.get(soaHeader.getMethodName());
+            REQ args = soaFunction.reqSerializer.read(contentProtocol);
             contentProtocol.readMessageEnd();
-            I iface = processor.getIface();  //
+            I iface = serviceDef.iface;  //
 
             SharedChain sharedChain = new SharedChain(new TimeoutFilter(),new HandlerFilter[0],null,0);
             HandlerFilter dispatchFilter = new HandlerFilter() {
                 @Override
                 public void onEntry(FilterContext ctx, FilterChain next) throws TException {
-                    if (soaFunction.isAsync()) {
-                        CompletableFuture<RESP> future = soaFunction.applyAsync(iface,args);
+                    if (serviceDef.isAsync) {
+                        SoaFunctionDefinition.Async asyncFunc = (SoaFunctionDefinition.Async) soaFunction;
+                        CompletableFuture<RESP> future = (CompletableFuture<RESP>) asyncFunc.apply(iface, args);
                             future.whenComplete((realResult, ex) -> {
                                 try {
 
                                     if (realResult != null) {
-                                        process(channelHandlerContext,soaFunction,iface,args,context,realResult,message,true);
+                                        processResult(channelHandlerContext,soaFunction.respSerializer,context,realResult,message);
                                     } else {
                                         future.completeExceptionally(ex);
                                     }
@@ -62,8 +63,9 @@ public class RequestProcessor {
                                 }
                             });
                     } else {
-                        RESP result =(RESP) soaFunction.apply(iface, args);
-                        process(channelHandlerContext,soaFunction,iface,args,context,result,message,false);
+                        SoaFunctionDefinition.Sync syncFunction = (SoaFunctionDefinition.Sync) soaFunction;
+                        RESP result =(RESP) syncFunction.apply(iface, args);
+                        processResult(channelHandlerContext,soaFunction.respSerializer,context,result,message);
                     }
                 }
                 @Override
@@ -113,7 +115,7 @@ public class RequestProcessor {
         buffer.readerIndex(readerIndex);
     }
 
-    private static <I,REQ,RESP> void process(ChannelHandlerContext channelHandlerContext, SoaFunctionDefinition soaFunction,I iface,REQ args,Context context,RESP result ,ByteBuf message,boolean isAsync) throws TException{
+    private static <RESP> void processResult(ChannelHandlerContext channelHandlerContext, TCommonBeanSerializer<RESP> respSerializer, Context context, RESP result , ByteBuf message) throws TException{
         TSoaTransport transport =null;
         try {
             SoaHeader header = context.getHeader();
@@ -125,7 +127,7 @@ public class RequestProcessor {
 
             SoaMessageProcessor builder = new SoaMessageProcessor(false, transport);
             builder.buildResponse(context);
-            soaFunction.getRespSerializer().write(result, new TCompactProtocol(transport));
+            respSerializer.write(result, new TCompactProtocol(transport));
             builder.writeMessageEnd();
 
             transport.flush();
