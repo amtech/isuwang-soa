@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 public class ZookeeperWatcher {
 
 
+	private ApiServices apiServices;
 	private static final Logger LOGGER = LoggerFactory.getLogger(com.isuwang.dapeng.registry.zookeeper.ZookeeperWatcher.class);
 
 	private final boolean isClient;
@@ -33,8 +34,9 @@ public class ZookeeperWatcher {
 	private ZooKeeper zk;
 	private CountDownLatch connectDownLatch;
 
-	public ZookeeperWatcher(boolean isClient) {
+	public ZookeeperWatcher(boolean isClient,ApiServices apiServices) {
 		this.isClient = isClient;
+		this.apiServices = apiServices;
 	}
 
 	public void init() {
@@ -264,7 +266,7 @@ public class ZookeeperWatcher {
 			}
 		}
 		caches.put(serviceName, sinfos);
-		new ApiServices().reloadServices();
+		apiServices.reloadServices();
 	}
 
 	/**

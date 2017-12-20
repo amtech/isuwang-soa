@@ -32,8 +32,8 @@ public class BaseController {
                 for (RegistryAgent registryAgent : registryAgentLoader) {
                     RegistryAgentProxy.setCurrentInstance(RegistryAgentProxy.Type.Client, registryAgent);
                     RegistryAgentProxy.getCurrentInstance(RegistryAgentProxy.Type.Client).start();
-                    ApiServices.init();
-                    new ZookeeperWatcher(true).init();
+                    ApiServices apiServices = new ApiServices();
+                    new ZookeeperWatcher(true,apiServices).init();
                 }
             } catch (Exception e) {
                 LOGGER.error("Load registry error", e);

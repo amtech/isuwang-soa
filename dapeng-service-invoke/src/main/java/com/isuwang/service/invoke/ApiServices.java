@@ -34,6 +34,10 @@ public class ApiServices {
         reloadServices();
     }
 
+    public ApiServices(){
+        init();
+    }
+
     public static void reloadServices() {
 
        final Map<String, Service> services = new TreeMap<>();
