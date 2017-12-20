@@ -48,7 +48,7 @@ public class SpringAppLoader implements Plugin {
                         method.invoke(context, appClassLoader.loadClass(SoaServiceDefinition.class.getName()));
                 //TODO: 需要构造Application对象
                 Map<String,ServiceInfo> appInfos = toServiceInfos(processorMap);
-                Application application = new DapengApplication(appInfos.values().stream().collect(Collectors.toList()));
+                Application application = new DapengApplication(appInfos.values().stream().collect(Collectors.toList()),appClassLoader);
 
                 Map<ProcessorKey, SoaServiceDefinition<?>> serviceDefinitionMap = toSoaServiceDefinitionMap(appInfos,processorMap);
                 container.registerAppProcessors(serviceDefinitionMap);
@@ -56,6 +56,7 @@ public class SpringAppLoader implements Plugin {
                 // IApplication app = new ...
                 if (! application.getServiceInfos().isEmpty()) {
                     container.registerApplication(application);
+                    container.registerAppMap(toApplicationMap(serviceDefinitionMap,application));
                 }
 
                 //Start spring context
@@ -67,6 +68,14 @@ public class SpringAppLoader implements Plugin {
                 e.printStackTrace();
             }
         }
+    }
+
+    private Map<ProcessorKey,Application> toApplicationMap(Map<ProcessorKey, SoaServiceDefinition<?>> serviceDefinitionMap,Application application){
+        Map<ProcessorKey,Application> map = new HashMap<>();
+        serviceDefinitionMap.forEach((key,serviceDef)->{
+            map.put(key,application);
+        });
+        return map;
     }
 
     @Override
