@@ -5,9 +5,9 @@ package com.isuwang.dapeng.api;
  */
 public interface FilterContext {
 
-    void setAttach(HandlerFilter filter, String key, Object value);
+    void setAttach(Filter filter, String key, Object value);
 
-    Object getAttach(HandlerFilter filter, String key);
+    Object getAttach(Filter filter, String key);
 
 
 }

@@ -58,7 +58,7 @@ public class SoaMessageProcessor {
     }
 
 
-    public void buildResponse(Context context) throws TException {
+    public void buildHeader(Context context) throws TException {
 
         headerProtocol = new TBinaryProtocol(transport);
 

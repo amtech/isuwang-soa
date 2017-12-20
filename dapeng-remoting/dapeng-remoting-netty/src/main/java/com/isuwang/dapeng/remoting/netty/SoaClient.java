@@ -142,6 +142,9 @@ public class SoaClient {
         }
     };
 
+
+
+
     /**
      * 发送请求，阻塞等待结果再返回
      *
@@ -226,11 +229,14 @@ public class SoaClient {
 
         while (fwt != null && fwt.getTimeout() < System.currentTimeMillis()) {
             LOGGER.info("异步任务({})超时...", fwt.getSeqid());
+
             futuresCachesWithTimeout.remove();
 
             CompletableFuture future = futureCaches.get(fwt.getSeqid());
-            future.completeExceptionally(new SoaException(SoaBaseCode.TimeOut));
-            futureCaches.remove(fwt.getSeqid());
+            if(future != null) {
+                future.completeExceptionally(new SoaException(SoaBaseCode.TimeOut));
+                futureCaches.remove(fwt.getSeqid());
+            }
 
             fwt = futuresCachesWithTimeout.peek();
         }

@@ -6,7 +6,7 @@ import com.isuwang.org.apache.thrift.TException;
 /**
  * Created by lihuimin on 2017/12/11.
  */
-public interface HandlerFilter {
+public interface Filter {
 
     void onEntry(FilterContext ctx, FilterChain next) throws TException;
 
