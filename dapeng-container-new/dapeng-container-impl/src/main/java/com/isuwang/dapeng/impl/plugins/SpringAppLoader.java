@@ -1,13 +1,16 @@
 package com.isuwang.dapeng.impl.plugins;
 
 import com.isuwang.dapeng.api.Container;
+import com.isuwang.dapeng.api.ContainerFactory;
 import com.isuwang.dapeng.api.Plugin;
-import com.isuwang.dapeng.core.*;
+import com.isuwang.dapeng.core.Application;
+import com.isuwang.dapeng.core.ProcessorKey;
+import com.isuwang.dapeng.core.Service;
+import com.isuwang.dapeng.core.ServiceInfo;
 import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
 import com.isuwang.dapeng.impl.classloader.AppClassLoader;
 import com.isuwang.dapeng.impl.container.DapengApplication;
 
-import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -57,6 +60,8 @@ public class SpringAppLoader implements Plugin {
                 if (! application.getServiceInfos().isEmpty()) {
                     container.registerApplication(application);
                 }
+
+                System.out.println(" ------------ SpringClassLoader: " + ContainerFactory.getContainer().getApplications());
 
                 //Start spring context
                 Thread.currentThread().setContextClassLoader(classLoader);

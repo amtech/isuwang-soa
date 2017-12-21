@@ -1,4 +1,4 @@
-package com.isuwang.dapeng;
+package com.isuwang.dapeng.impl;
 
 
 import com.isuwang.dapeng.api.ContainerFactory;
@@ -21,7 +21,7 @@ public class Bootstrap {
     private static final List<URL> platformURLs = new ArrayList<>();
     private static final List<List<URL>> appURLs = new ArrayList<>();
     private static final List<List<URL>> pluginURLs = new ArrayList<>();
-    private static final String enginePath = System.getProperty("soa.base", new File(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile().getParent()+"/dapeng-container/");
+    private static final String enginePath = System.getProperty("soa.base", new File(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile().getParentFile().getParent() +"/dapeng-container/");
 
 
     public static void main(String[] args) throws MalformedURLException {
@@ -43,17 +43,17 @@ public class Bootstrap {
 
         //3. 初始化appLoader,dapengPlugin
         Plugin springAppLoader = new SpringAppLoader(dapengContainer,appClassLoaders);
+        Plugin apiDocPlugin = new ApiDocPlugin(dapengContainer);
         Plugin zookeeperPlugin = new ZookeeperRegistryPlugin(dapengContainer);
         Plugin taskSchedulePlugin = new TaskSchedulePlugin(dapengContainer);
         Plugin nettyPlugin = new NettyPlugin(dapengContainer);
-        Plugin apiDocPlugin = new ApiDocPlugin(dapengContainer);
 
         //ApiDocPlugin优先启动(为了Spring触发注册事件时，ServiceCache已经实例化，能收到消息)
-        dapengContainer.registerPlugin(apiDocPlugin);
         dapengContainer.registerPlugin(springAppLoader);
         dapengContainer.registerPlugin(zookeeperPlugin);
         dapengContainer.registerPlugin(taskSchedulePlugin);
         dapengContainer.registerPlugin(nettyPlugin);
+        dapengContainer.registerPlugin(apiDocPlugin);
 
         //4.启动Apploader， plugins
         ContainerFactory.getContainer().getPlugins().forEach(Plugin::start);

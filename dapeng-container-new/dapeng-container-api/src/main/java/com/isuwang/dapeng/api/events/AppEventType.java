@@ -1,4 +1,4 @@
-package com.isuwang.dapeng.core.events;
+package com.isuwang.dapeng.api.events;
 
 
 /**

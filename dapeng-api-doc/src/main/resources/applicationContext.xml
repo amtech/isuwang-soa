@@ -27,7 +27,7 @@
     </mvc:annotation-driven>
 
     <!-- 由ApiDocPlugin 实例化 -->
-    <!--<bean id="serviceCache" class="com.isuwang.dapeng.doc.cache.ServiceCache" init-method="init" destroy-method="destory"/>-->
+    <bean id="serviceCache" class="com.isuwang.dapeng.doc.cache.ServiceCache" init-method="init" destroy-method="destory"/>
 
     <bean id="jspViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>

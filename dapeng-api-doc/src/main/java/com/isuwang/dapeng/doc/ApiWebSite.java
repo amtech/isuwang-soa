@@ -20,7 +20,7 @@ public class ApiWebSite {
 
     private static final String CONTEXT = "/";
 
-    public static Server createServer(int port, Collection<Object> extensionBeans) throws MalformedURLException, URISyntaxException {
+    public static Server createServer(int port) throws MalformedURLException, URISyntaxException {
         Server server = new Server();
         server.setStopAtShutdown(true);
 
@@ -35,8 +35,6 @@ public class ApiWebSite {
         webContext.setClassLoader(ApiWebSite.class.getClassLoader());
 
         server.setHandler(webContext);
-
-        server.setBeans(extensionBeans);
 
         return server;
     }

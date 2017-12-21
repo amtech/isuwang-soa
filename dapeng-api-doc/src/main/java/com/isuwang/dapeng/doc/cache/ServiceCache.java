@@ -2,10 +2,12 @@ package com.isuwang.dapeng.doc.cache;
 
 
 import com.google.common.collect.TreeMultimap;
-import com.isuwang.dapeng.core.AppListener;
+import com.isuwang.dapeng.api.AppListener;
+import com.isuwang.dapeng.api.Container;
+import com.isuwang.dapeng.api.ContainerFactory;
+import com.isuwang.dapeng.api.events.AppEvent;
 import com.isuwang.dapeng.core.Application;
 import com.isuwang.dapeng.core.ServiceInfo;
-import com.isuwang.dapeng.core.events.AppEvent;
 import com.isuwang.dapeng.core.metadata.Field;
 import com.isuwang.dapeng.core.metadata.Method;
 import com.isuwang.dapeng.core.metadata.Struct;
@@ -27,7 +29,7 @@ import java.util.TreeMap;
  * @author craneding
  * @date 15/4/26
  */
-public class ServiceCache implements AppListener {
+public class ServiceCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceCache.class);
 
@@ -37,24 +39,33 @@ public class ServiceCache implements AppListener {
 
     public static TreeMultimap<String, String> urlMappings = TreeMultimap.create();
 
-    @Override
-    public void appRegistered(AppEvent event) {
-        Application application = (Application)event.getSource();
-        loadServices(application);
+    public void init() {
+        System.out.println("------------------------- Initialize serviceCache......");
+        new Thread() {
+            @Override
+            public void run() {
+                // 延迟10秒
+                try {
+                    Thread.sleep(10 * 1000);
+                } catch (InterruptedException e) {
+                }
+
+                System.out.println("--------------------Container: " + ContainerFactory.getContainer());
+                System.out.println("--------------------Applications: " + ContainerFactory.getContainer().getApplications());
+
+                List<Application> applications = ContainerFactory.getContainer().getApplications();
+                applications.forEach(i -> loadServices(i));
+            }
+        }.start();
+
     }
 
-    @Override
-    public void appUnRegistered(AppEvent event) {
-        //TODO: invoke unloadServices
-    }
-
-
-    public void unloadServices(Application application) {
+    private void unloadServices(Application application) {
         //Some specific logic here
     }
 
 
-    public void loadServices(Application application) {
+    private void loadServices(Application application) {
 
         urlMappings.clear();
 

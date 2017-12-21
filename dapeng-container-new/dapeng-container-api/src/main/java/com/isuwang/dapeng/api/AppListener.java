@@ -1,7 +1,7 @@
-package com.isuwang.dapeng.core;
+package com.isuwang.dapeng.api;
 
 
-import com.isuwang.dapeng.core.events.AppEvent;
+import com.isuwang.dapeng.api.events.AppEvent;
 
 import java.util.EventListener;
 
