@@ -7,4 +7,8 @@ import com.isuwang.dapeng.message.consumer.api.context.ConsumerContext;
  */
 public interface MessageConsumerService {
     void addConsumer(ConsumerContext context);
+
+    void removeConsumer(ConsumerContext context);
+
+    void clearConsumers();
 }
