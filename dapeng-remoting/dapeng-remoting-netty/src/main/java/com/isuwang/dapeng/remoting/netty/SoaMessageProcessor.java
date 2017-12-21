@@ -2,6 +2,7 @@ package com.isuwang.dapeng.remoting.netty;
 
 
 import com.isuwang.dapeng.core.*;
+import com.isuwang.dapeng.core.enums.CodecProtocol;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.TBinaryProtocol;
 import com.isuwang.org.apache.thrift.protocol.TCompactProtocol;
@@ -58,7 +59,7 @@ public class SoaMessageProcessor {
     }
 
 
-    public void buildHeader(Context context) throws TException {
+    public void writeHeader(TransactionContext context) throws TException {
 
         headerProtocol = new TBinaryProtocol(transport);
 
@@ -88,7 +89,7 @@ public class SoaMessageProcessor {
     }
 
     public SoaHeader parseSoaMessage() throws TException{
-        final Context context = isRequestFlag ? InvocationContext.Factory.getCurrentInstance() : TransactionContext.Factory.getCurrentInstance();
+        final TransactionContext context = TransactionContext.Factory.getCurrentInstance();
 
         if (headerProtocol == null) {
             headerProtocol = new TBinaryProtocol(getTransport());
@@ -108,7 +109,7 @@ public class SoaMessageProcessor {
         }
 
         byte protocol = headerProtocol.readByte();
-        context.setCodecProtocol(Context.CodecProtocol.toCodecProtocol(protocol));
+        context.setCodecProtocol(CodecProtocol.toCodecProtocol(protocol));
         switch (context.getCodecProtocol()) {
             case Binary:
                 contentProtocol = new TBinaryProtocol(getTransport());

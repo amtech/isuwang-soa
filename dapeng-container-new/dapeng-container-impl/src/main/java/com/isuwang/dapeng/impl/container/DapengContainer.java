@@ -8,6 +8,7 @@ import com.isuwang.dapeng.api.events.AppEvent;
 import com.isuwang.dapeng.api.events.AppEventType;
 import com.isuwang.dapeng.core.Application;
 import com.isuwang.dapeng.core.ProcessorKey;
+import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class DapengContainer implements Container {
 
@@ -77,9 +80,6 @@ public class DapengContainer implements Container {
         return this.applications;
     }
 
-    public void setSharedChain(SharedChain sharedChain) {
-        this.sharedChain = sharedChain;
-    }
 
     @Override
     public SharedChain getSharedChain() {
@@ -112,6 +112,21 @@ public class DapengContainer implements Container {
     @Override
     public void registerAppMap(Map<ProcessorKey, Application> applicationMap) {
         this.applicationMap.putAll(applicationMap);
+    }
+
+    @Override
+    public Executor getDispatcher() {
+        if(!SoaSystemEnvProperties.SOA_CONTAINER_USETHREADPOOL){
+            return new Executor() {
+                @Override
+                public void execute(Runnable command) {
+                    command.run();
+                }
+            };
+        }
+        else {
+            return Executors.newFixedThreadPool(SoaSystemEnvProperties.SOA_CORE_POOL_SIZE);
+        }
     }
 
 

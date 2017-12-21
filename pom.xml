@@ -53,6 +53,7 @@
         <module>dapeng-message</module>
         <module>dapeng-service-invoke</module>
         <module>dapeng-container-new</module>
+        <module>dapeng-common</module>
     </modules>
 
     <properties>

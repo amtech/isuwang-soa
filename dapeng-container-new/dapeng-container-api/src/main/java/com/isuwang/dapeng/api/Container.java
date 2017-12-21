@@ -6,6 +6,7 @@ import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * 大鹏容器的主结构，负责管理容器相关的监听器，插件，应用程序。
@@ -68,6 +69,6 @@ public interface Container {
 
     public void registerAppMap(Map<ProcessorKey,Application> applicationMap);
 
-
+    public Executor getDispatcher();
 
 }
