@@ -27,7 +27,7 @@ import java.util.Map;
 @RequestMapping(value = "api")
 public class ApiServiceController {
 
-    //@Autowired
+    @Autowired
     private ServiceCache serviceCache;
 
     @ModelAttribute
