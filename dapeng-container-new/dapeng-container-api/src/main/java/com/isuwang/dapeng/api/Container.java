@@ -64,6 +64,10 @@ public interface Container {
 
     void registerAppProcessors(Map<ProcessorKey, SoaServiceDefinition<?>> processors);
 
+    public Application getApplication(ProcessorKey key);
+
+    public void registerAppMap(Map<ProcessorKey,Application> applicationMap);
+
 
 
 }

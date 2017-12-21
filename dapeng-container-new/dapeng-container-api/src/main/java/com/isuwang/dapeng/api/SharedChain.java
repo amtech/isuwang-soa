@@ -7,32 +7,32 @@ import com.isuwang.org.apache.thrift.TException;
  */
 public class SharedChain implements FilterChain {
 
-    private HandlerFilter head;
-    private HandlerFilter[]shared; // log->a->b->c
-    private HandlerFilter tail;
+    private Filter head;
+    private Filter[]shared; // log->a->b->c
+    private Filter tail;
     private int index;  // 0 -> n+2
 
-    public HandlerFilter getHead() {
+    public Filter getHead() {
         return head;
     }
 
-    public HandlerFilter[] getShared() {
+    public Filter[] getShared() {
         return shared;
     }
 
-    public HandlerFilter getTail() {
+    public Filter getTail() {
         return tail;
     }
 
-    public void setHead(HandlerFilter head) {
+    public void setHead(Filter head) {
         this.head = head;
     }
 
-    public void setShared(HandlerFilter[] shared) {
+    public void setShared(Filter[] shared) {
         this.shared = shared;
     }
 
-    public void setTail(HandlerFilter tail) {
+    public void setTail(Filter tail) {
         this.tail = tail;
     }
 
@@ -40,7 +40,7 @@ public class SharedChain implements FilterChain {
         return index;
     }
 
-    public SharedChain(HandlerFilter head, HandlerFilter[] shared, HandlerFilter tail, int index){
+    public SharedChain(Filter head, Filter[] shared, Filter tail, int index){
         if(index >= 2 + shared.length)
             throw new IllegalArgumentException();
         this.head = head;

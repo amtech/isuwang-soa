@@ -3,7 +3,7 @@ package com.isuwang.dapeng.impl.filters;
 
 import com.isuwang.dapeng.api.FilterChain;
 import com.isuwang.dapeng.api.FilterContext;
-import com.isuwang.dapeng.api.HandlerFilter;
+import com.isuwang.dapeng.api.Filter;
 import com.isuwang.org.apache.thrift.TException;
 
 /**
@@ -11,11 +11,11 @@ import com.isuwang.org.apache.thrift.TException;
  */
 public class HandlerFilterChain implements FilterChain {
 
-    final HandlerFilter filter;
+    final Filter filter;
     FilterChain next;
     FilterChain prev;
 
-    public HandlerFilterChain(HandlerFilter filter, FilterChain next) {
+    public HandlerFilterChain(Filter filter, FilterChain next) {
         this.filter = filter;
         this.next = next;
     }

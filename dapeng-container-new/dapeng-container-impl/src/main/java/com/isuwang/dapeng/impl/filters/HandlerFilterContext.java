@@ -2,7 +2,7 @@ package com.isuwang.dapeng.impl.filters;
 
 
 import com.isuwang.dapeng.api.FilterContext;
-import com.isuwang.dapeng.api.HandlerFilter;
+import com.isuwang.dapeng.api.Filter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +14,7 @@ public class HandlerFilterContext implements FilterContext {
 
     private Map<String, Object> attachments;
     @Override
-    public void setAttach(HandlerFilter filter, String key, Object value) {
+    public void setAttach(Filter filter, String key, Object value) {
         if (attachments == null) {
             attachments = new HashMap<String, Object>();
         }
@@ -22,7 +22,7 @@ public class HandlerFilterContext implements FilterContext {
     }
 
     @Override
-    public Object getAttach(HandlerFilter filter, String key) {
+    public Object getAttach(Filter filter, String key) {
         if (attachments == null) {
             return null;
         }

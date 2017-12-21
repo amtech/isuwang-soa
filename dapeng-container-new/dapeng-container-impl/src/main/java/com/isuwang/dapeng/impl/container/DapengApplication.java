@@ -26,8 +26,9 @@ public class DapengApplication implements Application {
 
     private ClassLoader appClassLoader;
 
-    public DapengApplication(List<ServiceInfo> serviceInfos ) {
+    public DapengApplication(List<ServiceInfo> serviceInfos,ClassLoader appClassLoader ) {
         this.serviceInfos=Collections.unmodifiableList(serviceInfos);
+        this.appClassLoader=appClassLoader;
     }
 
     @Override
@@ -50,10 +51,23 @@ public class DapengApplication implements Application {
         return serviceInfos.stream().filter(i -> name.equals(i.serviceName) && version.equals(i.version)).findFirst();
     }
 
-    public void info(Class<?> logClass, String formattedMsg, Object... args){
+    @Override
+    public void info(Class<?> logClass, String formattedMsg, Object... args) {
+
+        methodInvoke(logClass,"info",logger -> logger.info(formattedMsg, args), new Object[]{formattedMsg, args});
+    }
+
+    @Override
+    public void error(Class<?> logClass,String errMsg, Throwable exception) {
+
+        methodInvoke(logClass,"error", logger -> logger.error(errMsg, exception), new Object[]{errMsg, exception});
 
     }
 
+    @Override
+    public ClassLoader getAppClasssLoader() {
+        return this.appClassLoader;
+    }
 
     @Override
     public void start() {

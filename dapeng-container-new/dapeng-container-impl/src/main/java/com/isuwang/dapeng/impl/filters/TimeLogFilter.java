@@ -3,12 +3,12 @@ package com.isuwang.dapeng.impl.filters;
 
 import com.isuwang.dapeng.api.FilterChain;
 import com.isuwang.dapeng.api.FilterContext;
-import com.isuwang.dapeng.api.HandlerFilter;
+import com.isuwang.dapeng.api.Filter;
 
 /**
  * Created by lihuimin on 2017/12/11.
  */
-public class TimeLogFilter implements HandlerFilter {
+public class TimeLogFilter implements Filter {
 
     TimeLogAttach attach;
 

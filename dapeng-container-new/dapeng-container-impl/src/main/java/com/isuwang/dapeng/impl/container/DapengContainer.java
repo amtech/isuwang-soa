@@ -25,7 +25,8 @@ public class DapengContainer implements Container {
     private List<Application> applications = new Vector<>();
     private List<Plugin> plugins = new ArrayList<>();
     private SharedChain sharedChain;
-    public Map<ProcessorKey, SoaServiceDefinition<?>> processors = new ConcurrentHashMap<>();
+    private Map<ProcessorKey, SoaServiceDefinition<?>> processors = new ConcurrentHashMap<>();
+    private Map<ProcessorKey,Application>  applicationMap = new ConcurrentHashMap<>();
 
     @Override
     public void registerAppListener(AppListener listener) {
@@ -76,17 +77,6 @@ public class DapengContainer implements Container {
         return this.applications;
     }
 
-
-    //TODO: 考虑如何把该接口从Container 解耦
-//    public Dispatcher getDispatcher() {
-//        Boolean useThreadPool = SoaSystemEnvProperties.SOA_CONTAINER_USETHREADPOOL;
-//        if(useThreadPool){
-//            return new ThreadPoolDispatcher();
-//        }else{
-//            return new ThreadDispatcher();
-//        }
-//    }
-
     public void setSharedChain(SharedChain sharedChain) {
         this.sharedChain = sharedChain;
     }
@@ -113,5 +103,16 @@ public class DapengContainer implements Container {
     public void registerAppProcessors(Map<ProcessorKey, SoaServiceDefinition<?>> processors) {
         this.processors.putAll(processors);
     }
+
+    @Override
+    public Application getApplication(ProcessorKey key) {
+        return applicationMap.get(key);
+    }
+
+    @Override
+    public void registerAppMap(Map<ProcessorKey, Application> applicationMap) {
+        this.applicationMap.putAll(applicationMap);
+    }
+
 
 }
