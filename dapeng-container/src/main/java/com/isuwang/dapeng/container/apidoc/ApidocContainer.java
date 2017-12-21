@@ -21,23 +21,23 @@ public class ApidocContainer implements Container {
 
     @Override
     public void start() {
-//        Thread thread = new Thread("api-doc-thread") {
-//            @Override
-//            public void run() {
-//                try {
-//                    server = ApiWebSite.createServer(SoaSystemEnvProperties.SOA_APIDOC_PORT);
-//
-//                    server.start();
-//                    System.out.println("api-doc server started at port: " + SoaSystemEnvProperties.SOA_APIDOC_PORT);
-//
-//                    server.join();
-//                } catch (Exception e) {
-//                    LOGGER.error(e.getMessage(), e);
-//                }
-//            }
-//        };
-//        thread.setContextClassLoader(ApidocContainer.class.getClassLoader());
-//        thread.start();
+        Thread thread = new Thread("api-doc-thread") {
+            @Override
+            public void run() {
+                try {
+                    server = ApiWebSite.createServer(SoaSystemEnvProperties.SOA_APIDOC_PORT);
+
+                    server.start();
+                    System.out.println("api-doc server started at port: " + SoaSystemEnvProperties.SOA_APIDOC_PORT);
+
+                    server.join();
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
+            }
+        };
+        thread.setContextClassLoader(ApidocContainer.class.getClassLoader());
+        thread.start();
     }
 
     @Override

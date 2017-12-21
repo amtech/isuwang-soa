@@ -89,7 +89,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
 
             final int requestLength = getRequestLength(inputBuf);
 
-            final TransactionContext context = TransactionContext.Factory.getNewInstance();
+            final TransactionContext context = TransactionContext.Factory.createNewInstance();
             final SoaHeader soaHeader = new SoaHeader();
             inputSoaTransport = new TSoaTransport(inputBuf);
             context.setHeader(soaHeader);

@@ -12,8 +12,6 @@ import java.util.Map;
  */
 public class HandlerFilterContext implements FilterContext {
 
-//    private Map<String, Object> attachments;
-
     private Map<Filter, Map<String, Object>> attachments = new HashMap<>();
 
     @Override

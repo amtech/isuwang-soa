@@ -10,7 +10,7 @@ import java.util.Optional;
  * @author craneding
  * @date 15/9/24
  */
-public class InvocationContext{
+public class InvocationContext extends Context{
 
     private CodecProtocol codecProtocol = CodecProtocol.CompressedBinary;
 

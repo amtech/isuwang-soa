@@ -57,8 +57,6 @@ public interface Container {
      */
     public List<Application> getApplications();
 
-    public SharedChain getSharedChain();
-
     public List<Plugin> getPlugins();
 
     Map<ProcessorKey, SoaServiceDefinition<?>> getServiceProcessors();
@@ -70,5 +68,7 @@ public interface Container {
     public void registerAppMap(Map<ProcessorKey,Application> applicationMap);
 
     public Executor getDispatcher();
+
+    public List<Filter> getFilters();
 
 }

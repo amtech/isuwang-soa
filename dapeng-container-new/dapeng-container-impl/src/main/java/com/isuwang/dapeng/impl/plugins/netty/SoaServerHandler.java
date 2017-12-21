@@ -28,28 +28,25 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SoaServerHandler.class);
 
-    private final Boolean useThreadPool = SoaSystemEnvProperties.SOA_CONTAINER_USETHREADPOOL;
     private final Container container;
 
-    public SoaServerHandler(Container container){
+    public SoaServerHandler(Container container) {
         this.container = container;
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg){
+    public void channelRead(ChannelHandlerContext ctx, Object msg) {
         ByteBuf reqMessage = (ByteBuf) msg;
         TSoaTransport inputSoaTransport = new TSoaTransport(reqMessage);
-        SoaMessageProcessor parser = new SoaMessageProcessor(false, inputSoaTransport);
+        SoaMessageProcessor parser = new SoaMessageProcessor(inputSoaTransport);
         SoaHeader soaHeader = null;
 
         try {
-            soaHeader = parser.parseSoaMessage();
-
+            final TransactionContext context = TransactionContext.Factory.createNewInstance();
             // parser.service, version, method, header, bodyProtocol
-            // TODO explict construct TransactionContext
-            TransactionContext context = TransactionContext.Factory.getCurrentInstance();
-            context.setHeader(soaHeader);
-            SoaServiceDefinition processor = ContainerFactory.getContainer().getServiceProcessors().get(new ProcessorKey(soaHeader.getServiceName(), soaHeader.getVersionName()));
+            soaHeader = parser.parseSoaMessage(context);
+
+            SoaServiceDefinition processor = container.getServiceProcessors().get(new ProcessorKey(soaHeader.getServiceName(), soaHeader.getVersionName()));
 
             container.getDispatcher().execute(() -> {
                 try {
@@ -59,8 +56,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
                     e.printStackTrace();
                 }
             });
-        }
-        catch(TException ex){
+        } catch (TException ex) {
             // TODO
             ex.printStackTrace();
         }
@@ -78,73 +74,58 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
                                                ByteBuf reqMessage, TransactionContext context) throws TException {
 
         SoaHeader soaHeader = context.getHeader();
-        Application application = container.getApplication(new ProcessorKey(soaHeader.getServiceName(),soaHeader.getVersionName()));
+        Application application = container.getApplication(new ProcessorKey(soaHeader.getServiceName(), soaHeader.getVersionName()));
 
         SoaFunctionDefinition<I, REQ, RESP> soaFunction = (SoaFunctionDefinition<I, REQ, RESP>) serviceDef.functions.get(soaHeader.getMethodName());
         REQ args = soaFunction.reqSerializer.read(contentProtocol);
         contentProtocol.readMessageEnd();
         reqMessage.release();
 
-        if(reqMessage.refCnt() > 0){
-            // TODO
+        while (reqMessage.refCnt() > 0) {
+            application.error(this.getClass(), "request ByteBuf did not release correctly.The current refCnt is " + reqMessage.refCnt(), new Throwable());
             reqMessage.release();
         }
 
         //
         I iface = serviceDef.iface;
         //log request
-        application.info(this.getClass(),"{} {} {} operatorId:{} operatorName:{} request body:{}",soaHeader.getServiceName(),soaHeader.getVersionName(),soaHeader.getMethodName(),soaHeader.getOperatorId(),soaHeader.getOperatorName(),formatToString(soaFunction.reqSerializer.toString(args)));
+        application.info(this.getClass(), "{} {} {} operatorId:{} operatorName:{} request body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), soaHeader.getOperatorId(), soaHeader.getOperatorName(), formatToString(soaFunction.reqSerializer.toString(args)));
 
         Filter dispatchFilter = new Filter() {
 
             private FilterChain getPrevChain(FilterContext ctx) {
                 SharedChain chain = (SharedChain) ctx.getAttach(this, "chain");
-                return new SharedChain(chain.head, chain.shared, chain.tail, chain.size()-2);
+                return new SharedChain(chain.head, chain.shared, chain.tail, chain.size() - 2);
             }
+
             @Override
             public void onEntry(FilterContext ctx, FilterChain next) throws TException {
                 if (serviceDef.isAsync) {
                     SoaFunctionDefinition.Async asyncFunc = (SoaFunctionDefinition.Async) soaFunction;
                     CompletableFuture<RESP> future = (CompletableFuture<RESP>) asyncFunc.apply(iface, args);
                     future.whenComplete((realResult, ex) -> {
-                        // TODO refact as same as sync
-                        try {
-                            if (realResult != null) {
-                                //log result
-                                application.info(this.getClass(),"{} {} {} operatorId:{} operatorName:{} response body:{}",soaHeader.getServiceName(),soaHeader.getVersionName(),soaHeader.getMethodName(),soaHeader.getOperatorId(),soaHeader.getOperatorName(),formatToString(soaFunction.respSerializer.toString(realResult)));
-                                processResult(channelHandlerContext, soaFunction.respSerializer, context, realResult);
-                            } else {
-                                future.completeExceptionally(ex);
-                            }
-                            onExit(ctx, getPrevChain(ctx));
-                        } catch (Exception e) {
-                            LOGGER.error(e.getMessage(), e);
-                            writeErrorMessage(channelHandlerContext,context,soaHeader,new SoaException(SoaBaseCode.UnKnown, e.getMessage()));
-                        }
+                        processResult(channelHandlerContext, soaFunction, context, realResult, application);
+                        onExit(ctx, getPrevChain(ctx));
                     });
                 } else {
-                    try {
-                        SoaFunctionDefinition.Sync syncFunction = (SoaFunctionDefinition.Sync) soaFunction;
-                        RESP result = (RESP) syncFunction.apply(iface, args);
-                        //log result
-                        application.info( this.getClass(),"{} {} {} operatorId:{} operatorName:{} response body:{}",soaHeader.getServiceName(),soaHeader.getVersionName(),soaHeader.getMethodName(),soaHeader.getOperatorId(),soaHeader.getOperatorName(),formatToString(soaFunction.respSerializer.toString(result)));
-                        processResult(channelHandlerContext, soaFunction.respSerializer, context, result);
-                        onExit(ctx, getPrevChain(ctx));
-                    } catch (TException e) {
-                        LOGGER.error(e.getMessage(), e);
-                        writeErrorMessage(channelHandlerContext, context,soaHeader,new SoaException(SoaBaseCode.UnKnown, e.getMessage()));
-                    }
+                    SoaFunctionDefinition.Sync syncFunction = (SoaFunctionDefinition.Sync) soaFunction;
+                    RESP result = (RESP) syncFunction.apply(iface, args);
+                    processResult(channelHandlerContext, soaFunction, context, result, application);
+                    onExit(ctx, getPrevChain(ctx));
                 }
             }
 
             @Override
-            public void onExit(FilterContext ctx, FilterChain prev) throws TException {
-                prev.onExit(ctx);
+            public void onExit(FilterContext ctx, FilterChain prev){
+                try {
+                    prev.onExit(ctx);
+                } catch (TException e) {
+                    e.printStackTrace();  //TODO
+                }
             }
         };
-        SharedChain sharedChain = new SharedChain(new TimeoutFilter(), new ArrayList<>(), dispatchFilter, 0);
+        SharedChain sharedChain = new SharedChain(new TimeoutFilter(), container.getFilters(), dispatchFilter, 0);
 
-//        sharedChain.setTail(dispatchFilter);
         HandlerFilterContext filterContext = new HandlerFilterContext();
         filterContext.setAttach(dispatchFilter, "chain", sharedChain);
 
@@ -152,32 +133,35 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
 
     }
 
-    private <RESP> void processResult(ChannelHandlerContext channelHandlerContext, TCommonBeanSerializer<RESP> respSerializer, TransactionContext context, RESP result) throws TException {
+    private <RESP> void processResult(ChannelHandlerContext channelHandlerContext, SoaFunctionDefinition soaFunction, TransactionContext context, Object result, Application application) {
+        SoaHeader soaHeader = context.getHeader();
+        soaHeader.setRespCode(Optional.of("0000"));
+        soaHeader.setRespMessage(Optional.of("ok"));
         try {
-            SoaHeader header = context.getHeader();
-            header.setRespCode(Optional.of("0000"));
-            header.setRespMessage(Optional.of("ok"));
+            application.info(this.getClass(), "{} {} {} operatorId:{} operatorName:{} response body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), soaHeader.getOperatorId(), soaHeader.getOperatorName(), formatToString(soaFunction.respSerializer.toString(result)));
 
             ByteBuf outputBuf = channelHandlerContext.alloc().buffer(8192);  // TODO 8192?
             TSoaTransport transport = new TSoaTransport(outputBuf);
 
-            SoaMessageProcessor builder = new SoaMessageProcessor(false, transport);
+            SoaMessageProcessor builder = new SoaMessageProcessor(transport);
             builder.writeHeader(context);
-            // builder.write(result, respSerializer) TODO
-            respSerializer.write(result, new TCompactProtocol(transport));
+            builder.writeBody(soaFunction.respSerializer, result);
             builder.writeMessageEnd();
 
             transport.flush();
             channelHandlerContext.writeAndFlush(outputBuf);
-        }  finally {
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            writeErrorMessage(channelHandlerContext, context, soaHeader, new SoaException(SoaBaseCode.UnKnown, e.getMessage()));
+        } finally {
             TransactionContext.Factory.removeCurrentInstance();
         }
     }
 
-    private  void writeErrorMessage(ChannelHandlerContext ctx, Context context, SoaHeader soaHeader,  SoaException e) {
+    private void writeErrorMessage(ChannelHandlerContext ctx, TransactionContext context, SoaHeader soaHeader, SoaException e) {
         ByteBuf outputBuf = ctx.alloc().buffer(8192);
         TSoaTransport transport = new TSoaTransport(outputBuf);
-        SoaMessageProcessor builder = new SoaMessageProcessor(false, transport);
+        SoaMessageProcessor builder = new SoaMessageProcessor(transport);
         try {
             soaHeader.setRespCode(Optional.ofNullable(e.getCode()));
             soaHeader.setRespMessage(Optional.ofNullable(e.getMsg()));
@@ -195,7 +179,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
 
     }
 
-    private  String formatToString(String msg) {
+    private String formatToString(String msg) {
         if (msg == null)
             return msg;
 

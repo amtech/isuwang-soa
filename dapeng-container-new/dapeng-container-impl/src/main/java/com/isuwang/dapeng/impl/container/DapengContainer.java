@@ -1,9 +1,6 @@
 package com.isuwang.dapeng.impl.container;
 
-import com.isuwang.dapeng.api.AppListener;
-import com.isuwang.dapeng.api.Container;
-import com.isuwang.dapeng.api.Plugin;
-import com.isuwang.dapeng.api.SharedChain;
+import com.isuwang.dapeng.api.*;
 import com.isuwang.dapeng.api.events.AppEvent;
 import com.isuwang.dapeng.api.events.AppEventType;
 import com.isuwang.dapeng.core.Application;
@@ -27,7 +24,6 @@ public class DapengContainer implements Container {
     private List<AppListener> appListeners = new Vector<>();
     private List<Application> applications = new Vector<>();
     private List<Plugin> plugins = new ArrayList<>();
-    private SharedChain sharedChain;
     private Map<ProcessorKey, SoaServiceDefinition<?>> processors = new ConcurrentHashMap<>();
     private Map<ProcessorKey,Application>  applicationMap = new ConcurrentHashMap<>();
 
@@ -82,13 +78,6 @@ public class DapengContainer implements Container {
 
 
     @Override
-    public SharedChain getSharedChain() {
-        //TODO: should return the bean copy..not the real one.
-
-        return sharedChain;
-    }
-
-    @Override
     public List<Plugin> getPlugins() {
         //TODO: should return the bean copy..not the real one.
         return this.plugins;
@@ -127,6 +116,11 @@ public class DapengContainer implements Container {
         else {
             return Executors.newFixedThreadPool(SoaSystemEnvProperties.SOA_CORE_POOL_SIZE);
         }
+    }
+
+    @Override
+    public List<Filter> getFilters() {
+        return new ArrayList<>(); //TODO
     }
 
 

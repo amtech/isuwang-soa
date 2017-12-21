@@ -2,7 +2,6 @@ package com.isuwang.dapeng.remoting.netty;
 
 
 import com.isuwang.dapeng.core.*;
-import com.isuwang.dapeng.core.enums.CodecProtocol;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.TBinaryProtocol;
 import com.isuwang.org.apache.thrift.protocol.TCompactProtocol;
@@ -25,7 +24,6 @@ public class SoaMessageProcessor {
     private TProtocol headerProtocol;
     private TProtocol contentProtocol;
 
-    private final boolean isRequestFlag;
 
     public TSoaTransport transport;
 
@@ -53,11 +51,9 @@ public class SoaMessageProcessor {
         this.transport = transport;
     }
 
-    public SoaMessageProcessor(boolean isRequestFlag, TSoaTransport transport) {
-        this.isRequestFlag = isRequestFlag;
+    public SoaMessageProcessor(TSoaTransport transport) {
         this.transport = transport;
     }
-
 
     public void writeHeader(TransactionContext context) throws TException {
 
@@ -84,12 +80,13 @@ public class SoaMessageProcessor {
         }
 
         new SoaHeaderSerializer().write(context.getHeader(), headerProtocol);
-
-        //contentProtocol.writeMessageBegin(message);
     }
 
-    public SoaHeader parseSoaMessage() throws TException{
-        final TransactionContext context = TransactionContext.Factory.getCurrentInstance();
+    public <RESP>void writeBody(TCommonBeanSerializer<RESP> respSerializer,RESP result ) throws TException {
+        respSerializer.write(result,contentProtocol);
+    }
+
+    public SoaHeader parseSoaMessage(TransactionContext context) throws TException{
 
         if (headerProtocol == null) {
             headerProtocol = new TBinaryProtocol(getTransport());
@@ -109,7 +106,7 @@ public class SoaMessageProcessor {
         }
 
         byte protocol = headerProtocol.readByte();
-        context.setCodecProtocol(CodecProtocol.toCodecProtocol(protocol));
+        context.setCodecProtocol(Context.CodecProtocol.toCodecProtocol(protocol));
         switch (context.getCodecProtocol()) {
             case Binary:
                 contentProtocol = new TBinaryProtocol(getTransport());
