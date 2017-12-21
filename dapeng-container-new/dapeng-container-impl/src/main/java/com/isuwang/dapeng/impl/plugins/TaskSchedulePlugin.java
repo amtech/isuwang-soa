@@ -4,16 +4,31 @@ package com.isuwang.dapeng.impl.plugins;
 
 import com.isuwang.dapeng.api.AppListener;
 import com.isuwang.dapeng.api.Container;
+import com.isuwang.dapeng.api.ContainerFactory;
 import com.isuwang.dapeng.api.Plugin;
 import com.isuwang.dapeng.api.events.AppEvent;
-import com.isuwang.dapeng.core.Application;
-import com.isuwang.dapeng.core.ServiceInfo;
+import com.isuwang.dapeng.core.*;
+import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
+import com.isuwang.dapeng.core.timer.ScheduledTask;
+import com.isuwang.dapeng.core.timer.ScheduledTaskCron;
+import org.quartz.*;
+import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.impl.triggers.CronTriggerImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
+import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 
 public class TaskSchedulePlugin implements AppListener,Plugin {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskSchedulePlugin.class);
+
     private final Container container;
+
+    private Scheduler scheduler = null;
 
     public TaskSchedulePlugin(Container container) {
         this.container = container;
@@ -52,10 +67,67 @@ public class TaskSchedulePlugin implements AppListener,Plugin {
 
     }
 
-    public void runTask(ServiceInfo appInfo) {
-        //Some logic
-    }
+    public void runTask(ServiceInfo serviceInfo) {
+        Class<?> ifaceClass = serviceInfo.ifaceClass;
 
+        Map<ProcessorKey, SoaServiceDefinition<?>> processorMap = ContainerFactory.getContainer().getServiceProcessors();
+
+
+        if (ifaceClass.isAnnotationPresent(ScheduledTask.class)) {
+
+            for (Method method : ifaceClass.getMethods()) {
+                if (method.isAnnotationPresent(ScheduledTaskCron.class)) {
+
+                    String methodName = method.getName();
+
+                    SoaServiceDefinition soaServiceDefinition = processorMap.get(new ProcessorKey(serviceInfo.serviceName, serviceInfo.version));
+
+                    if (soaServiceDefinition == null) {
+                        LOGGER.error(" SoaServiceDefinition Not found....serviceName: {}, version: {} ", serviceInfo.serviceName, serviceInfo.version);
+                    }
+
+                    ScheduledTaskCron cron = method.getAnnotation(ScheduledTaskCron.class);
+                    String cronStr = cron.cron();
+
+                    //new quartz job
+                    JobDataMap jobDataMap = new JobDataMap();
+                    jobDataMap.put("function", soaServiceDefinition.functions.get(methodName));
+                    jobDataMap.put("iface", soaServiceDefinition.iface);
+                    jobDataMap.put("serviceName", serviceInfo.serviceName);
+                    jobDataMap.put("versionName", serviceInfo.version);
+                    JobDetail job = JobBuilder.newJob(ScheduledJob.class).withIdentity(ifaceClass.getName() + ":" + methodName).setJobData(jobDataMap).build();
+
+                    CronTriggerImpl trigger = new CronTriggerImpl();
+                    trigger.setName(job.getKey().getName());
+                    trigger.setJobKey(job.getKey());
+                    try {
+                        trigger.setCronExpression(cronStr);
+                    } catch (ParseException e) {
+                        LOGGER.error("定时任务({}:{})Cron解析出错", ifaceClass.getName(), methodName);
+                        LOGGER.error(e.getMessage(), e);
+                        continue;
+                    }
+
+                    if (scheduler == null) {
+                        try {
+                            scheduler = StdSchedulerFactory.getDefaultScheduler();
+                            scheduler.start();
+                        } catch (SchedulerException e) {
+                            LOGGER.error("ScheduledTaskContainer启动失败");
+                            LOGGER.error(e.getMessage(), e);
+                            return;
+                        }
+                    }
+                    try {
+                        scheduler.scheduleJob(job, trigger);
+                    } catch (SchedulerException e) {
+                        LOGGER.error(" Failed to scheduleJob....job: " + job.getKey().getName(), e);
+                    }
+                    LOGGER.info("添加定时任务({}:{})成功", ifaceClass.getName(), methodName);
+                }
+            }
+        }
+    }
 
     public void stopTask(ServiceInfo appInfo) {
         //Some logic
