@@ -1,7 +1,5 @@
 package com.isuwang.dapeng.message.consumer.api.context;
 
-import com.isuwang.dapeng.core.SoaProcessFunction;
-import com.isuwang.dapeng.core.TCommonBeanSerializer;
 import com.isuwang.dapeng.core.definition.SoaFunctionDefinition;
 
 

@@ -1,20 +1,19 @@
 package com.isuwang.dapeng.message.consumer.kafka;
 
-import com.isuwang.dapeng.core.SoaProcessFunction;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
-import com.isuwang.dapeng.core.TCommonBeanSerializer;
 import com.isuwang.dapeng.core.definition.SoaFunctionDefinition;
 import com.isuwang.dapeng.message.consumer.api.context.ConsumerContext;
-
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.serialization.ByteBufferDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Created by tangliu on 2016/8/3.
