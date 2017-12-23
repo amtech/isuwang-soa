@@ -1,6 +1,8 @@
 package com.isuwang.dapeng.message.consumer.api.context;
 
-import com.isuwang.dapeng.core.BeanSerializer;
+import com.isuwang.dapeng.core.SoaProcessFunction;
+import com.isuwang.dapeng.core.TCommonBeanSerializer;
+import com.isuwang.dapeng.core.definition.SoaFunctionDefinition;
 
 
 /**
@@ -10,7 +12,7 @@ public class ConsumerContext {
 
     public Object iface;
 
-    public SoaProcessFunction<Object, Object, Object, ? extends BeanSerializer<Object>, ? extends BeanSerializer<Object>> soaProcessFunction;
+    public SoaFunctionDefinition<Object, Object, Object> soaFunctionDefinition;
 
     public Object getIface() {
         return iface;
@@ -20,12 +22,12 @@ public class ConsumerContext {
         this.iface = iface;
     }
 
-    public SoaProcessFunction<Object, Object, Object, ? extends BeanSerializer<Object>, ? extends BeanSerializer<Object>> getSoaProcessFunction() {
-        return soaProcessFunction;
+    public SoaFunctionDefinition<Object, Object, Object> getSoaFunctionDefinition() {
+        return soaFunctionDefinition;
     }
 
-    public void setSoaProcessFunction(SoaProcessFunction<Object, Object, Object, ? extends BeanSerializer<Object>, ? extends BeanSerializer<Object>> soaProcessFunction) {
-        this.soaProcessFunction = soaProcessFunction;
+    public void setSoaFunctionDefinition(SoaFunctionDefinition<Object, Object, Object> soaFunctionDefinition) {
+        this.soaFunctionDefinition = soaFunctionDefinition;
     }
 
     Object action;
