@@ -1,4 +1,4 @@
-package com.isuwang.dapeng.api;
+package com.isuwang.dapeng.core.filter;
 
 import com.isuwang.org.apache.thrift.TException;
 

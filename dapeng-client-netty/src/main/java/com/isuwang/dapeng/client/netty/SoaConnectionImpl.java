@@ -1,9 +1,11 @@
 package com.isuwang.dapeng.client.netty;
 
+import com.isuwang.dapeng.client.filter.LoadBalanceFilter;
 import com.isuwang.dapeng.core.BeanSerializer;
 import com.isuwang.dapeng.core.SoaConnection;
 import com.isuwang.dapeng.core.SoaException;
 import com.isuwang.dapeng.core.SoaHeader;
+import com.isuwang.dapeng.core.filter.*;
 import com.isuwang.dapeng.util.SoaMessageBuilder;
 import com.isuwang.dapeng.util.SoaMessageParser;
 import com.isuwang.org.apache.thrift.TException;
@@ -12,6 +14,7 @@ import io.netty.buffer.PooledByteBufAllocator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -22,7 +25,7 @@ public class SoaConnectionImpl implements SoaConnection {
 
 
     private NettyClient client;
-    private AtomicInteger seqid = new AtomicInteger(0);
+    private AtomicInteger seqidAtomic = new AtomicInteger(0);
 
     public SoaConnectionImpl(String host, int port) {
         try {
@@ -39,26 +42,59 @@ public class SoaConnectionImpl implements SoaConnection {
             REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer) throws Exception {
 
         // InvocationContext context = InvocationContextImpl.Factory.getCurrentInstance();
-        int seqid = this.seqid.getAndIncrement();
-        ByteBuf requestBuf = buildRequestBuf(service,version,method,seqid,request,requestSerializer);
 
-        // TODO filter
-        ByteBuf responseBuf = client.send(seqid, requestBuf); //发送请求，返回结果
-        SoaMessageParser parser = new SoaMessageParser(responseBuf, responseSerializer).parse();
+        int seqid = this.seqidAtomic.getAndIncrement();
 
-        // TODO fill InvocationContext.lastInfo from response.Header
-        SoaHeader respHeader = parser.getHeader();
+        Filter dispatchFilter = new Filter() {
+            private FilterChain getPrevChain(FilterContext ctx) {
+                SharedChain chain = (SharedChain) ctx.getAttach(this, "chain");
+                return new SharedChain(chain.head, chain.shared, chain.tail, chain.size() - 2);
+            }
+            @Override
+            public void onEntry(FilterContext ctx, FilterChain next) throws TException {
 
-        RESP resp = (RESP)parser.getBody();
-        responseBuf.release();
+                try {
+                    ByteBuf requestBuf = buildRequestBuf(service, version, method, seqid, request, requestSerializer);
 
-        return resp;
+                    // TODO filter
+                    ByteBuf responseBuf = client.send(seqid, requestBuf); //发送请求，返回结果
+                    SoaMessageParser parser = new SoaMessageParser(responseBuf, responseSerializer).parse();
+
+                    // TODO fill InvocationContext.lastInfo from response.Header
+                    SoaHeader respHeader = parser.getHeader();
+
+                    RESP resp = (RESP) parser.getBody();
+                    responseBuf.release();
+
+                    ctx.setAttach(this,"response",resp);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
+
+            }
+
+            @Override
+            public void onExit(FilterContext ctx, FilterChain prev) throws TException {
+
+            }
+        };
+
+        SharedChain sharedChain = new SharedChain(new LoadBalanceFilter(), new ArrayList<>(), dispatchFilter, 0);
+
+        HandlerFilterContext filterContext = new HandlerFilterContext();
+        filterContext.setAttach(dispatchFilter, "chain", sharedChain);
+
+        sharedChain.onEntry(filterContext);
+        RESP response = (RESP) filterContext.getAttach(dispatchFilter,"response");
+
+        return response;
     }
 
     @Override
     public <REQ, RESP> Future<RESP> sendAsync(String service, String version, String method, REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer, long timeout) throws Exception {
 
-        int seqid = this.seqid.getAndIncrement();
+        int seqid = this.seqidAtomic.getAndIncrement();
         ByteBuf requestBuf = buildRequestBuf(service,version,method,seqid,request,requestSerializer);
 
         CompletableFuture<ByteBuf> responseBufFuture = new CompletableFuture<>();

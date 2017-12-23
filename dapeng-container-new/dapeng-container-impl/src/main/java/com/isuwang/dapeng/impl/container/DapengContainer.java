@@ -7,6 +7,7 @@ import com.isuwang.dapeng.core.Application;
 import com.isuwang.dapeng.core.ProcessorKey;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
+import com.isuwang.dapeng.core.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

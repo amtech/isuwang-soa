@@ -1,8 +1,8 @@
 package com.isuwang.dapeng.impl.filters;
 
-import com.isuwang.dapeng.api.FilterChain;
-import com.isuwang.dapeng.api.FilterContext;
-import com.isuwang.dapeng.api.Filter;
+import com.isuwang.dapeng.core.filter.FilterChain;
+import com.isuwang.dapeng.core.filter.FilterContext;
+import com.isuwang.dapeng.core.filter.Filter;
 
 /**
  * Created by lihuimin on 2017/12/8.

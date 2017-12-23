@@ -3,6 +3,7 @@ package com.isuwang.dapeng.api;
 import com.isuwang.dapeng.core.Application;
 import com.isuwang.dapeng.core.ProcessorKey;
 import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
+import com.isuwang.dapeng.core.filter.Filter;
 
 import java.util.List;
 import java.util.Map;

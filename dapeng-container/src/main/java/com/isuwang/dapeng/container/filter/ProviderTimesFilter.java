@@ -2,7 +2,6 @@ package com.isuwang.dapeng.container.filter;
 
 import com.isuwang.dapeng.core.SoaHeader;
 import com.isuwang.dapeng.core.TransactionContext;
-import com.isuwang.dapeng.core.filter.Filter;
 import com.isuwang.dapeng.core.filter.FilterChain;
 import com.isuwang.dapeng.core.filter.container.ContainerFilterChain;
 import com.isuwang.org.apache.thrift.TException;

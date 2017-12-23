@@ -1,7 +1,5 @@
 package com.isuwang.dapeng.container.filter;
 
-import com.isuwang.dapeng.core.filter.Filter;
-
 /**
  * Status Filter
  *

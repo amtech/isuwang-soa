@@ -1,19 +1,15 @@
 package com.isuwang.dapeng.core.filter;
 
+
 import com.isuwang.org.apache.thrift.TException;
 
 /**
- * Filter
- *
- * @author craneding
- * @date 16/1/20
+ * Created by lihuimin on 2017/12/11.
  */
 public interface Filter {
 
-    //void init();
+    void onEntry(FilterContext ctx, FilterChain next) throws TException;
 
-    void doFilter(FilterChain chain) throws TException;
-
-    //void destory();
+    void onExit(FilterContext ctx, FilterChain prev)throws TException ;
 
 }

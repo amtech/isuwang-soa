@@ -1,7 +1,6 @@
 package com.isuwang.dapeng.remoting.filter;
 
 import com.isuwang.dapeng.core.SoaHeader;
-import com.isuwang.dapeng.core.filter.Filter;
 import com.isuwang.dapeng.core.filter.FilterChain;
 import com.isuwang.org.apache.thrift.TException;
 import org.slf4j.Logger;

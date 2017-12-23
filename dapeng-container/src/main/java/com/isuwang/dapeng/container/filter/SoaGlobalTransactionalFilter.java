@@ -4,7 +4,6 @@ import com.isuwang.dapeng.core.SoaGlobalTransactional;
 import com.isuwang.dapeng.core.SoaHeader;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.core.TransactionContext;
-import com.isuwang.dapeng.core.filter.Filter;
 import com.isuwang.dapeng.core.filter.FilterChain;
 import com.isuwang.dapeng.core.filter.container.ContainerFilterChain;
 import com.isuwang.dapeng.transaction.api.GlobalTransactionCallbackWithoutResult;

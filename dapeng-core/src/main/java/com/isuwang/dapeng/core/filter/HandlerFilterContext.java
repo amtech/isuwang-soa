@@ -1,8 +1,8 @@
-package com.isuwang.dapeng.impl.filters;
+package com.isuwang.dapeng.core.filter;
 
 
-import com.isuwang.dapeng.api.FilterContext;
-import com.isuwang.dapeng.api.Filter;
+import com.isuwang.dapeng.core.filter.FilterContext;
+import com.isuwang.dapeng.core.filter.Filter;
 
 import java.util.HashMap;
 import java.util.Map;
