@@ -67,6 +67,7 @@ public class SoaConnectionImpl implements SoaConnection {
                     responseBuf.release();
 
                     ctx.setAttach(this,"response",resp);
+                    onExit(ctx, getPrevChain(ctx));
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -95,24 +96,55 @@ public class SoaConnectionImpl implements SoaConnection {
     public <REQ, RESP> Future<RESP> sendAsync(String service, String version, String method, REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer, long timeout) throws Exception {
 
         int seqid = this.seqidAtomic.getAndIncrement();
-        ByteBuf requestBuf = buildRequestBuf(service,version,method,seqid,request,requestSerializer);
 
-        CompletableFuture<ByteBuf> responseBufFuture = new CompletableFuture<>();
-        client.sendAsync(seqid, requestBuf,responseBufFuture,timeout); //发送请求，返回结果
-
-        return responseBufFuture.thenApply((ByteBuf responseBuf) ->{
-            try {
-                SoaMessageParser parser = new SoaMessageParser(responseBuf, responseSerializer).parse();
-                // TODO fill InvocationContext.lastInfo from response.Header
-                SoaHeader respHeader = parser.getHeader();
-                RESP result = (RESP)parser.getBody();
-                responseBuf.release();
-                return result;
-            } catch (TException e) {
-                e.printStackTrace();
-                return null;
+        Filter dispatchFilter = new Filter() {
+            private FilterChain getPrevChain(FilterContext ctx) {
+                SharedChain chain = (SharedChain) ctx.getAttach(this, "chain");
+                return new SharedChain(chain.head, chain.shared, chain.tail, chain.size() - 2);
             }
-        });
+            @Override
+            public void onEntry(FilterContext ctx, FilterChain next) throws TException {
+
+                ByteBuf requestBuf = buildRequestBuf(service,version,method,seqid,request,requestSerializer);
+
+                CompletableFuture<ByteBuf> responseBufFuture = new CompletableFuture<>();
+                try {
+                    client.sendAsync(seqid, requestBuf,responseBufFuture,timeout); //发送请求，返回结果
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                CompletableFuture<RESP> responseFuture= responseBufFuture.thenApply((ByteBuf responseBuf) ->{
+                    try {
+                        SoaMessageParser parser = new SoaMessageParser(responseBuf, responseSerializer).parse();
+                        // TODO fill InvocationContext.lastInfo from response.Header
+                        SoaHeader respHeader = parser.getHeader();
+                        RESP result = (RESP)parser.getBody();
+                        responseBuf.release();
+                        onExit(ctx, getPrevChain(ctx));
+                        return result;
+                    } catch (TException e) {
+                        e.printStackTrace();
+                        return null;
+                    }
+                });
+                ctx.setAttach(this,"response",responseFuture);
+            }
+
+            @Override
+            public void onExit(FilterContext ctx, FilterChain prev) throws TException {
+
+            }
+        };
+
+        SharedChain sharedChain = new SharedChain(new LoadBalanceFilter(), new ArrayList<>(), dispatchFilter, 0);
+
+        HandlerFilterContext filterContext = new HandlerFilterContext();
+        filterContext.setAttach(dispatchFilter, "chain", sharedChain);
+
+        sharedChain.onEntry(filterContext);
+        CompletableFuture<RESP> resultFuture = (CompletableFuture<RESP>) filterContext.getAttach(dispatchFilter,"response");
+
+        return resultFuture;
     }
 
     private SoaHeader buildHeader(String service, String version, String method) {

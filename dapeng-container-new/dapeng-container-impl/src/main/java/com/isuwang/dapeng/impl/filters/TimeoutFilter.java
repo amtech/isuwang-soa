@@ -19,7 +19,5 @@ public class TimeoutFilter implements Filter {
     @Override
     public void onExit(FilterContext ctx, FilterChain prev) throws TException {
 
-        prev.onExit(ctx);
-
     }
 }
