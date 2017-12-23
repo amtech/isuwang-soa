@@ -18,6 +18,7 @@ public class TimeoutFilter implements Filter {
 
     @Override
     public void onExit(FilterContext ctx, FilterChain prev) throws TException {
+        // 第一个filter不需要调onExit
 
     }
 }
