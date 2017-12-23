@@ -1,7 +1,8 @@
-package com.isuwang.dapeng.remoting.netty;
+package com.isuwang.dapeng.impl.plugins.netty;
 
 
 import com.isuwang.dapeng.core.*;
+import com.isuwang.dapeng.remoting.netty.TSoaTransport;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.TBinaryProtocol;
 import com.isuwang.org.apache.thrift.protocol.TCompactProtocol;
@@ -82,7 +83,7 @@ public class SoaMessageProcessor {
         new SoaHeaderSerializer().write(context.getHeader(), headerProtocol);
     }
 
-    public <RESP>void writeBody(TCommonBeanSerializer<RESP> respSerializer,RESP result ) throws TException {
+    public <RESP>void writeBody(BeanSerializer<RESP> respSerializer, RESP result ) throws TException {
         respSerializer.write(result,contentProtocol);
     }
 
@@ -92,7 +93,7 @@ public class SoaMessageProcessor {
             headerProtocol = new TBinaryProtocol(getTransport());
         }
 
-        // length(int32) stx(int8) version(string) protocol(int8) header(struct) body(struct) etx(int8)
+        // length(int32) stx(int8) version(int8) protocol(int8) seqid(i32) header(struct) body(struct) etx(int8)
 
         byte stx = headerProtocol.readByte();
         if (stx != STX) {// 通讯协议不正确
@@ -135,4 +136,6 @@ public class SoaMessageProcessor {
 
         headerProtocol.writeByte(ETX);
     }
+
+
 }

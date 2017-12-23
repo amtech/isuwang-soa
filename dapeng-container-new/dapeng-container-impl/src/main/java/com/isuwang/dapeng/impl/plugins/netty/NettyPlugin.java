@@ -20,10 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Netty Container
- *
- * @author craneding
- * @date 16/1/21
+ * Created by lihuimin on 2017/12/7
  */
 public class NettyPlugin implements AppListener, Plugin {
 

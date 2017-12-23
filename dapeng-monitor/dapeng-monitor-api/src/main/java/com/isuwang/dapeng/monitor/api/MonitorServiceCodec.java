@@ -1,6 +1,7 @@
 package com.isuwang.dapeng.monitor.api;
 
 import com.isuwang.dapeng.core.*;
+import com.isuwang.dapeng.monitor.api.domain.QPSStat;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.TProtocol;
 
@@ -9,7 +10,7 @@ import java.io.InputStreamReader;
 import java.util.Optional;
 
 public class MonitorServiceCodec {
-    public static class QPSStatSerializer implements TCommonBeanSerializer<com.isuwang.dapeng.monitor.api.domain.QPSStat> {
+    public static class QPSStatSerializer implements BeanSerializer<QPSStat> {
 
         @Override
         public com.isuwang.dapeng.monitor.api.domain.QPSStat read( TProtocol iprot) throws TException {

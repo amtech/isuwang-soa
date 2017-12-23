@@ -24,7 +24,7 @@ import java.util.concurrent.Future;
 public class SoaConnectionImpl implements SoaCommonConnection {
     private static final Logger LOGGER = LoggerFactory.getLogger(SoaConnectionImpl.class);
 
-    public <REQ, RESP> RESP send(REQ request, TCommonBeanSerializer<REQ> requestSerializer, TCommonBeanSerializer<RESP> responseSerializer) throws TException {
+    public <REQ, RESP> RESP send(REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer) throws TException {
         final InvocationContext context = InvocationContext.Factory.getCurrentInstance();
         SoaHeader header = context.getHeader();
         RESP response=null;
@@ -75,7 +75,7 @@ public class SoaConnectionImpl implements SoaCommonConnection {
     }
 
     @Override
-    public <REQ, RESP> Future<RESP> sendAsync(REQ request,TCommonBeanSerializer<REQ> requestSerializer, TCommonBeanSerializer<RESP> responseSerializer, long timeout) throws TException {
+    public <REQ, RESP> Future<RESP> sendAsync(REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer, long timeout) throws TException {
         return null;
     }
 

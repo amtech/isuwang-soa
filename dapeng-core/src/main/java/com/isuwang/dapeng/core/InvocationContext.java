@@ -5,138 +5,60 @@ import com.isuwang.dapeng.core.enums.CodecProtocol;
 import java.util.Optional;
 
 /**
- * 客户端上下文
- *
- * @author craneding
- * @date 15/9/24
+ * Created by lihuimin on 2017/12/21.
  */
-public class InvocationContext extends Context{
+public interface InvocationContext {
 
-    private CodecProtocol codecProtocol = CodecProtocol.CompressedBinary;
+    void setCodecProtocol(CodecProtocol protocol);
 
-    private SoaHeader header;
+    CodecProtocol getCodecProtocol();
 
-    private Integer seqid;
+    Optional<String> getCalleeIp();
 
-    private int failedTimes = 0;
+    void setCalleeIp(Optional<String> calleeIp);
 
-    private boolean isSoaTransactionProcess;
+    Optional<Integer> getCalleePort();
 
-    private Integer currentTransactionSequence = 0;
+    void setCalleePort(Optional<Integer> calleePort);
 
-    private Integer currentTransactionId = 0;
+    void setLastInfo(InvocationInfo invocationInfo);
 
-    public CodecProtocol getCodecProtocol() {
-        return codecProtocol;
+    InvocationInfo getLastInfo();
+
+    SoaHeader getHeader();
+
+    void setHeader(SoaHeader soaHeader);
+
+    // seqid
+    // tid
+    interface InvocationInfo {
     }
 
-    public void setCodecProtocol(CodecProtocol codecProtocol) {
-        this.codecProtocol = codecProtocol;
-    }
+//    interface Set {
+//        // codecProtocol
+//        // calleeIp, calleePort
+//        // loadbalance
+//        // timeout
+//        // sessionid
+//        // cookie
+//        // uid
+//        // staffid
+//    }
 
-    public SoaHeader getHeader() {
-        return header;
-    }
 
-    public void setHeader(SoaHeader header) {
-        this.header = header;
-    }
 
-    public Integer getSeqid() {
-        return seqid;
-    }
 
-    public void setSeqid(Integer seqid) {
-        this.seqid = seqid;
-    }
+    /*
+        InvocationContext context = InvocationContextFactory.getInvocationContext();
 
-    public int getFailedTimes() {
-        return failedTimes;
-    }
+        context.setCalleeIp("....");
+        context.setTimeout(10s);
 
-    public void setFailedTimes(int failedTimes) {
-        this.failedTimes = failedTimes;
-    }
+        someclient.somethod();
 
-    public boolean isSoaTransactionProcess() {
-        return isSoaTransactionProcess;
-    }
+        context.getLastInfo().getCalleeIp();
+        context.getLastInfo().getTid();
 
-    public void setSoaTransactionProcess(boolean soaTransactionProcess) {
-        isSoaTransactionProcess = soaTransactionProcess;
-    }
-
-    public Integer getCurrentTransactionSequence() {
-        return currentTransactionSequence;
-    }
-
-    public void setCurrentTransactionSequence(Integer currentTransactionSequence) {
-        this.currentTransactionSequence = currentTransactionSequence;
-    }
-
-    public Integer getCurrentTransactionId() {
-        return currentTransactionId;
-    }
-
-    public void setCurrentTransactionId(Integer currentTransactionId) {
-        this.currentTransactionId = currentTransactionId;
-    }
-
-    public static class Factory {
-        private static ThreadLocal<InvocationContext> threadLocal = new ThreadLocal<>();
-        private static ISoaHeaderProxy soaHeaderProxy;
-
-        public static interface ISoaHeaderProxy {
-
-            Optional<String> callerFrom();
-
-            Optional<Integer> customerId();
-
-            Optional<String> customerName();
-
-            Optional<Integer> operatorId();
-
-            Optional<String> operatorName();
-
-            Optional<String> sessionId();
-        }
-
-        public static void setSoaHeaderProxy(ISoaHeaderProxy soaHeaderProxy) {
-            Factory.soaHeaderProxy = soaHeaderProxy;
-        }
-
-        public static ISoaHeaderProxy getSoaHeaderProxy() {
-            return soaHeaderProxy;
-        }
-
-        public static InvocationContext createNewInstance() {
-
-            InvocationContext context = new InvocationContext();
-            threadLocal.set(context);
-            return context;
-        }
-
-        public static InvocationContext setCurrentInstance(InvocationContext context) {
-            threadLocal.set(context);
-
-            return context;
-        }
-
-        public static InvocationContext getCurrentInstance() {
-            InvocationContext context = threadLocal.get();
-
-            if (context == null) {
-                context = createNewInstance();
-
-                threadLocal.set(context);
-            }
-
-            return context;
-        }
-
-        public static void removeCurrentInstance() {
-            threadLocal.remove();
-        }
-    }
+     */
 
 }

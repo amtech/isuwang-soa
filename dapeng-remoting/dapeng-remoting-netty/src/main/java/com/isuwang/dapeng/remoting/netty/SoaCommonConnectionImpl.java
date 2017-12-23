@@ -29,7 +29,7 @@ public class SoaCommonConnectionImpl implements SoaCommonConnection {
     }
 
     @Override
-    public <REQ, RESP> RESP send(REQ request, TCommonBeanSerializer<REQ> requestSerializer, TCommonBeanSerializer<RESP> responseSerializer) throws TException {
+    public <REQ, RESP> RESP send(REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer) throws TException {
         InvocationContext context = InvocationContext.Factory.getCurrentInstance();
         SoaHeader soaHeader = context.getHeader();
 
@@ -79,7 +79,6 @@ public class SoaCommonConnectionImpl implements SoaCommonConnection {
                     } else {
                         throw new SoaException(soaHeader.getRespCode().get(), soaHeader.getRespMessage().get());
                     }
-
                     return response;
                 }
             }
@@ -116,7 +115,7 @@ public class SoaCommonConnectionImpl implements SoaCommonConnection {
      * @throws TException
      */
     @Override
-    public <REQ, RESP> Future<RESP> sendAsync(REQ request, TCommonBeanSerializer<REQ> requestSerializer, TCommonBeanSerializer<RESP> responseSerializer, long timeout) throws TException {
+    public <REQ, RESP> Future<RESP> sendAsync(REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer, long timeout) throws TException {
 
         InvocationContext context = InvocationContext.Factory.getCurrentInstance();
         SoaHeader soaHeader = context.getHeader();

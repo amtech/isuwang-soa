@@ -22,12 +22,12 @@ public class TransactionContext extends Context{
 
     private Integer currentTransactionId = 0;
 
-    public CodecProtocol getCodecProtocol() {
-        return codecProtocol;
-    }
-
     public void setCodecProtocol(CodecProtocol codecProtocol) {
         this.codecProtocol = codecProtocol;
+    }
+
+    public CodecProtocol getCodecProtocol() {
+        return codecProtocol;
     }
 
     public SoaHeader getHeader() {

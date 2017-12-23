@@ -1,13 +1,13 @@
 package com.isuwang.dapeng.remoting.fake.metadata;
 
-import com.isuwang.dapeng.core.TCommonBeanSerializer;
+import com.isuwang.dapeng.core.BeanSerializer;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.*;
 
 /**
  * Created by tangliu on 2016/3/3.
  */
-public class GetServiceMetadata_argsSerializer implements TCommonBeanSerializer<getServiceMetadata_args> {
+public class GetServiceMetadata_argsSerializer implements BeanSerializer<getServiceMetadata_args> {
 
     @Override
     public getServiceMetadata_args read( TProtocol iprot) throws TException {

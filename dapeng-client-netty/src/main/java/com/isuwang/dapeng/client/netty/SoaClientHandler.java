@@ -1,10 +1,12 @@
-package com.isuwang.dapeng.remoting.netty;
+package com.isuwang.dapeng.client.netty;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by tangliu on 2016/1/13.
@@ -15,7 +17,7 @@ public class SoaClientHandler extends ChannelInboundHandlerAdapter {
     private CallBack callBack;
 
     public static interface CallBack {
-        void onSuccess(ByteBuf msg);
+        void onSuccess(ByteBuf msg) throws ExecutionException, InterruptedException;
     }
 
     public SoaClientHandler(CallBack callBack) {
@@ -24,8 +26,15 @@ public class SoaClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
+
         if (callBack != null)
-            callBack.onSuccess((ByteBuf) msg);
+            try {
+                callBack.onSuccess((ByteBuf) msg);
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
     }
 
     @Override

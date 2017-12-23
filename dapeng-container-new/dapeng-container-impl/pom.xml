@@ -15,11 +15,6 @@
     <dependencies>
         <dependency>
             <groupId>com.isuwang</groupId>
-            <artifactId>dapeng-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.isuwang</groupId>
             <artifactId>dapeng-container-api</artifactId>
             <version>${project.version}</version>
         </dependency>

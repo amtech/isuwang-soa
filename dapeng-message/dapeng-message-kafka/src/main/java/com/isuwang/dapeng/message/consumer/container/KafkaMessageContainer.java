@@ -1,11 +1,9 @@
 package com.isuwang.dapeng.message.consumer.container;
 
-import com.isuwang.dapeng.core.SoaProcessFunction;
-import com.isuwang.dapeng.core.TCommonBeanSerializer;
+import com.isuwang.dapeng.core.BeanSerializer;
 import com.isuwang.dapeng.core.plugin.SoaPluginContainer;
 import com.isuwang.dapeng.message.consumer.api.context.ConsumerContext;
 import com.isuwang.dapeng.message.consumer.api.service.MessageConsumerService;
-import com.isuwang.org.apache.thrift.TProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +64,7 @@ public class KafkaMessageContainer implements SoaPluginContainer{
                             if (method.isAnnotationPresent(MessageConsumerActionClass)) {
 
                                 String methodName = method.getName();
-                                SoaProcessFunction<Object, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>> soaProcessFunction = (SoaProcessFunction<Object, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>>) processor.getProcessMapView().get(methodName);
+                                SoaProcessFunction<Object, Object, Object, ? extends BeanSerializer<Object>, ? extends BeanSerializer<Object>> soaProcessFunction = (SoaProcessFunction<Object, Object, Object, ? extends BeanSerializer<Object>, ? extends BeanSerializer<Object>>) processor.getProcessMapView().get(methodName);
 
                                 Annotation annotation = method.getAnnotation(MessageConsumerActionClass);
                                 String topic = (String) annotation.getClass().getDeclaredMethod("topic").invoke(annotation);

@@ -1,7 +1,7 @@
 package com.isuwang.dapeng.remoting;
 
+import com.isuwang.dapeng.remoting.fake.json.TBeanSerializer;
 import com.isuwang.org.apache.thrift.TException;
-import com.isuwang.dapeng.core.TBeanSerializer;
 
 import java.util.concurrent.Future;
 
