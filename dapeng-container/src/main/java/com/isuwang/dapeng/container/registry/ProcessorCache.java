@@ -1,7 +1,6 @@
 package com.isuwang.dapeng.container.registry;
 
 import com.isuwang.dapeng.core.ProcessorKey;
-import com.isuwang.org.apache.thrift.TProcessor;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

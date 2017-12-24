@@ -3,7 +3,6 @@ package com.isuwang.dapeng.container;
 import com.isuwang.dapeng.container.apidoc.ApidocContainer;
 import com.isuwang.dapeng.container.filter.ContainerFilter;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
-import com.isuwang.dapeng.core.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

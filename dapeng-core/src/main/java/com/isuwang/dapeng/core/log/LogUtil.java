@@ -1,9 +1,7 @@
 package com.isuwang.dapeng.core.log;
 
 import com.isuwang.dapeng.core.ProcessorKey;
-import com.isuwang.dapeng.core.SoaBaseProcessor;
 import com.isuwang.dapeng.core.SoaHeader;
-import com.isuwang.dapeng.core.helper.SoaHeaderHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

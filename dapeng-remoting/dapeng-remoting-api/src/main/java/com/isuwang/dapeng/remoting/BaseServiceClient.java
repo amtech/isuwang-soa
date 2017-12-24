@@ -11,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,8 +37,8 @@ public class BaseServiceClient extends BaseClient {
     }
 
     @SuppressWarnings("unchecked")
-    protected <REQ, RESP> RESP sendBase(REQ request, RESP response, TBeanSerializer<REQ> requestSerializer, TBeanSerializer<RESP> responseSerializer) throws TException {
-        InvocationContext context = InvocationContext.Factory.getCurrentInstance();
+    protected <REQ, RESP> RESP sendBase(REQ request, RESP response, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer) throws TException {
+        InvocationContext context = InvocationContextImpl.Factory.getCurrentInstance();
         SoaHeader soaHeader = context.getHeader();
 
         final StubFilterChain stubFilterChain = new StubFilterChain();

@@ -3,7 +3,6 @@ package com.isuwang.dapeng.remoting.filter;
 import com.isuwang.dapeng.core.InvocationContext;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.core.TransactionContext;
-import com.isuwang.dapeng.core.filter.Filter;
 import com.isuwang.dapeng.core.filter.FilterChain;
 import com.isuwang.dapeng.transaction.api.GlobalTransactionProcessTemplate;
 import com.isuwang.org.apache.thrift.TException;

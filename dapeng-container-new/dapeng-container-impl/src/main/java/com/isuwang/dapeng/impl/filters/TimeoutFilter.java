@@ -1,9 +1,9 @@
 package com.isuwang.dapeng.impl.filters;
 
 
-import com.isuwang.dapeng.api.FilterChain;
-import com.isuwang.dapeng.api.FilterContext;
-import com.isuwang.dapeng.api.Filter;
+import com.isuwang.dapeng.core.filter.FilterChain;
+import com.isuwang.dapeng.core.filter.FilterContext;
+import com.isuwang.dapeng.core.filter.Filter;
 import com.isuwang.org.apache.thrift.TException;
 
 public class TimeoutFilter implements Filter {
@@ -18,8 +18,7 @@ public class TimeoutFilter implements Filter {
 
     @Override
     public void onExit(FilterContext ctx, FilterChain prev) throws TException {
-
-        prev.onExit(ctx);
+        // 第一个filter不需要调onExit
 
     }
 }

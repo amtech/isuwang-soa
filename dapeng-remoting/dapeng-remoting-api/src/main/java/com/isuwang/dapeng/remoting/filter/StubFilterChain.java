@@ -1,6 +1,5 @@
 package com.isuwang.dapeng.remoting.filter;
 
-import com.isuwang.dapeng.core.filter.Filter;
 import com.isuwang.dapeng.core.filter.FilterChain;
 import com.isuwang.org.apache.thrift.TException;
 

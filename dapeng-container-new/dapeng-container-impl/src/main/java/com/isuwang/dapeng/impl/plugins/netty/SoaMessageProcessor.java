@@ -1,7 +1,8 @@
-package com.isuwang.dapeng.remoting.netty;
+package com.isuwang.dapeng.impl.plugins.netty;
 
 
 import com.isuwang.dapeng.core.*;
+import com.isuwang.dapeng.remoting.netty.TSoaTransport;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.TBinaryProtocol;
 import com.isuwang.org.apache.thrift.protocol.TCompactProtocol;
@@ -24,7 +25,6 @@ public class SoaMessageProcessor {
     private TProtocol headerProtocol;
     private TProtocol contentProtocol;
 
-    private final boolean isRequestFlag;
 
     public TSoaTransport transport;
 
@@ -52,13 +52,11 @@ public class SoaMessageProcessor {
         this.transport = transport;
     }
 
-    public SoaMessageProcessor(boolean isRequestFlag, TSoaTransport transport) {
-        this.isRequestFlag = isRequestFlag;
+    public SoaMessageProcessor(TSoaTransport transport) {
         this.transport = transport;
     }
 
-
-    public void buildHeader(Context context) throws TException {
+    public void writeHeader(TransactionContext context) throws TException {
 
         headerProtocol = new TBinaryProtocol(transport);
 
@@ -83,18 +81,19 @@ public class SoaMessageProcessor {
         }
 
         new SoaHeaderSerializer().write(context.getHeader(), headerProtocol);
-
-        //contentProtocol.writeMessageBegin(message);
     }
 
-    public SoaHeader parseSoaMessage() throws TException{
-        final Context context = isRequestFlag ? InvocationContext.Factory.getCurrentInstance() : TransactionContext.Factory.getCurrentInstance();
+    public <RESP>void writeBody(BeanSerializer<RESP> respSerializer, RESP result ) throws TException {
+        respSerializer.write(result,contentProtocol);
+    }
+
+    public SoaHeader parseSoaMessage(TransactionContext context) throws TException{
 
         if (headerProtocol == null) {
             headerProtocol = new TBinaryProtocol(getTransport());
         }
 
-        // length(int32) stx(int8) version(string) protocol(int8) header(struct) body(struct) etx(int8)
+        // length(int32) stx(int8) version(int8) protocol(int8) seqid(i32) header(struct) body(struct) etx(int8)
 
         byte stx = headerProtocol.readByte();
         if (stx != STX) {// 通讯协议不正确
@@ -137,4 +136,6 @@ public class SoaMessageProcessor {
 
         headerProtocol.writeByte(ETX);
     }
+
+
 }

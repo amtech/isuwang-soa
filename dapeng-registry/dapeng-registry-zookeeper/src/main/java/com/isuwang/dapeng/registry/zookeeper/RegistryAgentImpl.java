@@ -144,7 +144,7 @@ public class RegistryAgentImpl implements RegistryAgent {
         //使用路由规则，过滤可用服务器 （local模式不考虑）
         final boolean isLocal = SoaSystemEnvProperties.SOA_REMOTING_MODE.equals("local");
         if (!isLocal) {
-            InvocationContext context = InvocationContext.Factory.getCurrentInstance();
+            InvocationContext context = InvocationContextImpl.Factory.getCurrentInstance();
             List<Route> routes = usingFallbackZookeeper ? zkfbw.getRoutes() : siw.getRoutes();
             List<ServiceInfo> tmpList = new ArrayList<>();
 

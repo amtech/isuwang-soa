@@ -2,6 +2,7 @@ package com.isuwang.dapeng.transaction.api;
 
 import com.google.gson.Gson;
 import com.isuwang.dapeng.core.InvocationContext;
+import com.isuwang.dapeng.core.InvocationContextImpl;
 import com.isuwang.dapeng.core.SoaException;
 import com.isuwang.dapeng.core.TransactionContext;
 import com.isuwang.dapeng.transaction.api.domain.TGlobalTransactionProcess;
@@ -36,7 +37,7 @@ public class GlobalTransactionProcessTemplate<REQ> {
         T result = null;
 
         try {
-            InvocationContext invocationContext = InvocationContext.Factory.getCurrentInstance();
+            InvocationContext invocationContext = InvocationContextImpl.Factory.getCurrentInstance();
             TransactionContext transactionContext = TransactionContext.Factory.getCurrentInstance();
 
             transactionContext.setCurrentTransactionSequence(transactionContext.getCurrentTransactionSequence() + 1);

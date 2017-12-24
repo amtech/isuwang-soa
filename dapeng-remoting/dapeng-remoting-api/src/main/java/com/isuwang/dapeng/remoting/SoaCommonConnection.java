@@ -1,6 +1,6 @@
 package com.isuwang.dapeng.remoting;
 
-import com.isuwang.dapeng.core.TCommonBeanSerializer;
+import com.isuwang.dapeng.core.BeanSerializer;
 import com.isuwang.org.apache.thrift.TException;
 
 import java.util.concurrent.Future;
@@ -11,8 +11,8 @@ import java.util.concurrent.Future;
  */
 public interface SoaCommonConnection {
 
-    <REQ, RESP> RESP send(REQ request, TCommonBeanSerializer<REQ> requestSerializer, TCommonBeanSerializer<RESP> responseSerializer) throws TException;
+    <REQ, RESP> RESP send(REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer) throws TException;
 
-    <REQ, RESP> Future<RESP> sendAsync(REQ request, TCommonBeanSerializer<REQ> requestSerializer, TCommonBeanSerializer<RESP> responseSerializer, long timeout) throws TException;
+    <REQ, RESP> Future<RESP> sendAsync(REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer, long timeout) throws TException;
 
 }

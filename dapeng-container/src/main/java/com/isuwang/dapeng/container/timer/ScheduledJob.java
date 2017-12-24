@@ -33,8 +33,10 @@ public class ScheduledJob implements Job {
 
         logger.info("定时任务({})开始执行", context.getJobDetail().getKey().getName());
 
-        SoaProcessFunction<Object, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>> soaProcessFunction =
-                (SoaProcessFunction<Object, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>>) data.get("function");
+        SoaProcessFunction<Object, Object, Object, ? extends TCommonBeanSerializer<Object>,
+                ? extends TCommonBeanSerializer<Object>> soaProcessFunction =
+                (SoaProcessFunction<Object, Object, Object, ? extends TCommonBeanSerializer<Object>,
+                        ? extends TCommonBeanSerializer<Object>>) data.get("function");
 
         Object iface = data.get("iface");
         Object args = soaProcessFunction.getEmptyArgsInstance();

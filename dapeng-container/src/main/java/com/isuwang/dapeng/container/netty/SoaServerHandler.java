@@ -8,7 +8,6 @@ import com.isuwang.dapeng.monitor.api.domain.PlatformProcessData;
 import com.isuwang.dapeng.registry.ConfigKey;
 import com.isuwang.dapeng.registry.RegistryAgentProxy;
 import com.isuwang.org.apache.thrift.TException;
-import com.isuwang.org.apache.thrift.TProcessor;
 import com.isuwang.org.apache.thrift.protocol.TMessage;
 import com.isuwang.org.apache.thrift.protocol.TMessageType;
 import io.netty.buffer.ByteBuf;
@@ -89,7 +88,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
 
             final int requestLength = getRequestLength(inputBuf);
 
-            final TransactionContext context = TransactionContext.Factory.getNewInstance();
+            final TransactionContext context = TransactionContext.Factory.createNewInstance();
             final SoaHeader soaHeader = new SoaHeader();
             inputSoaTransport = new TSoaTransport(inputBuf);
             context.setHeader(soaHeader);

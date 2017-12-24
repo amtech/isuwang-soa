@@ -36,7 +36,7 @@ public class BaseCommonServiceClient extends BaseClient {
     }
 
     @SuppressWarnings("unchecked")
-    protected <REQ, RESP> RESP sendBase(REQ request, TCommonBeanSerializer<REQ> requestSerializer, TCommonBeanSerializer<RESP> responseSerializer) throws TException {
+    protected <REQ, RESP> RESP sendBase(REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer) throws TException {
         InvocationContext context = InvocationContext.Factory.getCurrentInstance();
         SoaHeader soaHeader = context.getHeader();
 
@@ -103,7 +103,7 @@ public class BaseCommonServiceClient extends BaseClient {
      * @return
      * @throws TException
      */
-    protected <REQ, RESP> Future<RESP> sendBaseAsync(REQ request, TCommonBeanSerializer<REQ> requestSerializer, TCommonBeanSerializer<RESP> responseSerializer, long timeout) throws TException {
+    protected <REQ, RESP> Future<RESP> sendBaseAsync(REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer, long timeout) throws TException {
 
         InvocationContext context = InvocationContext.Factory.getCurrentInstance();
         SoaHeader soaHeader = context.getHeader();

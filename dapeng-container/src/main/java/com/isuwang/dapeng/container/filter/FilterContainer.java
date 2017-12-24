@@ -2,7 +2,6 @@ package com.isuwang.dapeng.container.filter;
 
 import com.isuwang.dapeng.container.Container;
 import com.isuwang.dapeng.container.ContainerStartup;
-import com.isuwang.dapeng.core.filter.Filter;
 import com.isuwang.dapeng.core.filter.container.ContainerFilterChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

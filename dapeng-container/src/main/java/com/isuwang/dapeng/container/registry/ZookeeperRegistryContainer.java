@@ -8,7 +8,6 @@ import com.isuwang.dapeng.core.log.SoaAppClassLoaderCache;
 import com.isuwang.dapeng.registry.RegistryAgent;
 import com.isuwang.dapeng.registry.RegistryAgentProxy;
 import com.isuwang.dapeng.registry.zookeeper.RegistryAgentImpl;
-import com.isuwang.org.apache.thrift.TProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -4,17 +4,13 @@ import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.TProtocol;
 
 /**
- * 序列化接口
- *
- * @author craneding
- * @date 15/4/26
+ * Created by ever on 2017/7/17.
  */
-@Deprecated
-public interface TBeanSerializer<T> {
+public interface BeanSerializer<T> {
 
-    void read(T bean, TProtocol iprot) throws TException;
+    T read(TProtocol iproto) throws TException;
 
-    void write(T bean, TProtocol oprot) throws TException;
+    void write(T bean, TProtocol oproto) throws TException;
 
     void validate(T bean) throws TException;
 

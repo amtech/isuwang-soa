@@ -2,7 +2,6 @@ package com.isuwang.dapeng.container.socket;
 
 import com.isuwang.dapeng.core.*;
 import com.isuwang.dapeng.core.socket.TSoaTransport;
-import com.isuwang.org.apache.thrift.TProcessor;
 import com.isuwang.org.apache.thrift.protocol.TMessage;
 import com.isuwang.org.apache.thrift.protocol.TMessageType;
 import org.slf4j.Logger;

@@ -1,19 +1,19 @@
 package com.isuwang.dapeng.message.consumer.kafka;
 
-import com.isuwang.dapeng.core.SoaProcessFunction;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
-import com.isuwang.dapeng.core.TCommonBeanSerializer;
+import com.isuwang.dapeng.core.definition.SoaFunctionDefinition;
 import com.isuwang.dapeng.message.consumer.api.context.ConsumerContext;
-
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.serialization.ByteBufferDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Created by tangliu on 2016/8/3.
@@ -113,7 +113,7 @@ public class KafkaConsumer extends Thread {
 
     private void dealMessage(ConsumerContext customer, ByteBuffer message) {
 
-        SoaProcessFunction<Object, Object, Object, ? extends TCommonBeanSerializer<Object>, ? extends TCommonBeanSerializer<Object>> soaProcessFunction = customer.getSoaProcessFunction();
+        SoaFunctionDefinition.Sync functionDefinition = (SoaFunctionDefinition.Sync)customer.getSoaFunctionDefinition();
         Object iface = customer.getIface();
 
         long count = new ArrayList<>(Arrays.asList(iface.getClass().getInterfaces()))
@@ -129,19 +129,17 @@ public class KafkaConsumer extends Thread {
             ifaceClass = iface.getClass();
         }
 
-        Object args = soaProcessFunction.getEmptyArgsInstance();
-        Field field = args.getClass().getDeclaredFields()[0];
-        field.setAccessible(true);//暴力访问，取消私有权限,让对象可以访问
-
-        ByteBuffer buf = message;
+        //Object args = soaProcessFunction.getEmptyArgsInstance();
+//        Field field = args.getClass().getDeclaredFields()[0];
+//        field.setAccessible(true);//暴力访问，取消私有权限,让对象可以访问
+//        ByteBuffer buf = message;
+        //field.set(args, buf);
         try {
-            field.set(args, buf);
-
-            logger.info("{}收到kafka消息，执行{}方法", ifaceClass.getName(), soaProcessFunction.getMethodName());
-            soaProcessFunction.getResult(iface, args);
-            logger.info("{}收到kafka消息，执行{}方法完成", ifaceClass.getName(), soaProcessFunction.getMethodName());
+            logger.info("{}收到kafka消息，执行{}方法", ifaceClass.getName(), functionDefinition.methodName);
+            functionDefinition.apply(iface,null);
+            logger.info("{}收到kafka消息，执行{}方法完成", ifaceClass.getName(), functionDefinition.methodName);
         } catch (Exception e) {
-            logger.error("{}收到kafka消息，执行{}方法异常", ifaceClass.getName(), soaProcessFunction.getMethodName());
+            logger.error("{}收到kafka消息，执行{}方法异常", ifaceClass.getName(), functionDefinition.methodName);
             logger.error(e.getMessage(), e);
         }
     }

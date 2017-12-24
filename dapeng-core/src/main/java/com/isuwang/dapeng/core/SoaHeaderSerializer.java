@@ -9,7 +9,7 @@ import java.util.Optional;
  * Created by tangliu on 2016/1/11.
  * SoaHeader序列化和反序列化
  */
-public class SoaHeaderSerializer implements TCommonBeanSerializer<SoaHeader> {
+public class SoaHeaderSerializer implements BeanSerializer<SoaHeader> {
 
     /**
      * 反序列化

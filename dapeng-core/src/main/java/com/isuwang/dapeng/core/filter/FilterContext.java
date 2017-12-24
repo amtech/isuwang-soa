@@ -1,4 +1,6 @@
-package com.isuwang.dapeng.api;
+package com.isuwang.dapeng.core.filter;
+
+import com.isuwang.dapeng.core.filter.Filter;
 
 /**
  * Created by lihuimin on 2017/12/11.
