@@ -12,6 +12,14 @@ public class NettyConnectionPoolFactory implements SoaConnctionPoolFactory{
 
     @Override
     public SoaConnectionPool getPool() {
+        if (pool == null) {
+            synchronized(SoaConnectionPoolImpl.class) {
+                if (pool == null) {
+                    pool = new SoaConnectionPoolImpl();
+                }
+            }
+        }
         return pool;
     }
+
 }
