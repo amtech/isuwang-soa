@@ -40,7 +40,7 @@ public class NettyClient {
     private Channel channel = null;
     private final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-    private static final Map<Integer, CompletableFuture> futureCaches = new ConcurrentHashMap<>();
+    private final Map<Integer, CompletableFuture> futureCaches = new ConcurrentHashMap<>();
 
     public NettyClient(String host, int port) throws SoaException {
         this.host = host;

@@ -1,12 +1,44 @@
 package com.isuwang.dapeng.core;
 
+import java.util.concurrent.Future;
+
 /**
  * @author craneding
  * @date 16/3/1
  */
 public interface SoaConnectionPool {
 
-    SoaConnection getConnection() throws SoaException;
+    public static class ClientInfo {
+        final String serviceName;
+        final String version;
 
-    void removeConnection(SoaConnection connection) throws SoaException;
+        public ClientInfo(String serviceName, String version) {
+            this.serviceName = serviceName;
+            this.version = version;
+        }
+    }
+
+    ClientInfo registerClientInfo(String servcice, String version);
+
+    <REQ, RESP> RESP send(
+            String service,
+            String version,
+            String method,
+            REQ request,
+            BeanSerializer<REQ> requestSerializer,
+            BeanSerializer<RESP> responseSerializer) throws Exception;
+
+    <REQ, RESP> Future<RESP> sendAsync(
+            String service,
+            String version,
+            String method,
+            REQ request,
+            BeanSerializer<REQ> requestSerializer,
+            BeanSerializer<RESP> responseSerializer,
+            long timeout) throws Exception;
+
+
+//    SoaConnection getConnection() throws SoaException;
+
+//    void removeConnection(SoaConnection connection) throws SoaException;
 }

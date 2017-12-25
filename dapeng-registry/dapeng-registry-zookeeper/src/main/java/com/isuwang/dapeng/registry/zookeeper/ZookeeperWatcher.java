@@ -3,7 +3,9 @@ package com.isuwang.dapeng.registry.zookeeper;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.core.version.Version;
 import com.isuwang.dapeng.registry.ConfigKey;
+import com.isuwang.dapeng.registry.RuntimeInstance;
 import com.isuwang.dapeng.registry.ServiceInfo;
+import com.isuwang.dapeng.registry.ServiceZKInfo;
 import com.isuwang.dapeng.route.Route;
 import com.isuwang.dapeng.route.parse.RouteParser;
 import org.apache.zookeeper.*;
@@ -237,12 +239,42 @@ public class ZookeeperWatcher {
         return usableList;
     }
 
+    public ServiceZKInfo getServiceZkInfo(String serviceName){
+        String servicePath = serviceRoute + "/" + serviceName;
+        try {
+            if (zk == null)
+                init();
+
+            List<String> childrens = zk.getChildren(servicePath, watchedEvent -> {
+                if (watchedEvent.getType() == Watcher.Event.EventType.NodeChildrenChanged) {
+                    LOGGER.info("{}子节点发生变化，重新获取信息", watchedEvent.getPath());
+                    getServiceZkInfo(serviceName);
+                }
+            });
+
+            List<RuntimeInstance> runtimeInstanceList = new ArrayList<>();
+            LOGGER.info("获取{}的子节点成功", servicePath);
+            //child = 10.168.13.96:9085:1.0.0
+            for (String children : childrens) {
+                String []infos = children.split(":");
+                RuntimeInstance instance = new RuntimeInstance(serviceName,infos[0],Integer.valueOf(infos[1]),infos[2]);
+                runtimeInstanceList.add(instance);
+            }
+            return new ServiceZKInfo(serviceName,runtimeInstanceList);
+
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+        }
+        return null;
+    }
+
+
     /**
      * 根据serviceName节点的路径，获取下面的子节点，并监听子节点变化
      *
      * @param serviceName
      */
-    private void getServiceInfoByServiceName(String serviceName) {
+    private void  getServiceInfoByServiceName(String serviceName) {
 
         String servicePath = serviceRoute + "/" + serviceName;
         try {

@@ -24,7 +24,7 @@ public class SoaConnectionImpl implements SoaConnection {
     private static final Logger LOGGER = LoggerFactory.getLogger(SoaConnectionImpl.class);
 
 
-    private NettyClient client;
+    private NettyClient client; // Netty Channel
     private AtomicInteger seqidAtomic = new AtomicInteger(0);
 
     public SoaConnectionImpl(String host, int port) {
