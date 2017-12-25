@@ -2,17 +2,14 @@ package com.isuwang.dapeng.doc.cache;
 
 
 import com.google.common.collect.TreeMultimap;
-import com.isuwang.dapeng.api.AppListener;
-import com.isuwang.dapeng.api.Container;
 import com.isuwang.dapeng.api.ContainerFactory;
-import com.isuwang.dapeng.api.events.AppEvent;
 import com.isuwang.dapeng.core.Application;
 import com.isuwang.dapeng.core.ServiceInfo;
 import com.isuwang.dapeng.core.metadata.Field;
 import com.isuwang.dapeng.core.metadata.Method;
 import com.isuwang.dapeng.core.metadata.Struct;
 import com.isuwang.dapeng.core.metadata.TEnum;
-import com.isuwang.dapeng.remoting.fake.metadata.MetadataClient;
+import com.isuwang.dapeng.metadata.MetadataClient;
 import com.isuwang.org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,7 +71,7 @@ public class ServiceCache {
             String metadata = "";
             try {
                 metadata = new MetadataClient(s.serviceName, s.version).getServiceMetadata();
-            } catch (TException e) {
+            } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
             }
             if (metadata != null) {

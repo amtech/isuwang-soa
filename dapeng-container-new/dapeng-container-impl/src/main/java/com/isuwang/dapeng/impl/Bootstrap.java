@@ -55,12 +55,15 @@ public class Bootstrap {
         dapengContainer.registerPlugin(nettyPlugin);
         dapengContainer.registerPlugin(apiDocPlugin);
 
-        PluginLoader pluginLoader = new PluginLoader();
-        pluginLoader.startup();
 
         //4.启动Apploader， plugins
-        ContainerFactory.getContainer().getPlugins().forEach(Plugin::start);
+        //ContainerFactory.getContainer().getPlugins().forEach(Plugin::start);
+        springAppLoader.start();
+        nettyPlugin.start();
+        apiDocPlugin.start();
 
+//        PluginLoader pluginLoader = new PluginLoader();
+//        pluginLoader.startup();
 
 
     }

@@ -6,7 +6,6 @@ import com.isuwang.dapeng.api.Plugin;
 import com.isuwang.dapeng.api.events.AppEvent;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.doc.ApiWebSite;
-import com.isuwang.dapeng.doc.cache.ServiceCache;
 import org.eclipse.jetty.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +51,7 @@ public class ApiDocPlugin implements AppListener, Plugin {
                     server.start();
                     System.out.println("api-doc server started at port: " + SoaSystemEnvProperties.SOA_APIDOC_PORT);
 
-                    server.join();
+                    //server.join();
                 } catch (Exception e) {
                     LOGGER.error(e.getMessage(), e);
                 }
