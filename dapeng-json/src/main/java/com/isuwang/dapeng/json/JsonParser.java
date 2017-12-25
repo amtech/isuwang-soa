@@ -1,6 +1,8 @@
 package com.isuwang.dapeng.json;
 
-import javax.print.DocFlavor;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class JsonParser {
 
@@ -31,8 +33,13 @@ public class JsonParser {
             this.column = column;
             this.text = text;
         }
+
+        @Override
+        public String toString() {
+            return "\"" + text + "\"," + "line:" + lineNr + ",column:" + column;
+        }
     }
-    
+
     public static class ParsingException extends RuntimeException {
         private final String summary;
         private final String detail;
@@ -46,25 +53,30 @@ public class JsonParser {
 
     public static interface ParserInput {
         char nextChar();
+
         char nextUtf8Char();
 
         int cursor();
+
         char[] sliceCharArray(int start, int end);
-        Line  getLine(int Index);
+
+        Line getLine(int Index);
     }
 
     static abstract class DefaultParserInput implements ParserInput {
 
         protected int _cursor = -1;
 
-        public int cursor(){ return _cursor; }
+        public int cursor() {
+            return _cursor;
+        }
         //public void setCursor(int pos) { this._cursor = pos; }
 
         public Line getLine(int index) {
             StringBuilder sb = new StringBuilder();
             int savedCursor = _cursor;
             _cursor = -1;
-            Line line = rec(sb,index, 0, 0, 1);
+            Line line = loop(index);
             _cursor = savedCursor;
             return line;
         }
@@ -72,17 +84,42 @@ public class JsonParser {
         // TODO rewrite as while
         private Line rec(StringBuilder sb, int index, int ix, int lineStartIx, int lineNo) {
             char nc = nextUtf8Char();
-            switch(nc){
+            switch (nc) {
                 case '\n':
-                    if(index > ix) {
+                    if (index > ix) {
                         sb.setLength(0);
-                        return rec(sb, index, ix+1, ix+1, lineNo + 1);
+                        return rec(sb, index, ix + 1, ix + 1, lineNo + 1);
                     }
                 case EOI:
-                    return new Line(lineNo, index - lineStartIx +1, sb.toString());
+                    return new Line(lineNo, index - lineStartIx + 1, sb.toString());
                 default:
                     sb.append(nc);
-                    return rec(sb, index, ix+1, lineStartIx, lineNo);
+                    return rec(sb, index, ix + 1, lineStartIx, lineNo);
+            }
+        }
+
+        private Line loop(int index) {
+            StringBuilder sb = new StringBuilder();
+            int lineNo = 1;
+            int ix = 0;
+            int lineStartIx = 0;
+            while (true) {
+                char nc = nextUtf8Char();
+                switch (nc) {
+                    case '\n':
+                        if (index > ix) {
+                            sb.setLength(0);
+                            lineNo++;
+                            ix++;
+                            lineStartIx = ix + 1;
+                            break;
+                        }
+                    case EOI:
+                        return new Line(lineNo, index - lineStartIx + 1, sb.toString());
+                    default:
+                        sb.append(nc);
+                        ix++;
+                }
             }
         }
 
@@ -98,7 +135,7 @@ public class JsonParser {
         @Override
         public char nextChar() {
             _cursor += 1;
-            if(_cursor < string.length())
+            if (_cursor < string.length())
                 return string.charAt(_cursor);
             else return EOI;
         }
@@ -128,11 +165,11 @@ public class JsonParser {
         Line line = input.getLine(cursor);
 
         String unexpected = null;
-        if(errorChar == EOI) unexpected =  "end-of-input";
-        else if(Character.isISOControl(errorChar)) unexpected = String.format("\\u%04x", (int)errorChar);
+        if (errorChar == EOI) unexpected = "end-of-input";
+        else if (Character.isISOControl(errorChar)) unexpected = String.format("\\u%04x", (int) errorChar);
         else unexpected = "" + errorChar;
 
-        String expected = (target.equals("'\uFFFF'"))? "end-of-input" : target;
+        String expected = (target.equals("'\uFFFF'")) ? "end-of-input" : target;
 
         String summary = "Unexpected " + unexpected + " at input index:" +
                 input.cursor() + "(line:" + line.lineNr + ",position:" + line.column +
@@ -143,37 +180,39 @@ public class JsonParser {
         return new ParsingException(summary, detail);
     }
 
-    void parseJsValue(){
+    void parseJsValue() {
         ws();
         value();
         require(EOI);
     }
 
-    void ws(){
-        while( ((1L << cursorChar) & ((cursorChar - 64) >> 31) & 0x100002600L) != 0L ){
+    void ws() {
+        while (((1L << cursorChar) & ((cursorChar - 64) >> 31) & 0x100002600L) != 0L) {
             advance();
         }
     }
 
-    boolean advance(){
+    boolean advance() {
         cursorChar = input.nextChar();
         return true;
     }
 
-    void value(){
+    void value() {
         int mark = input.cursor();
 
-        switch (cursorChar){
+        switch (cursorChar) {
             case 'f':
-                if( ! _false() ) throw fail("JSON Value", mark);
+                if (!_false()) throw fail("JSON Value", mark);
                 callback.onBoolean(false);
                 break;
             case 'n':
-                if(! _null() ) throw fail("JSON Value", mark);;
+                if (!_null()) throw fail("JSON Value", mark);
+                ;
                 callback.onNull();
                 break;
             case 't':
-                if(! _true() ) throw fail("JSON Value", mark);;
+                if (!_true()) throw fail("JSON Value", mark);
+                ;
                 callback.onBoolean(true);
                 break;
             case '{':
@@ -212,47 +251,45 @@ public class JsonParser {
 
     }
 
-    boolean _false(){
+    boolean _false() {
         advance();
         return ch('a') && ch('l') && ch('s') && ws('e');
     }
 
-    boolean _null(){
+    boolean _null() {
         advance();
         return ch('u') && ch('l') && ws('l');
     }
 
-    boolean _true(){
+    boolean _true() {
         advance();
         return ch('r') && ch('u') && ws('e');
     }
 
     boolean ch(char c) {
-        if(cursorChar == c) {
+        if (cursorChar == c) {
             advance();
             return true;
-        }
-        else return false;
+        } else return false;
     }
 
-    void require(char c){
-        if(!ch(c))
+    void require(char c) {
+        if (!ch(c))
             throw fail("'" + c + "'");
     }
 
-    boolean ws(char c){
-        if(ch(c)) {
+    boolean ws(char c) {
+        if (ch(c)) {
             ws();
             return true;
-        }
-        else return false;
+        } else return false;
     }
 
-    boolean _char(){
+    boolean _char() {
         if (((1L << cursorChar) & ((31 - cursorChar) >> 31) & 0x3ffffffbefffffffL) != 0L)
             return appendSB(cursorChar);
         else {
-            switch (cursorChar){
+            switch (cursorChar) {
                 case '\"':
                 case EOI:
                     return false;
@@ -266,14 +303,14 @@ public class JsonParser {
     }
 
     int hexValue(char c) {
-        if('0' <= c && c <='9') return c - '0';
-        else if('a' <= c && c <='f') return c - 87;
-        else if('A' <= c && c <= 'F') return c = 55;
+        if ('0' <= c && c <= '9') return c - '0';
+        else if ('a' <= c && c <= 'f') return c - 87;
+        else if ('A' <= c && c <= 'F') return c = 55;
         else throw fail("hex digit");
     }
 
     boolean escaped() {
-        switch (cursorChar){
+        switch (cursorChar) {
             case '"':
             case '/':
             case '\\':
@@ -298,7 +335,7 @@ public class JsonParser {
                 value = (value << 4) + hexValue(cursorChar);
                 advance();
                 value = (value << 4) + hexValue(cursorChar);
-                return appendSB((char)value);
+                return appendSB((char) value);
             default:
                 throw fail("JSON escape sequencne");
         }
@@ -309,16 +346,16 @@ public class JsonParser {
         return true;
     }
 
-    void object(){
+    void object() {
         ws();
-        if( cursorChar != '}' ){
+        if (cursorChar != '}') {
             members();
         }
         require('}');
         ws();
     }
 
-    void members(){
+    void members() {
         do {
             string();
             require(':');
@@ -331,25 +368,25 @@ public class JsonParser {
 
             callback.onEndField();
 
-        } while(ws(','));
+        } while (ws(','));
     }
 
 
-    void string(){
-        if(cursorChar == '"') cursorChar = input.nextUtf8Char();
-        else fail("'\"'");
+    void string() {
+        if (cursorChar == '"') cursorChar = input.nextUtf8Char();
+        else throw fail("'\"'");
 
         sb.setLength(0);
-        while( _char() ) {
+        while (_char()) {
             cursorChar = input.nextUtf8Char();
         }
         require('\"');
         ws();
     }
 
-    void array(){
+    void array() {
         ws();
-        if(cursorChar != ']') {
+        if (cursorChar != ']') {
             do {
                 value();
             } while (ws(','));
@@ -358,7 +395,7 @@ public class JsonParser {
         ws();
     }
 
-    void number(){
+    void number() {
         int start = input.cursor();
         int startChar = cursorChar;
 
@@ -367,41 +404,70 @@ public class JsonParser {
         frac();
         exp();
 
-        callback.onNumber( Double.parseDouble( new String(input.sliceCharArray(start, input.cursor()))) );
+        callback.onNumber(Double.parseDouble(new String(input.sliceCharArray(start, input.cursor()))));
         ws();
     }
 
-    void _int(){
-        if(!ch('0')) oneOrMoreDigits();
+    void _int() {
+        if (!ch('0')) oneOrMoreDigits();
     }
-    void frac(){
-        if(ch('.')) oneOrMoreDigits();
+
+    void frac() {
+        if (ch('.')) oneOrMoreDigits();
     }
-    void exp(){
-        if( ch('e') || ch('E')) {
+
+    void exp() {
+        if (ch('e') || ch('E')) {
             ch('-');
             ch('+');
             oneOrMoreDigits();
         }
     }
 
-    void oneOrMoreDigits(){
-        if(digit()) zeroOrMoreDigits();
+    void oneOrMoreDigits() {
+        if (digit()) zeroOrMoreDigits();
         else throw fail("DIGIT");
     }
-    void zeroOrMoreDigits(){
-        while(digit()) { }
+
+    void zeroOrMoreDigits() {
+        while (digit()) {
+        }
     }
-    boolean digit(){
+
+    boolean digit() {
         return cursorChar >= '0' && cursorChar <= '9' && advance();
     }
 
 
-    public static void main(String[] args) {
-
+    public static void main(String[] args) throws ClassNotFoundException {
         String json = "{ \"a\": 10, \"b\": true, \n\"c\": [1,2,3], " +
-                "\"user\": { \"name\": \"wangzx\", \"age\": 10 } }";
+                "\"user\": { \"name\": \"wangzx\", \"age\": 10 }, \n\"emptyArray\":[],\"emptyObject\":{} }";
 
+        String json1 = "{ a\": 10, \"b\": true, \n\"c\": [1,2,3], " +
+                "\"user\": { \"name\": \"wangzx\", \"age\": 10 }, \n\"emptyArray\":[],\"emptyObject\":{} }";
+
+        String json2 = "{ \"a\": 10d, \"b\": true, \n\"c\": [1,2,3], " +
+                "\"user\": { \"name\": \"wangzx\", \"age\": 10 }, \n\"emptyArray\":[],\"emptyObject\":{} }";
+
+        String json3 = "{ \"a\": 10, b\": true, \n\"c\": [1,2,3], " +
+                "\"user\": { \"name\": \"wangzx\", \"age\": 10 }, \n\"emptyArray\":[],\"emptyObject\":{} }";
+
+        String json4 = "{ \"a\": 10, \"b\": true, \n\"c: [1,2,3], " +
+                "\"user\": { \"name\": \"wangzx\", \"age\": 10 }, \n\"emptyArray\":[],\"emptyObject\":{} }";
+        String json5 = "{ \"a\": 10, \"b\": true, \n\"c\": 1,2,3], " +
+                "\"user\": { \"name\": \"wangzx\", \"age\": 10 }, \n\"emptyArray\":[],\"emptyObject\":{} }";
+        String json6 = "{ \"a\": 10, \"b\": true, \n\"c\": [1,2,3] " +
+                "\"user\": { \"name\": \"wangzx\", \"age\": 10 }, \n\"emptyArray\":[],\"emptyObject\":{} }";
+        String json7 = "{ \"a\": 10, \"b\": true, \n\"c\": [1,2,3, " +
+                "\"user\": { \"name\": \"wangzx\", \"age\": 10 }, \n\"emptyArray\":[],\"emptyObject\":{} }";
+        String json8 = "{ \"a\": 10, \"b\": true, \n\"c\": [1,2,3], " +
+                "\"user\": { \"name\": \"wangzx\", \"age\": 10 }, \n\"emptyArray\":[],\"emptyObject\":} }";
+        String json9 = "{ \"a\": 10, \"b\": true, \n\"c\": [1,2,3], " +
+                "\"user\": { \"name\": \"wangzx\", \"age\": 10 }, \n\"emptyArray\":[],\"emptyObject\":{ }";
+        String json10 = "{ \"a\": 10, \"b\": true, \n\"c\": [1,2,3], " +
+                "\"user\": { \"name\": \"wangzx\", \"age\": 10 }, \n\"emptyArray\":[],\"emptyObject\":{}, }";
+
+        List<String> errorJsons = Arrays.asList(json1, json2, json3, json4, json5, json6, json7, json8, json9, json10);
         JsonCallback callback = new JsonCallback() {
             @Override
             public void onStartObject() {
@@ -456,9 +522,19 @@ public class JsonParser {
 
         StringBasedParserInput input = new StringBasedParserInput(json);
         JsonParser parser = new JsonParser(input, callback);
-
+        System.out.println(json);
         parser.value();
-
+System.out.println("finished=====");
+        errorJsons.forEach(errorJson -> {
+            StringBasedParserInput errorInput = new StringBasedParserInput(errorJson);
+            JsonParser myParser = new JsonParser(errorInput, callback);
+            try {
+                myParser.value();
+            } catch (ParsingException e) {
+                e.printStackTrace();
+            }
+            System.out.println("finished=====");
+        });
     }
 
 }
