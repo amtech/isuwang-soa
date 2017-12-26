@@ -1,4 +1,4 @@
-package com.isuwang.dapeng.remoting.filter;
+package com.isuwang.dapeng.registry;
 
 /**
  * Load Balance Stratage

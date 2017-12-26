@@ -1,4 +1,4 @@
-package com.isuwang.dapeng.registry;
+package com.isuwang.dapeng.client.netty;
 
 /**
  * Created by lihuimin on 2017/12/25.

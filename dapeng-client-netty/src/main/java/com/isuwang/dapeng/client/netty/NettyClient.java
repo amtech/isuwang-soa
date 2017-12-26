@@ -95,7 +95,7 @@ public class NettyClient {
 
         try {
             channel.writeAndFlush(request);
-            ByteBuf respByteBuf = future.get(1000, TimeUnit.MILLISECONDS);
+            ByteBuf respByteBuf = future.get(30000, TimeUnit.MILLISECONDS);
             return respByteBuf;
         } finally {
             futureCaches.remove(seqid);

@@ -1,4 +1,4 @@
-package com.isuwang.dapeng.remoting.fake.metadata;
+package com.isuwang.dapeng.metadata;
 
 /**
  * Created by tangliu on 2016/3/3.

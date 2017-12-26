@@ -1,4 +1,4 @@
-package com.isuwang.dapeng.remoting.fake.metadata;
+package com.isuwang.dapeng.metadata;
 
 import com.isuwang.dapeng.core.BeanSerializer;
 import com.isuwang.dapeng.core.SoaBaseCode;

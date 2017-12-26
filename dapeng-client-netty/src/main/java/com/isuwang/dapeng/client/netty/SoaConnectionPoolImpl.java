@@ -3,13 +3,14 @@ package com.isuwang.dapeng.client.netty;
 import com.isuwang.dapeng.core.BeanSerializer;
 import com.isuwang.dapeng.core.SoaConnection;
 import com.isuwang.dapeng.core.SoaConnectionPool;
+import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.registry.*;
+import com.isuwang.dapeng.registry.zookeeper.LoadBalanceService;
 import com.isuwang.dapeng.registry.zookeeper.ZkClientAgentImpl;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -19,13 +20,12 @@ import java.util.stream.Collectors;
  */
 public class SoaConnectionPoolImpl implements SoaConnectionPool {
 
-    private   Map<String,ServiceZKInfo> zkInfos = new ConcurrentHashMap<>();
-   // private Map<IpPort, SubPool> subPools = new ConcurrentHashMap<>();
+    private Map<String, ServiceZKInfo> zkInfos = new ConcurrentHashMap<>();
+    private Map<IpPort, SubPool> subPools = new ConcurrentHashMap<>();
+    private ZkClientAgent zkAgent = new ZkClientAgentImpl();
 
-    private Map<IpPort, SoaConnection> subPools = new ConcurrentHashMap<>();
-
+    //TODO
     List<WeakReference<ClientInfo>> clientInfos;
-    ZkClientAgent zkAgent = new ZkClientAgentImpl();
 
     // TODO connection idle process.
     Thread cleanThread = null;  // clean idle connections;
@@ -40,6 +40,7 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
 
     @Override
     public ClientInfo registerClientInfo(String serviceName, String version) {
+        // TODO
         // clientInfos.add(new WeakReference<ClientInfo>(client));
 
         zkAgent.syncService(serviceName, zkInfos);
@@ -49,34 +50,67 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
     @Override
     public <REQ, RESP> RESP send(String service, String version, String method, REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer) throws Exception {
 
-        // step1：filter List[(ip,port, version)]
-        // List[(service, version, ip, port)] getMatchedServices(service)
+        SoaConnection connection = findConnection(service,version,method);
 
+        return connection.send(service, version, method, request, requestSerializer, responseSerializer);
+    }
+
+    @Override
+    public <REQ, RESP> Future<RESP> sendAsync(String service, String version, String method, REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer, long timeout) throws Exception {
+
+        SoaConnection connection = findConnection(service,version,method);
+        return connection.sendAsync(service,version,method,request,requestSerializer,responseSerializer,timeout);
+    }
+
+    public SoaConnection findConnection(String service, String version, String method){
         ServiceZKInfo zkInfo = zkInfos.get(service);
 
         List<RuntimeInstance> compatibles = zkInfo.getRuntimeInstances().stream().filter(rt -> {
             return checkVersion(version, rt.version);
         }).collect(Collectors.toList());
 
-        RuntimeInstance inst = loadbalance(compatibles);
+        String serviceKey = service + "." + version + "." + method + ".consumer";
+        RuntimeInstance inst = loadbalance(serviceKey,compatibles);
+
+        inst.getActiveCount().incrementAndGet();
 
         IpPort ipPort = new IpPort(inst.ip, inst.port);
-        SoaConnection connection = subPools.get(ipPort);
-        if(connection == null){
-            connection = new SoaConnectionImpl(inst.ip,inst.port);
-            subPools.put(ipPort,connection);
+        SubPool subPool = subPools.get(ipPort);
+        if (subPool == null) {
+            subPool = new SubPool(inst.ip, inst.port);
+            subPools.put(ipPort, subPool);
         }
 
-        return connection.send(service, version, method, request, requestSerializer, responseSerializer);
+        return subPool.getConnection();
     }
 
-    private RuntimeInstance loadbalance(List<RuntimeInstance> compatibles) {
-        return null;
-    }
+    private RuntimeInstance loadbalance(String serviceKey, List<RuntimeInstance> compatibles) {
 
-    @Override
-    public <REQ, RESP> Future<RESP> sendAsync(String service, String version, String method, REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer, long timeout) throws Exception {
-        return null;
+        boolean usingFallbackZookeeper = SoaSystemEnvProperties.SOA_ZOOKEEPER_FALLBACK_ISCONFIG;
+        LoadBalanceStratage balance = LoadBalanceStratage.Random;
+
+        Map<ConfigKey, Object> configs = zkAgent.getConfig(usingFallbackZookeeper, serviceKey);
+        if (null != configs) {
+            balance = LoadBalanceStratage.findByValue((String) configs.get(ConfigKey.LoadBalance));
+        }
+
+        RuntimeInstance instance = null;
+        switch (balance) {
+            case Random:
+                instance =  LoadBalanceService.random(compatibles);
+                break;
+            case RoundRobin:
+                instance =  LoadBalanceService.roundRobin(compatibles);
+                break;
+            case LeastActive:
+                instance = LoadBalanceService.leastActive(compatibles);
+                break;
+            case ConsistentHash:
+                break;
+        }
+
+        return instance;
+
     }
 
 }
