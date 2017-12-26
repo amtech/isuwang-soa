@@ -1,6 +1,6 @@
 package com.isuwang.dapeng.client.netty;
 
-import com.isuwang.dapeng.SoaConnctionPoolFactory;
+import com.isuwang.dapeng.core.SoaConnctionPoolFactory;
 import com.isuwang.dapeng.core.SoaConnectionPool;
 
 /**
@@ -8,7 +8,7 @@ import com.isuwang.dapeng.core.SoaConnectionPool;
  */
 public class NettyConnectionPoolFactory implements SoaConnctionPoolFactory{
 
-    private static SoaConnectionPoolImpl pool;
+    private static SoaConnectionPool pool;
 
     @Override
     public SoaConnectionPool getPool() {
