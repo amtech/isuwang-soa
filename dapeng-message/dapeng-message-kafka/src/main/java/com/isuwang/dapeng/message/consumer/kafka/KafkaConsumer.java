@@ -41,6 +41,7 @@ public class KafkaConsumer extends Thread {
 
     public void init() {
 
+        kafkaConnect = "192.168.5.117:9092";
         logger.info(new StringBuffer("[KafkaConsumer] [init] ")
                 .append("kafkaConnect(").append(kafkaConnect)
                 .append(") groupId(").append(groupId)

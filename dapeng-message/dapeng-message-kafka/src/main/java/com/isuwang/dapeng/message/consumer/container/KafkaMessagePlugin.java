@@ -2,7 +2,9 @@ package com.isuwang.dapeng.message.consumer.container;
 
 import com.isuwang.dapeng.api.ContainerFactory;
 import com.isuwang.dapeng.api.Plugin;
+import com.isuwang.dapeng.core.Application;
 import com.isuwang.dapeng.core.ProcessorKey;
+import com.isuwang.dapeng.core.ServiceInfo;
 import com.isuwang.dapeng.core.definition.SoaFunctionDefinition;
 import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
 import com.isuwang.dapeng.message.consumer.api.context.ConsumerContext;
@@ -27,46 +29,53 @@ public class KafkaMessagePlugin implements Plugin{
     public void start() {
 
         Map<ProcessorKey, SoaServiceDefinition<?>> processorMap = ContainerFactory.getContainer().getServiceProcessors();
+        List<Application> applications = ContainerFactory.getContainer().getApplications();
         try {
-            Collection<SoaServiceDefinition<?>> soaServiceDefinitions = processorMap.values();
-            for (SoaServiceDefinition definition : soaServiceDefinitions) {
-                Class<?> ifaceClass = definition.ifaceClass;
-                Class MessageConsumerClass = null;
-                Class MessageConsumerActionClass = null;
-                try {
-                    MessageConsumerClass = ifaceClass.getClassLoader().loadClass("com.isuwang.dapeng.message.consumer.api.annotation.MessageConsumer");
-                    MessageConsumerActionClass = ifaceClass.getClassLoader().loadClass("com.isuwang.dapeng.message.consumer.api.annotation.MessageConsumerAction");
-                } catch (ClassNotFoundException e) {
-                    LOGGER.info("({})添加消息订阅失败:{}", ifaceClass.getName(), e.getMessage());
-                    break;
-                }
+            //Collection<SoaServiceDefinition<?>> soaServiceDefinitions = processorMap.values();
+            for (Application application : applications) {
+                List<ServiceInfo> serviceInfos = application.getServiceInfos();
 
-                if (ifaceClass.isAnnotationPresent(MessageConsumerClass)) {
+                for (ServiceInfo serviceInfo: serviceInfos) {
+                    SoaServiceDefinition<?> definition = processorMap.get(new ProcessorKey(serviceInfo.serviceName,serviceInfo.version));
+                    Class<?> ifaceClass = serviceInfo.ifaceClass;
+                    Class MessageConsumerClass = null;
+                    Class MessageConsumerActionClass = null;
+                    try {
+                        MessageConsumerClass = ifaceClass.getClassLoader().loadClass("com.isuwang.dapeng.message.consumer.api.annotation.MessageConsumer");
+                        MessageConsumerActionClass = ifaceClass.getClassLoader().loadClass("com.isuwang.dapeng.message.consumer.api.annotation.MessageConsumerAction");
+                    } catch (ClassNotFoundException e) {
+                        LOGGER.info("({})添加消息订阅失败:{}", ifaceClass.getName(), e.getMessage());
+                        break;
+                    }
 
-                    Annotation messageConsumer = ifaceClass.getAnnotation(MessageConsumerClass);
-                    String groupId = (String) messageConsumer.getClass().getDeclaredMethod("groupId").invoke(messageConsumer);
+                    if (ifaceClass.isAnnotationPresent(MessageConsumerClass)) {
 
-                    for (Method method : ifaceClass.getMethods()) {
-                        if (method.isAnnotationPresent(MessageConsumerActionClass)) {
+                        Annotation messageConsumer = ifaceClass.getAnnotation(MessageConsumerClass);
+                        String groupId = (String) messageConsumer.getClass().getDeclaredMethod("groupId").invoke(messageConsumer);
 
-                            String methodName = method.getName();
+                        for (Method method : ifaceClass.getMethods()) {
+                            if (method.isAnnotationPresent(MessageConsumerActionClass)) {
 
-                            Annotation annotation = method.getAnnotation(MessageConsumerActionClass);
-                            String topic = (String) annotation.getClass().getDeclaredMethod("topic").invoke(annotation);
-                            SoaFunctionDefinition functionDefinition = (SoaFunctionDefinition)definition.functions.get(methodName);
+                                String methodName = method.getName();
 
-                            ConsumerContext consumerContext = new ConsumerContext();
-                            consumerContext.setGroupId(groupId);
-                            consumerContext.setTopic(topic);
-                            consumerContext.setIface(definition.iface);
-                            consumerContext.setSoaFunctionDefinition(functionDefinition);
+                                Annotation annotation = method.getAnnotation(MessageConsumerActionClass);
+                                String topic = (String) annotation.getClass().getDeclaredMethod("topic").invoke(annotation);
+                                SoaFunctionDefinition functionDefinition = (SoaFunctionDefinition)definition.functions.get(methodName);
 
-                            consumerService.addConsumer(consumerContext);
+                                ConsumerContext consumerContext = new ConsumerContext();
+                                consumerContext.setGroupId(groupId);
+                                consumerContext.setTopic(topic);
+                                consumerContext.setIface(definition.iface);
+                                consumerContext.setSoaFunctionDefinition(functionDefinition);
 
-                            LOGGER.info("添加消息订阅({})({})", ifaceClass.getName(), method.getName());
+                                consumerService.addConsumer(consumerContext);
+
+                                LOGGER.info("添加消息订阅({})({})", ifaceClass.getName(), method.getName());
+                            }
                         }
                     }
                 }
+
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
