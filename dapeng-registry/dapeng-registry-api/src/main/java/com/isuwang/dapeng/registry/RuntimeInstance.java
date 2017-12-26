@@ -12,7 +12,7 @@ public class RuntimeInstance {
     public final String ip;
     public final int port;
 
-    private AtomicInteger activeCount;
+    private AtomicInteger activeCount = new AtomicInteger(0);
 
     public RuntimeInstance(String service, String ip, int port, String version) {
         this.service = service;

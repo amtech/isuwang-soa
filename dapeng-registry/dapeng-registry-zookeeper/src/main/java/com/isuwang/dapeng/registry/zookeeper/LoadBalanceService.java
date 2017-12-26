@@ -1,8 +1,6 @@
 package com.isuwang.dapeng.registry.zookeeper;
 
-import com.isuwang.dapeng.core.filter.FilterChain;
 import com.isuwang.dapeng.registry.RuntimeInstance;
-import com.isuwang.dapeng.registry.ServiceInfo;
 
 import java.util.List;
 import java.util.Random;
@@ -30,7 +28,20 @@ public class LoadBalanceService {
     }
 
     public static RuntimeInstance leastActive(List<RuntimeInstance> instances) {
-        return null;
+        RuntimeInstance result = null;
+        if (instances.size() > 0) {
+
+            int index = 0;
+
+            for (int i = 1; i < instances.size(); i++) {
+                if (instances.get(i).getActiveCount().intValue() < instances.get(index).getActiveCount().intValue()) {
+                    index = i;
+                }
+            }
+            result = instances.get(index);
+
+        }
+        return result;
     }
 
     public static RuntimeInstance roundRobin(List<RuntimeInstance> instances) {

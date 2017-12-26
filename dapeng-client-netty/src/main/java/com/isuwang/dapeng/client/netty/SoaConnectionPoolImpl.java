@@ -72,6 +72,8 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
         String serviceKey = service + "." + version + "." + method + ".consumer";
         RuntimeInstance inst = loadbalance(serviceKey,compatibles);
 
+        inst.getActiveCount().incrementAndGet();
+
         IpPort ipPort = new IpPort(inst.ip, inst.port);
         SubPool subPool = subPools.get(ipPort);
         if (subPool == null) {

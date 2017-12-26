@@ -17,7 +17,7 @@ public class SoaServiceDefinition<I>{
                                 Map<String, SoaFunctionDefinition<I, ?, ?>> functions){
         this.iface = iface;
         this.ifaceClass = ifaceClass;
-        this.isAsync = AsyncService.class.isAssignableFrom(ifaceClass);
+        this.isAsync = AsyncService.class.isAssignableFrom(iface.getClass());
         this.functions = functions;
 
         // TODO assert functions.forall( _.isInstance[ SoaFunctionDefinition.Async] )
