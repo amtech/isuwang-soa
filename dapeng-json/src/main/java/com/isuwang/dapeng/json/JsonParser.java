@@ -1,7 +1,8 @@
 package com.isuwang.dapeng.json;
 
+import com.isuwang.org.apache.thrift.TException;
+
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class JsonParser {
@@ -15,8 +16,8 @@ public class JsonParser {
     private char cursorChar;
     private StringBuilder sb = new StringBuilder(64);
 
-    public JsonParser(ParserInput input, JsonCallback callback) {
-        this.input = input;
+    public JsonParser(String json, JsonCallback callback) {
+        this.input = new StringBasedParserInput(json);
         this.callback = callback;
 
         cursorChar = input.nextChar();
@@ -180,7 +181,7 @@ public class JsonParser {
         return new ParsingException(summary, detail);
     }
 
-    void parseJsValue() {
+    void parseJsValue() throws TException {
         ws();
         value();
         require(EOI);
@@ -197,7 +198,7 @@ public class JsonParser {
         return true;
     }
 
-    void value() {
+    void value() throws TException {
         int mark = input.cursor();
 
         switch (cursorChar) {
@@ -346,7 +347,7 @@ public class JsonParser {
         return true;
     }
 
-    void object() {
+    void object() throws TException {
         ws();
         if (cursorChar != '}') {
             members();
@@ -355,7 +356,7 @@ public class JsonParser {
         ws();
     }
 
-    void members() {
+    void members() throws TException {
         do {
             string();
             require(':');
@@ -384,7 +385,7 @@ public class JsonParser {
         ws();
     }
 
-    void array() {
+    void array() throws TException {
         ws();
         if (cursorChar != ']') {
             do {
@@ -395,7 +396,7 @@ public class JsonParser {
         ws();
     }
 
-    void number() {
+    void number() throws TException {
         int start = input.cursor();
         int startChar = cursorChar;
 
@@ -439,8 +440,8 @@ public class JsonParser {
     }
 
 
-    public static void main(String[] args) throws ClassNotFoundException {
-        String json = "{ \"a\": 10, \"b\": true, \n\"c\": [1,2,3], " +
+    public static void main(String[] args) throws TException {
+        String json = "{ \"a\": 10, \"b\": true, \n\"c\": [1,2,3], \"d\":10.2," +
                 "\"user\": { \"name\": \"wangzx\", \"age\": 10 }, \n\"emptyArray\":[],\"emptyObject\":{} }";
 
         String json1 = "{ a\": 10, \"b\": true, \n\"c\": [1,2,3], " +
@@ -520,21 +521,19 @@ public class JsonParser {
             }
         };
 
-        StringBasedParserInput input = new StringBasedParserInput(json);
-        JsonParser parser = new JsonParser(input, callback);
+        JsonParser parser = new JsonParser(json, callback);
         System.out.println(json);
         parser.value();
 System.out.println("finished=====");
-        errorJsons.forEach(errorJson -> {
-            StringBasedParserInput errorInput = new StringBasedParserInput(errorJson);
-            JsonParser myParser = new JsonParser(errorInput, callback);
-            try {
-                myParser.value();
-            } catch (ParsingException e) {
-                e.printStackTrace();
-            }
-            System.out.println("finished=====");
-        });
+//        errorJsons.forEach(errorJson -> {
+//            JsonParser myParser = new JsonParser(errorJson, callback);
+//            try {
+//                myParser.value();
+//            } catch (ParsingException e) {
+//                e.printStackTrace();
+//            }
+//            System.out.println("finished=====");
+//        });
     }
 
 }
