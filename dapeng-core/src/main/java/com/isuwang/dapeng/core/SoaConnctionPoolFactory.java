@@ -1,6 +1,4 @@
-package com.isuwang.dapeng;
-
-import com.isuwang.dapeng.core.SoaConnectionPool;
+package com.isuwang.dapeng.core;
 
 /**
  * Created by lihuimin on 2017/12/24.

@@ -70,7 +70,7 @@ public class ZkClientAgentImpl implements ZkClientAgent {
         boolean usingFallbackZookeeper = SoaSystemEnvProperties.SOA_ZOOKEEPER_FALLBACK_ISCONFIG;
 
         ServiceZKInfo zkInfo = zkInfos.get(serviceName);
-        if(zkInfo == null){
+        if(zkInfo == null){  //zkInfos没有，从zookeeper拿
             zkInfo = siw.getServiceZkInfo(serviceName);
             if(zkInfo == null && usingFallbackZookeeper){
                 zkInfo = zkfbw.getServiceZkInfo(serviceName);
@@ -93,7 +93,28 @@ public class ZkClientAgentImpl implements ZkClientAgent {
             }
         }
         zkInfo.setRuntimeInstances(runtimeList);
+
         zkInfos.put(serviceName,zkInfo);
 
+    }
+
+
+    @Override
+    public Map<ConfigKey, Object> getConfig(boolean usingFallback, String serviceKey) {
+
+        if (usingFallback) {
+            if (zkfbw.getConfigWithKey(serviceKey).entrySet().size() <= 0) {
+                return null;
+            } else {
+                return zkfbw.getConfigWithKey(serviceKey);
+            }
+        } else {
+
+            if (siw.getConfigWithKey(serviceKey).entrySet().size() <= 0) {
+                return null;
+            } else {
+                return siw.getConfigWithKey(serviceKey);
+            }
+        }
     }
 }
