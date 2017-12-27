@@ -156,6 +156,13 @@ class JavaGenerator extends CodeGenerator {
       println(s"生成Codec:${service.name}Codec.java 完成")
 
 
+//      println(s"生成AsyncCodec:${service.name}AsyncCodec.java")
+//      val asyncCodecTemplate = new StringTemplate(new JavaCodecGenerator().toAsyncCodeTemplate(service, namespaces,structNamespaces))
+//      val asyncCodecWriter = new PrintWriter(new File(rootDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))), s"${service.name}AsyncCodec.java"), "UTF-8")
+//      asyncCodecWriter.write(asyncCodecTemplate.toString())
+//      asyncCodecWriter.close()
+//      println(s"生成AsyncCodec:${service.name}AsyncCodec.java 完成")
+
 
       println(s"生成metadata:${service.namespace}.${service.name}.xml")
       new MetadataGenerator().generateXmlFile(service, resourceDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))));
@@ -175,31 +182,31 @@ class JavaGenerator extends CodeGenerator {
 
       import com.isuwang.dapeng.core.*;
       import com.isuwang.org.apache.thrift.*;
-      import com.isuwang.dapeng.remoting.BaseCommonServiceClient;
       import java.util.concurrent.CompletableFuture;
       import java.util.concurrent.Future;
+      import java.util.ServiceLoader;
       import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + "." + service.name + "Codec.*"};
+      import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + ".service." + service.name };
 
       /**
       {notice}
       **/
-      public class {service.name}Client extends BaseCommonServiceClient<block>
+      public class {service.name}Client implements {service.name}<block>
+        private final String serviceName;
+        private final String version;
+
+        private SoaConnectionPool pool;
 
       public {service.name}Client() <block>
-        super("{service.namespace}.{service.name}", "{service.meta.version}");
-      </block>
+        this.serviceName = "{service.namespace.substring(0, service.namespace.lastIndexOf(".")) + "." + service.name }";
+        this.version = "{service.meta.version}";
 
-      @Override
-      protected boolean isSoaTransactionalProcess()<block>{
-
-        toMethodArrayBuffer(service.methods).map{(method:Method)=>{
-
-          if(method.doc != null && method.doc.contains("@IsSoaTransactionProcess"))
-          <div>if(InvocationContext.Factory.getCurrentInstance().getHeader().getMethodName().equals("{method.name}"))
-                  return true;</div>
-        }}
-        }
-        return false;
+        ServiceLoader{lt}SoaConnectionPoolFactory{gt} factories = ServiceLoader.load(SoaConnectionPoolFactory.class);
+        for (SoaConnectionPoolFactory factory: factories) <block>
+          this.pool = factory.getPool();
+          break;
+        </block>
+        this.pool.registerClientInfo(serviceName,version);
       </block>
 
       {
@@ -208,111 +215,62 @@ class JavaGenerator extends CodeGenerator {
        /**
        * {method.doc}
        **/
-          {
-            if(method.doc != null && method.doc.contains("@SoaAsyncFunction"))
-              <div>
-                public Future{lt}{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}{gt} {method.name} ({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
-                <div>{toDataTypeTemplate(field.getDataType())} {field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}},long timeout) throws SoaException<block>
-                initContext("{method.name}");
+          <div>
+            public {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+            <div>{toDataTypeTemplate(field.getDataType())} {field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}}) throws SoaException<block>
 
-                try <block>
-                  {method.getRequest.name} {method.getRequest.name} = new {method.getRequest.name}();
-                  {
-                  toFieldArrayBuffer(method.getRequest.getFields).map{(field: Field)=>{
-                    <div>{method.getRequest.name}.set{field.name.charAt(0).toUpper + field.name.substring(1)}({field.name});
-                    </div>
-                  }
-                  }
-                  }
-                  CompletableFuture{lt}{method.response.name}{gt} resultFuture = (CompletableFuture) sendBaseAsync({method.request.name}, new {method.request.name.charAt(0).toUpper + method.request.name.substring(1)}Serializer(), new {method.response.name.charAt(0).toUpper + method.response.name.substring(1)}Serializer(),timeout);
-                  CompletableFuture{lt}{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}{gt} response = new CompletableFuture{lt}{gt}();
-                    resultFuture.whenComplete(({method.response.name}, ex) -{gt} <block>
-                    if ({method.response.name} != null) <block>
-                      response.complete({method.response.name}.getSuccess());
-                    </block>
-                    else <block>
-                      response.completeExceptionally(ex);
-                    </block>
-                  </block>);
-                  return response;
-                  </block>catch (SoaException e)<block>
-                  throw e;
-                </block> catch (TException e)<block>
-                  throw new SoaException(e);
-                </block>finally <block>
-                  destoryContext();
-                </block>
-                </block>
-              </div>
-            else <div>
-              public {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
-                <div>{toDataTypeTemplate(field.getDataType())} {field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}}) throws SoaException<block>
-                initContext("{method.name}");
 
-          try <block>
-             {method.getRequest.name} {method.getRequest.name} = new {method.getRequest.name}();
-          {
-          toFieldArrayBuffer(method.getRequest.getFields).map{(field: Field)=>{
-            <div>{method.getRequest.name}.set{field.name.charAt(0).toUpper + field.name.substring(1)}({field.name});
-            </div>
-          }
-          }
-          }
+            try <block>
+              {method.getRequest.name} {method.getRequest.name} = new {method.getRequest.name}();
+              {
+              toFieldArrayBuffer(method.getRequest.getFields).map{(field: Field)=>{
+                <div>{method.getRequest.name}.set{field.name.charAt(0).toUpper + field.name.substring(1)}({field.name});
+                </div>
+              }
+              }
+              }
 
-          {method.response.name} response = sendBase({method.request.name}, new {method.request.name.charAt(0).toUpper + method.request.name.substring(1)}Serializer(), new {method.response.name.charAt(0).toUpper + method.response.name.substring(1)}Serializer());
+              {method.response.name} response = pool.send(serviceName,version,"{method.name}",{method.request.name}, new {method.request.name.charAt(0).toUpper + method.request.name.substring(1)}Serializer(), new {method.response.name.charAt(0).toUpper + method.response.name.substring(1)}Serializer());
 
-             {
+              {
               toFieldArrayBuffer(method.getResponse.getFields()).map {(field:Field)=> {
                 <div>
                   {
-                    if(field.getDataType.getKind == DataType.KIND.VOID) {
-                      <div></div>
-                    } else {
-                      <div>
-                        return response.getSuccess();
-                      </div>
-                    }
+                  if(field.getDataType.getKind == DataType.KIND.VOID) {
+                    <div></div>
+                  } else {
+                    <div>
+                      return response.getSuccess();
+                    </div>
+                  }
                   }
                 </div>
               }
               }
-             }
-          </block>catch (SoaException e)<block>
+              }
+            </block>catch (SoaException e)<block>
               throw e;
-          </block> catch (TException e)<block>
+            </block> catch (TException e)<block>
               throw new SoaException(e);
-          </block>finally <block>
-            destoryContext();
+            </block>
+            catch (Exception e) <block>
+              throw new SoaException(new TException(e));
+            </block>
+            finally <block>
+
+            </block>
           </block>
-          </block>
-            </div>
-          }
+          </div>
         </div>
       }
       }
       }
 
-      /**
-      * getServiceMetadata
-      **/
-      public String getServiceMetadata() throws SoaException <block>
-        initContext("getServiceMetadata");
-        try <block>
-          getServiceMetadata_args getServiceMetadata_args = new getServiceMetadata_args();
-          getServiceMetadata_result response = sendBase(getServiceMetadata_args, new GetServiceMetadata_argsSerializer(), new GetServiceMetadata_resultSerializer());
-          return response.getSuccess();
-        </block>catch (SoaException e)<block>
-          throw e;
-        </block> catch (TException e)<block>
-          throw new SoaException(e);
-        </block> finally <block>
-          destoryContext();
-        </block>
-      </block>
-
       </block>
     </div>
   }
+
+
 
 
   private def toEnumTemplate(enum: TEnum): Elem = {
