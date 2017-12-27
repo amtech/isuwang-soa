@@ -8,17 +8,10 @@ import com.isuwang.dapeng.core.SoaConnectionPool;
  */
 public class NettyConnectionPoolFactory implements SoaConnectionPoolFactory {
 
-    private static SoaConnectionPool pool;
+    private static SoaConnectionPool pool = new SoaConnectionPoolImpl();
 
-    @Override
-    public SoaConnectionPool getPool() {
-        if (pool == null) {
-            synchronized(SoaConnectionPoolImpl.class) {
-                if (pool == null) {
-                    pool = new SoaConnectionPoolImpl();
-                }
-            }
-        }
+    public static SoaConnectionPool getPool() {
+
         return pool;
     }
 

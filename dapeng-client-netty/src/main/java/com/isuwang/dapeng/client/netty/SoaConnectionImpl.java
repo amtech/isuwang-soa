@@ -160,7 +160,6 @@ public class SoaConnectionImpl implements SoaConnection {
 
     private <REQ> ByteBuf buildRequestBuf(String service, String version, String method,int seqid, REQ request, BeanSerializer<REQ> requestSerializer) throws TException {
         final ByteBuf requestBuf = PooledByteBufAllocator.DEFAULT.buffer(8192);//Unpooled.directBuffer(8192);  // TODO Pooled
-        final TSoaTransport reqSoaTransport = new TSoaTransport(requestBuf);
 
         SoaMessageBuilder<REQ> builder = new SoaMessageBuilder<>();
 

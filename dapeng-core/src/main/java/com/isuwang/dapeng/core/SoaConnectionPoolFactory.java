@@ -5,6 +5,6 @@ package com.isuwang.dapeng.core;
  */
 public interface SoaConnectionPoolFactory {
 
-    SoaConnectionPool getPool();
+    //SoaConnectionPool getPool();
 
 }
