@@ -594,9 +594,10 @@ class JavaGenerator extends CodeGenerator {
             **/
             {if(method.doc != null && method.doc.contains("@SoaGlobalTransactional")) <div>@SoaGlobalTransactional</div>}
               <div>
-                Future{lt}{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}{gt} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+
+                {if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType) else <div>Future{lt}{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}{gt}</div>} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
                 <div> {toDataTypeTemplate(field.getDataType())} {field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}
-              }},long timeout) throws com.isuwang.dapeng.core.SoaException;
+              }}{if(toFieldArrayBuffer(method.getRequest.getFields).size>0) ","}long timeout) throws com.isuwang.dapeng.core.SoaException;
               </div>
                <div>
                {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
@@ -639,9 +640,9 @@ class JavaGenerator extends CodeGenerator {
             **/
             {if(method.doc != null && method.doc.contains("@SoaGlobalTransactional")) <div>@SoaGlobalTransactional</div>}
             <div>
-              Future{lt}{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}{gt} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+              {if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType) else <div>Future{lt}{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}{gt}</div>} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
               <div> {toDataTypeTemplate(field.getDataType())} {field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}
-            }},long timeout) throws com.isuwang.dapeng.core.SoaException;
+            }} {if(toFieldArrayBuffer(method.getRequest.getFields).size>0) ","} long timeout) throws com.isuwang.dapeng.core.SoaException;
             </div>
             <div>
               {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
