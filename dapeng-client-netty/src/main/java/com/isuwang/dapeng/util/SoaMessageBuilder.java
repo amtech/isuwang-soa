@@ -82,7 +82,6 @@ public class SoaMessageBuilder<T> {
                 throw new TException("通讯协议不正确(包体协议)");
         }
         bodySerializer.write(body,bodyProtocol);
-        bodyProtocol.writeMessageEnd();
 
         headerProtocol.writeByte(ETX);
         transport.flush();

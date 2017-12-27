@@ -39,7 +39,7 @@ public class SoaConnectionImpl implements SoaConnection {
     @Override
     public <REQ, RESP> RESP send(
             String service, String version, String method,
-            REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer) throws Exception {
+            REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer) throws SoaException {
 
         // InvocationContext context = InvocationContextImpl.Factory.getCurrentInstance();
 
@@ -86,14 +86,19 @@ public class SoaConnectionImpl implements SoaConnection {
         HandlerFilterContext filterContext = new HandlerFilterContext();
         filterContext.setAttach(dispatchFilter, "chain", sharedChain);
 
-        sharedChain.onEntry(filterContext);
+        try {
+            sharedChain.onEntry(filterContext);
+        } catch (TException e) {
+            throw new SoaException(e);
+        }
         RESP response = (RESP) filterContext.getAttach(dispatchFilter,"response");
 
         return response;
     }
 
     @Override
-    public <REQ, RESP> Future<RESP> sendAsync(String service, String version, String method, REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer, long timeout) throws Exception {
+    public <REQ, RESP> Future<RESP> sendAsync(String service, String version, String method, REQ request, BeanSerializer<REQ> requestSerializer,
+                                              BeanSerializer<RESP> responseSerializer, long timeout) throws SoaException {
 
         int seqid = this.seqidAtomic.getAndIncrement();
 
@@ -141,7 +146,11 @@ public class SoaConnectionImpl implements SoaConnection {
         HandlerFilterContext filterContext = new HandlerFilterContext();
         filterContext.setAttach(dispatchFilter, "chain", sharedChain);
 
-        sharedChain.onEntry(filterContext);
+        try {
+            sharedChain.onEntry(filterContext);
+        } catch (TException e) {
+            throw new SoaException(e);
+        }
         CompletableFuture<RESP> resultFuture = (CompletableFuture<RESP>) filterContext.getAttach(dispatchFilter,"response");
 
         return resultFuture;
@@ -160,7 +169,6 @@ public class SoaConnectionImpl implements SoaConnection {
 
     private <REQ> ByteBuf buildRequestBuf(String service, String version, String method,int seqid, REQ request, BeanSerializer<REQ> requestSerializer) throws TException {
         final ByteBuf requestBuf = PooledByteBufAllocator.DEFAULT.buffer(8192);//Unpooled.directBuffer(8192);  // TODO Pooled
-        final TSoaTransport reqSoaTransport = new TSoaTransport(requestBuf);
 
         SoaMessageBuilder<REQ> builder = new SoaMessageBuilder<>();
 
