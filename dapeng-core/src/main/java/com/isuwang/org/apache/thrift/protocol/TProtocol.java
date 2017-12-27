@@ -61,7 +61,7 @@ public abstract class TProtocol {
    * Writing methods.
    */
 
-  public abstract void writeMessageBegin() throws TException;
+  public abstract void writeMessageBegin(TMessage message) throws TException;
 
   public abstract void writeMessageEnd() throws TException;
 
@@ -107,7 +107,7 @@ public abstract class TProtocol {
    * Reading methods.
    */
 
-  public abstract void readMessageBegin() throws TException;
+  public abstract TMessage readMessageBegin() throws TException;
 
   public abstract void readMessageEnd() throws TException;
 

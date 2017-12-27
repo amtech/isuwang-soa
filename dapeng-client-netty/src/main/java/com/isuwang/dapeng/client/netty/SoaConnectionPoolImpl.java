@@ -1,9 +1,6 @@
 package com.isuwang.dapeng.client.netty;
 
-import com.isuwang.dapeng.core.BeanSerializer;
-import com.isuwang.dapeng.core.SoaConnection;
-import com.isuwang.dapeng.core.SoaConnectionPool;
-import com.isuwang.dapeng.core.SoaSystemEnvProperties;
+import com.isuwang.dapeng.core.*;
 import com.isuwang.dapeng.registry.*;
 import com.isuwang.dapeng.registry.zookeeper.LoadBalanceService;
 import com.isuwang.dapeng.registry.zookeeper.ZkClientAgentImpl;
@@ -48,7 +45,7 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
     }
 
     @Override
-    public <REQ, RESP> RESP send(String service, String version, String method, REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer) throws Exception {
+    public <REQ, RESP> RESP send(String service, String version, String method, REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer) throws SoaException {
 
         SoaConnection connection = findConnection(service,version,method);
 
@@ -56,7 +53,7 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
     }
 
     @Override
-    public <REQ, RESP> Future<RESP> sendAsync(String service, String version, String method, REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer, long timeout) throws Exception {
+    public <REQ, RESP> Future<RESP> sendAsync(String service, String version, String method, REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer, long timeout) throws SoaException {
 
         SoaConnection connection = findConnection(service,version,method);
         return connection.sendAsync(service,version,method,request,requestSerializer,responseSerializer,timeout);

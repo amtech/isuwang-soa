@@ -1,7 +1,5 @@
 package com.isuwang.dapeng.core;
 
-import com.isuwang.org.apache.thrift.TException;
-
 import java.util.concurrent.Future;
 
 /**
@@ -16,7 +14,7 @@ public interface SoaConnection {
             String method,
             REQ request,
             BeanSerializer<REQ> requestSerializer,
-            BeanSerializer<RESP> responseSerializer) throws Exception;
+            BeanSerializer<RESP> responseSerializer) throws SoaException;
 
     <REQ, RESP> Future<RESP> sendAsync(
             String service,
@@ -25,5 +23,5 @@ public interface SoaConnection {
             REQ request,
             BeanSerializer<REQ> requestSerializer,
             BeanSerializer<RESP> responseSerializer,
-            long timeout) throws Exception;
+            long timeout) throws SoaException;
 }

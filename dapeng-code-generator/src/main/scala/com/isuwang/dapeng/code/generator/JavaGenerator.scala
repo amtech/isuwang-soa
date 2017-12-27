@@ -104,6 +104,13 @@ class JavaGenerator extends CodeGenerator {
       writer.close()
       println(s"生成service:${service.name}.java 完成")
 
+      println(s"生成AsyncService:${service.name}Async.java")
+      val asyncServiceTemplate = new StringTemplate(toAsyncServiceTemplate(service))
+      val writer2 = new PrintWriter(new File(rootDir(outDir, service.getNamespace), s"${service.name}Async.java"), "UTF-8")
+      writer2.write(asyncServiceTemplate.toString())
+      writer2.close()
+      println(s"生成AsyncService:${service.name}Async.java 完成")
+
       if(!generateAll){
         {
           toStructArrayBuffer(service.structDefinitions).map{(struct: Struct)=>{
@@ -139,6 +146,13 @@ class JavaGenerator extends CodeGenerator {
       clientWriter.close()
       println(s"生成client:${service.name}Client.java 完成")
 
+      println(s"生成AsyncClient:${service.name}AsyncClient.java")
+      val asyncClientTemplate = new StringTemplate(toAsyncClientTemplate(service, namespaces))
+      val clientWriter2 = new PrintWriter(new File(rootDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))), s"${service.name}AsyncClient.java"), "UTF-8")
+      clientWriter2.write(asyncClientTemplate.toString())
+      clientWriter2.close()
+      println(s"生成AsyncClient:${service.name}AsyncClient.java 完成")
+
       println(s"生成serializer")
       toStructArrayBuffer(service.structDefinitions).map{(struct:Struct)=>{
         val structSerializerTemplate = new StringTemplate(new JavaCodecGenerator().toStructSerializerTemplate(service,struct,structNamespaces))
@@ -156,12 +170,12 @@ class JavaGenerator extends CodeGenerator {
       println(s"生成Codec:${service.name}Codec.java 完成")
 
 
-//      println(s"生成AsyncCodec:${service.name}AsyncCodec.java")
-//      val asyncCodecTemplate = new StringTemplate(new JavaCodecGenerator().toAsyncCodeTemplate(service, namespaces,structNamespaces))
-//      val asyncCodecWriter = new PrintWriter(new File(rootDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))), s"${service.name}AsyncCodec.java"), "UTF-8")
-//      asyncCodecWriter.write(asyncCodecTemplate.toString())
-//      asyncCodecWriter.close()
-//      println(s"生成AsyncCodec:${service.name}AsyncCodec.java 完成")
+      println(s"生成AsyncCodec:${service.name}AsyncCodec.java")
+      val asyncCodecTemplate = new StringTemplate(new JavaCodecGenerator().toAsyncCodecTemplate(service, namespaces,structNamespaces))
+      val asyncCodecWriter = new PrintWriter(new File(rootDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))), s"${service.name}AsyncCodec.java"), "UTF-8")
+      asyncCodecWriter.write(asyncCodecTemplate.toString())
+      asyncCodecWriter.close()
+      println(s"生成AsyncCodec:${service.name}AsyncCodec.java 完成")
 
 
       println(s"生成metadata:${service.namespace}.${service.name}.xml")
@@ -198,7 +212,7 @@ class JavaGenerator extends CodeGenerator {
         private SoaConnectionPool pool;
 
       public {service.name}Client() <block>
-        this.serviceName = "{service.namespace.substring(0, service.namespace.lastIndexOf(".")) + "." + service.name }";
+        this.serviceName = "{service.namespace + "." + service.name }";
         this.version = "{service.meta.version}";
 
         ServiceLoader{lt}SoaConnectionPoolFactory{gt} factories = ServiceLoader.load(SoaConnectionPoolFactory.class);
@@ -212,15 +226,16 @@ class JavaGenerator extends CodeGenerator {
       {
       toMethodArrayBuffer(service.methods).map{(method:Method)=>{
         <div>
+        <div>
        /**
        * {method.doc}
        **/
           <div>
-            public {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+            public { toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
             <div>{toDataTypeTemplate(field.getDataType())} {field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}}) throws SoaException<block>
 
+              String methodName = "{method.name}";
 
-            try <block>
               {method.getRequest.name} {method.getRequest.name} = new {method.getRequest.name}();
               {
               toFieldArrayBuffer(method.getRequest.getFields).map{(field: Field)=>{
@@ -248,28 +263,205 @@ class JavaGenerator extends CodeGenerator {
               }
               }
               }
-            </block>catch (SoaException e)<block>
-              throw e;
-            </block> catch (TException e)<block>
-              throw new SoaException(e);
-            </block>
-            catch (Exception e) <block>
-              throw new SoaException(new TException(e));
-            </block>
-            finally <block>
-
-            </block>
           </block>
           </div>
+        </div>
+
+
+          <div>
+            /**
+            * {method.doc}
+            **/
+            <div>
+              public {if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType) else <div>CompletableFuture{lt}{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}{gt}</div>}  {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+              <div>{toDataTypeTemplate(field.getDataType())} {field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}}{if(toFieldArrayBuffer(method.getRequest.getFields).size==0) "long timeout" else ", long timeout"}) throws SoaException<block>
+
+              String methodName = "{method.name}";
+              {method.getRequest.name} {method.getRequest.name} = new {method.getRequest.name}();
+              {
+              toFieldArrayBuffer(method.getRequest.getFields).map{(field: Field)=>{
+                <div>{method.getRequest.name}.set{field.name.charAt(0).toUpper + field.name.substring(1)}({field.name});
+                </div>
+              }
+              }
+              }
+
+              CompletableFuture{lt}{method.response.name}{gt} response = (CompletableFuture{lt}{method.response.name}{gt}) pool.sendAsync(serviceName,version,"{method.name}",{method.request.name}, new {method.request.name.charAt(0).toUpper + method.request.name.substring(1)}Serializer(), new {method.response.name.charAt(0).toUpper + method.response.name.substring(1)}Serializer(),timeout);
+
+              {
+              toFieldArrayBuffer(method.getResponse.getFields()).map {(field:Field)=> {
+                <div>
+                  {
+                  if(field.getDataType.getKind == DataType.KIND.VOID) {
+                    <div></div>
+                  } else {
+                    <div>
+                      return response.thenApply(({method.response.name} result )->  result.getSuccess());
+                    </div>
+                  }
+                  }
+                </div>
+              }
+              }
+              }
+            </block>
+            </div>
+          </div>
+
         </div>
       }
       }
       }
 
+      /**
+      * getServiceMetadata
+      **/
+      public String getServiceMetadata() throws SoaException <block>
+        String methodName = "getServiceMetadata";
+          getServiceMetadata_args getServiceMetadata_args = new getServiceMetadata_args();
+          getServiceMetadata_result response = pool.send(serviceName,version,methodName,getServiceMetadata_args, new GetServiceMetadata_argsSerializer(), new GetServiceMetadata_resultSerializer());
+          return response.getSuccess();
+      </block>
+
       </block>
     </div>
   }
 
+  private def toAsyncClientTemplate(service: Service, namespaces:util.Set[String]): Elem = return {
+    <div>package {service.namespace.substring(0, service.namespace.lastIndexOf("."))};
+
+      import com.isuwang.dapeng.core.*;
+      import com.isuwang.org.apache.thrift.*;
+      import java.util.concurrent.CompletableFuture;
+      import java.util.concurrent.Future;
+      import java.util.ServiceLoader;
+      import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + "." + service.name + "Codec.*"};
+      import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + ".service." + service.name }Async;
+
+      /**
+      {notice}
+      **/
+      public class {service.name}AsyncClient implements {service.name}Async<block>
+      private final String serviceName;
+      private final String version;
+
+      private SoaConnectionPool pool;
+
+      public {service.name}AsyncClient() <block>
+        this.serviceName = "{service.namespace+ "." + service.name}Async";
+        this.version = "{service.meta.version}";
+
+        ServiceLoader{lt}SoaConnectionPoolFactory{gt} factories = ServiceLoader.load(SoaConnectionPoolFactory.class);
+        for (SoaConnectionPoolFactory factory: factories) <block>
+          this.pool = factory.getPool();
+          break;
+        </block>
+        this.pool.registerClientInfo(serviceName,version);
+      </block>
+
+      {
+      toMethodArrayBuffer(service.methods).map{(method:Method)=>{
+        <div>
+          <div>
+            /**
+            * {method.doc}
+            **/
+            <div>
+              public {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+              <div>{toDataTypeTemplate(field.getDataType())} {field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}}) throws SoaException<block>
+
+              String methodName = "{method.name}";
+
+              {method.getRequest.name} {method.getRequest.name} = new {method.getRequest.name}();
+              {
+              toFieldArrayBuffer(method.getRequest.getFields).map{(field: Field)=>{
+                <div>{method.getRequest.name}.set{field.name.charAt(0).toUpper + field.name.substring(1)}({field.name});
+                </div>
+              }
+              }
+              }
+
+              {method.response.name} response = pool.send(serviceName,version,"{method.name}",{method.request.name}, new {method.request.name.charAt(0).toUpper + method.request.name.substring(1)}Serializer(), new {method.response.name.charAt(0).toUpper + method.response.name.substring(1)}Serializer());
+
+              {
+              toFieldArrayBuffer(method.getResponse.getFields()).map {(field:Field)=> {
+                <div>
+                  {
+                  if(field.getDataType.getKind == DataType.KIND.VOID) {
+                    <div></div>
+                  } else {
+                    <div>
+                      return response.getSuccess();
+                    </div>
+                  }
+                  }
+                </div>
+              }
+              }
+              }
+            </block>
+            </div>
+          </div>
+
+
+          <div>
+            /**
+            * {method.doc}
+            **/
+            <div>
+              public {if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType) else <div>CompletableFuture{lt}{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}{gt}</div>} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+              <div>{toDataTypeTemplate(field.getDataType())} {field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}}{if(toFieldArrayBuffer(method.getRequest.getFields).size==0) "long timeout" else ", long timeout"}) throws SoaException<block>
+
+              String methodName = "{method.name}";
+              {method.getRequest.name} {method.getRequest.name} = new {method.getRequest.name}();
+              {
+              toFieldArrayBuffer(method.getRequest.getFields).map{(field: Field)=>{
+                <div>{method.getRequest.name}.set{field.name.charAt(0).toUpper + field.name.substring(1)}({field.name});
+                </div>
+              }
+              }
+              }
+
+              CompletableFuture{lt}{method.response.name}{gt} response = (CompletableFuture{lt}{method.response.name}{gt}) pool.sendAsync(serviceName,version,"{method.name}",{method.request.name}, new {method.request.name.charAt(0).toUpper + method.request.name.substring(1)}Serializer(), new {method.response.name.charAt(0).toUpper + method.response.name.substring(1)}Serializer(),timeout);
+
+              {
+              toFieldArrayBuffer(method.getResponse.getFields()).map {(field:Field)=> {
+                <div>
+                  {
+                  if(field.getDataType.getKind == DataType.KIND.VOID) {
+                    <div></div>
+                  } else {
+                    <div>
+                      return response.thenApply(({method.response.name} result )->  result.getSuccess());
+                    </div>
+                  }
+                  }
+                </div>
+              }
+              }
+              }
+            </block>
+            </div>
+          </div>
+
+        </div>
+      }
+      }
+      }
+
+      /**
+      * getServiceMetadata
+      **/
+      public String getServiceMetadata() throws SoaException <block>
+        String methodName = "getServiceMetadata";
+        getServiceMetadata_args getServiceMetadata_args = new getServiceMetadata_args();
+        getServiceMetadata_result response = pool.send(serviceName,version,methodName,getServiceMetadata_args, new GetServiceMetadata_argsSerializer(), new GetServiceMetadata_resultSerializer());
+        return response.getSuccess();
+      </block>
+
+    </block>
+    </div>
+  }
 
 
 
@@ -401,24 +593,68 @@ class JavaGenerator extends CodeGenerator {
             * {method.doc}
             **/
             {if(method.doc != null && method.doc.contains("@SoaGlobalTransactional")) <div>@SoaGlobalTransactional</div>}
-            {if(method.doc != null && method.doc.contains("@SoaAsyncFunction"))
               <div>
-                Future{lt}{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}{gt} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+
+                {if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType) else <div>Future{lt}{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}{gt}</div>} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
                 <div> {toDataTypeTemplate(field.getDataType())} {field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}
-              }}) throws com.isuwang.dapeng.core.SoaException;
+              }}{if(toFieldArrayBuffer(method.getRequest.getFields).size>0) ","}long timeout) throws com.isuwang.dapeng.core.SoaException;
               </div>
-              else <div>
+               <div>
                {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
                <div> {toDataTypeTemplate(field.getDataType())} {field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}
                }}) throws com.isuwang.dapeng.core.SoaException;
               </div>
-            }
           </div>
         }
         }
         }
         </block>
         </div>
+    }
+  }
+
+  private def toAsyncServiceTemplate(service:Service): Elem = {
+    return {
+      <div>
+        package {service.namespace};
+
+        import com.isuwang.dapeng.core.Processor;
+        import com.isuwang.dapeng.core.Service;
+        import com.isuwang.dapeng.core.SoaGlobalTransactional;
+
+        import java.util.concurrent.Future;
+
+        /**
+        {notice}
+        * {service.doc}
+        **/
+        @Service(name="{s"${service.namespace}.${service.name}Async"}",version = "{service.meta.version}")
+        @Processor(className = "{service.namespace.substring(0, service.namespace.lastIndexOf("service"))}{service.name}AsyncCodec$Processor")
+        public interface {service.name}Async <block>
+        {
+        toMethodArrayBuffer(service.methods).map { (method: Method) =>
+        {
+          <div>
+            /**
+            * {method.doc}
+            **/
+            {if(method.doc != null && method.doc.contains("@SoaGlobalTransactional")) <div>@SoaGlobalTransactional</div>}
+            <div>
+              {if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType) else <div>Future{lt}{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}{gt}</div>} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+              <div> {toDataTypeTemplate(field.getDataType())} {field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}
+            }} {if(toFieldArrayBuffer(method.getRequest.getFields).size>0) ","} long timeout) throws com.isuwang.dapeng.core.SoaException;
+            </div>
+            <div>
+              {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+              <div> {toDataTypeTemplate(field.getDataType())} {field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}
+            }}) throws com.isuwang.dapeng.core.SoaException;
+            </div>
+          </div>
+        }
+        }
+        }
+      </block>
+      </div>
     }
   }
 
