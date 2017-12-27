@@ -1,7 +1,6 @@
 package com.isuwang.dapeng.json;
 
 import com.isuwang.dapeng.core.BeanSerializer;
-import com.isuwang.dapeng.core.enums.CodecProtocol;
 import com.isuwang.dapeng.core.metadata.*;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.*;
@@ -99,21 +98,35 @@ public class JsonSerializer implements BeanSerializer<String> {
         private final Method method;
         private final Service service;
         private final ByteBuf byteBuf;
-        private CodecProtocol protocol;
 
         class StackNode {
             final DataType dataType;
+            /**
+             * byteBuf position when this node created
+             */
             final int byteBufPosition;
-            int size = 0;
+            /**
+             * if dataType is a Collection(such as LIST, MAP, SET etc), elSize represents the size of the Collection.
+             */
+            private int elCount = 0;
 
             StackNode(DataType dataType, int byteBufPosition) {
                 this.dataType = dataType;
                 this.byteBufPosition = byteBufPosition;
             }
+
+            void increaseElement() {
+                elCount++;
+            }
+
+            int getElCount() {
+                return elCount;
+            }
         }
 
         // current struct
         StackNode current;
+        boolean inited = false;
 
         /**
          * @param oproto
@@ -126,6 +139,9 @@ public class JsonSerializer implements BeanSerializer<String> {
             this.method = method;
             this.service = service;
             this.byteBuf = byteBuf;
+            DataType initDataType = new DataType();
+            initDataType.setKind(DataType.KIND.STRUCT);
+            this.current = new StackNode(initDataType, byteBuf.writerIndex());
         }
 
 
@@ -155,12 +171,19 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onStartObject() throws TException {
-            if (current == null) {
+            assert current.dataType.kind == DataType.KIND.STRUCT || current.dataType.kind == DataType.KIND.MAP;
+            //TODO
+            if (!inited) {
                 oproto.writeStructBegin(new TStruct(method.name));
+                inited = true;
             } else {
                 switch (current.dataType.kind) {
                     case STRUCT:
-//                        oproto.writeStructBegin();
+                        Struct struct = findStruct(current.dataType.qualifiedName, service);
+                        oproto.writeStructBegin(new TStruct(struct.name));
+                        break;
+                    case MAP:
+                        oproto.writeMapBegin(new TMap(dataType2Byte(current.dataType.keyType), dataType2Byte(current.dataType.valueType), 0));
                         break;
                 }
             }
@@ -168,26 +191,74 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onEndObject() throws TException {
-            oproto.writeStructEnd();
+            assert current.dataType.kind == DataType.KIND.STRUCT || current.dataType.kind == DataType.KIND.MAP;
+
+            oproto.writeFieldStop();
+
+            switch (current.dataType.kind) {
+                case STRUCT:
+                    oproto.writeStructEnd();
+                    break;
+                case MAP:
+                    oproto.writeMapEnd();
+
+                    //拿到当前node的开始位置以及集合元素大小
+                    int beginPosition = current.byteBufPosition;
+                    int elCount = current.elCount;
+
+                    //备份最新的writerIndex
+                    int currentIndex = byteBuf.writerIndex();
+
+                    //reWriteListBegin
+                    byteBuf.writerIndex(beginPosition);
+
+                    oproto.writeMapBegin(new TMap(dataType2Byte(current.dataType.keyType), dataType2Byte(current.dataType.valueType), elCount));
+
+                    byteBuf.writerIndex(currentIndex);
+                    break;
+            }
         }
 
+        /**
+         * 由于目前拿不到集合的元素个数, 暂时设置为0个
+         *
+         * @throws TException
+         */
         @Override
         public void onStartArray() throws TException {
-            assert current.dataType.kind == DataType.KIND.LIST;
-            stackNew(new StackNode(current.dataType.valueType, byteBuf.writerIndex()));
-            oproto.writeListBegin(new TList(dataType2Byte(current.dataType.valueType), 0));
+            assert current.dataType.kind == DataType.KIND.LIST || current.dataType.kind == DataType.KIND.SET;
+            switch (current.dataType.kind) {
+                case LIST:
+                    oproto.writeListBegin(new TList(dataType2Byte(current.dataType.valueType), 0));
+                    break;
+                case SET:
+                    oproto.writeSetBegin(new TSet(dataType2Byte(current.dataType.valueType), 0));
+                    break;
+            }
+
         }
 
         @Override
         public void onEndArray() throws TException {
-            StackNode lastNode = pop();
-            int beginPosition = lastNode.byteBufPosition;
-            int arraySize = lastNode.size;
+            assert current.dataType.kind == DataType.KIND.LIST || current.dataType.kind == DataType.KIND.SET;
+            //拿到当前node的开始位置以及集合元素大小
+            int beginPosition = current.byteBufPosition;
+            int elCount = current.elCount;
 
+            //备份最新的writerIndex
             int currentIndex = byteBuf.writerIndex();
 
+            //reWriteListBegin
             byteBuf.writerIndex(beginPosition);
-            oproto.writeListBegin(new TList(dataType2Byte(lastNode.dataType), arraySize));
+            switch (current.dataType.kind) {
+                case LIST:
+                    oproto.writeListBegin(new TList(dataType2Byte(current.dataType.valueType), elCount));
+                    break;
+                case SET:
+                    oproto.writeSetBegin(new TSet(dataType2Byte(current.dataType.valueType), elCount));
+                    break;
+            }
+
             byteBuf.writerIndex(currentIndex);
 
             oproto.writeListEnd();
@@ -195,12 +266,9 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onStartField(String name) throws TException {
-            // if field is Struct, stackNew(subStruct)
-            // if field is List
-
             Field field = findField(name, method.request);
             oproto.writeFieldBegin(new TField(field.name, dataType2Byte(field.dataType), (short) field.getTag()));
-            stackNew(field.dataType);
+            stackNew(new StackNode(field.dataType, byteBuf.writerIndex()));
         }
 
         @Override
@@ -211,13 +279,18 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onBoolean(boolean value) throws TException {
-            assert current.kind == DataType.KIND.BOOLEAN;
+            if (isMultiElementKind(current.dataType.kind)) {
+                current.increaseElement();
+            }
             oproto.writeBool(value);
         }
 
         @Override
         public void onNumber(double value) throws TException {
-            switch (current.kind) {
+            if (isMultiElementKind(current.dataType.kind)) {
+                current.increaseElement();
+            }
+            switch (current.dataType.kind) {
                 case SHORT:
                     oproto.writeI16((short) value);
                     break;
@@ -230,11 +303,14 @@ public class JsonSerializer implements BeanSerializer<String> {
                 case DOUBLE:
                     oproto.writeDouble(value);
                     break;
+                case BIGDECIMAL:
+                    //TODO
+                    break;
                 case BYTE:
                     //TODO
                     break;
                 default:
-                    throw new TException("DataType(" + current.kind + ") for " + current.qualifiedName + " is not a Number");
+                    throw new TException("DataType(" + current.dataType.kind + ") for " + current.dataType.qualifiedName + " is not a Number");
 
             }
         }
@@ -242,12 +318,14 @@ public class JsonSerializer implements BeanSerializer<String> {
         @Override
         public void onNull() throws TException {
             //TODO
-            throw new TException("DataType(" + current.kind + ") for " + current.qualifiedName + " is a null");
+            throw new TException("DataType(" + current.dataType.kind + ") for " + current.dataType.qualifiedName + " is a null");
         }
 
         @Override
         public void onString(String value) throws TException {
-            assert current.kind == DataType.KIND.STRING;
+            if (isMultiElementKind(current.dataType.kind)) {
+                current.increaseElement();
+            }
             oproto.writeString(value);
         }
 
@@ -257,7 +335,7 @@ public class JsonSerializer implements BeanSerializer<String> {
         }
 
         private StackNode pop() {
-            return history.pop();
+            return this.current = history.pop();
         }
 
         private Field findField(String fieldName, Struct struct) {
@@ -272,6 +350,17 @@ public class JsonSerializer implements BeanSerializer<String> {
             return null;
         }
 
+        protected Struct findStruct(String qualifiedName, Service service) {
+            List<Struct> structDefinitions = service.getStructDefinitions();
+
+            for (Struct structDefinition : structDefinitions) {
+                if ((structDefinition.getNamespace() + "." + structDefinition.getName()).equals(qualifiedName)) {
+                    return structDefinition;
+                }
+            }
+
+            return null;
+        }
 
         private byte dataType2Byte(DataType type) {
             switch (type.kind) {
@@ -328,6 +417,36 @@ public class JsonSerializer implements BeanSerializer<String> {
             }
 
             return TType.STOP;
+        }
+
+        /**
+         * 是否集合类型
+         *
+         * @param kind
+         * @return
+         */
+        private boolean isCollectionKind(DataType.KIND kind) {
+            return kind == DataType.KIND.LIST || kind == DataType.KIND.SET;
+        }
+
+        /**
+         * 是否容器类型
+         *
+         * @param kind
+         * @return
+         */
+        private boolean isMultiElementKind(DataType.KIND kind) {
+            return isCollectionKind(kind) || kind == DataType.KIND.MAP;
+        }
+
+        /**
+         * 是否复杂类型
+         *
+         * @param kind
+         * @return
+         */
+        private boolean isComplexKind(DataType.KIND kind) {
+            return isMultiElementKind(kind) || kind == DataType.KIND.STRUCT;
         }
     }
 
