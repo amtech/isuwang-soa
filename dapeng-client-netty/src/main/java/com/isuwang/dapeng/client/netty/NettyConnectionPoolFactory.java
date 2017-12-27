@@ -10,7 +10,8 @@ public class NettyConnectionPoolFactory implements SoaConnectionPoolFactory {
 
     private static SoaConnectionPool pool = new SoaConnectionPoolImpl();
 
-    public static SoaConnectionPool getPool() {
+    @Override
+    public SoaConnectionPool getPool() {
 
         return pool;
     }

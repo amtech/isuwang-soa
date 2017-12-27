@@ -1,6 +1,7 @@
 package com.isuwang.dapeng.core.definition;
 
 import com.isuwang.dapeng.core.BeanSerializer;
+import com.isuwang.dapeng.core.SoaException;
 
 import java.util.concurrent.Future;
 
@@ -15,7 +16,7 @@ public abstract class SoaFunctionDefinition<I, REQ, RESP>  {
             super(methodName, reqSerializer, respSerializer);
         }
 
-        public abstract RESP apply(I iface, REQ req);
+        public abstract RESP apply(I iface, REQ req) throws SoaException;
     }
 
     public static abstract class Async<I, REQ, RESP> extends SoaFunctionDefinition<I, REQ, RESP> {
@@ -24,7 +25,7 @@ public abstract class SoaFunctionDefinition<I, REQ, RESP>  {
             super(methodName, reqSerializer, respSerializer);
         }
 
-        public abstract Future<RESP> apply(I iface, REQ req);
+        public abstract Future<RESP> apply(I iface, REQ req) throws SoaException;
     }
 
     public final String methodName;
