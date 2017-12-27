@@ -37,7 +37,6 @@
 
     <modules>
         <module>dapeng-core</module>
-        <module>dapeng-container</module>
         <module>dapeng-spring</module>
         <module>dapeng-zookeeper</module>
         <module>dapeng-maven-plugin</module>
@@ -45,7 +44,7 @@
         <module>dapeng-code-generator</module>
         <module>dapeng-bootstrap</module>
         <module>dapeng-api-doc</module>
-        <module>dapeng-monitor</module>
+        <!--<module>dapeng-monitor</module>-->
         <module>dapeng-route</module>
         <module>dapeng-tools</module>
         <module>dapeng-message</module>

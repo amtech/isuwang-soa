@@ -9,11 +9,11 @@ import com.isuwang.dapeng.core.metadata._
 import scala.xml.Elem
 
 /**
- * JAVA生成器
- *
- * @author tangliu
- * @date 15/9/8
- */
+  * JAVA生成器
+  *
+  * @author tangliu
+  * @date 15/9/8
+  */
 class JavaCodecGenerator extends CodeGenerator {
 
   override def generate(services: util.List[Service], outDir: String, generateAll:Boolean , structs: util.List[Struct], enums:util.List[TEnum]): Unit = {}
@@ -37,6 +37,9 @@ class JavaCodecGenerator extends CodeGenerator {
         import com.isuwang.dapeng.core.*;
         import com.isuwang.org.apache.thrift.*;
         import com.isuwang.org.apache.thrift.protocol.*;
+
+        import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
+        import com.isuwang.dapeng.core.definition.SoaFunctionDefinition;
 
         import java.io.BufferedReader;
         import java.io.InputStreamReader;
@@ -126,7 +129,7 @@ class JavaCodecGenerator extends CodeGenerator {
             }}
           </block>
 
-            public static class {method.name.charAt(0).toUpper + method.name.substring(1)}_argsSerializer implements TCommonBeanSerializer{lt}{method.name}_args{gt}<block>
+            public static class {method.name.charAt(0).toUpper + method.name.substring(1)}_argsSerializer implements BeanSerializer{lt}{method.name}_args{gt}<block>
             {getReadMethod(method.getRequest)}{getWriteMethod(method.getRequest)}{getValidateMethod(method.getRequest)}
 
             @Override
@@ -134,7 +137,7 @@ class JavaCodecGenerator extends CodeGenerator {
 
           </block>
 
-            public static class {method.name.charAt(0).toUpper + method.name.substring(1)}_resultSerializer implements TCommonBeanSerializer{lt}{method.name}_result{gt}<block>
+            public static class {method.name.charAt(0).toUpper + method.name.substring(1)}_resultSerializer implements BeanSerializer{lt}{method.name}_result{gt}<block>
             @Override
             public {method.response.name} read(TProtocol iprot) throws TException<block>
 
@@ -177,11 +180,11 @@ class JavaCodecGenerator extends CodeGenerator {
             public String toString({method.name}_result bean) <block> return bean == null ? "null" : bean.toString(); </block>
           </block>
 
-            public static class {method.name}{lt}I extends {service.getNamespace + "." + service.name}{gt} extends SoaFunctionDefinition{lt}I, {method.name}_args, {method.name}_result{gt}
+            public static class {method.name}{lt}I extends {service.getNamespace + "." + service.name}{gt} extends SoaFunctionDefinition.Sync{lt}I, {method.name}_args, {method.name}_result{gt}
             <block>
               public {method.name}()
               <block>
-              super("{method.name}", new {method.name.charAt(0).toUpper + method.name.substring(1)}_argsSerializer(),  new {method.name.charAt(0).toUpper + method.name.substring(1)}_resultSerializer(),false);
+                super("{method.name}", new {method.name.charAt(0).toUpper + method.name.substring(1)}_argsSerializer(),  new {method.name.charAt(0).toUpper + method.name.substring(1)}_resultSerializer());
               </block>
 
               @Override
@@ -190,18 +193,12 @@ class JavaCodecGenerator extends CodeGenerator {
 
                 {method.name}_result result = new {method.name}_result();
 
-              try <block>
-                result.success = iface.sayHello{toFieldArrayBuffer(method.getRequest.getFields).map(i => {method.name} + "_args." + i.name).mkString("(",",",")")};
+                try <block>
+                result.success = iface.{method.name}{toFieldArrayBuffer(method.getRequest.getFields).map(i => {method.name} + "_args." + i.name).mkString("(",",",")")};
               </block> catch (SoaException e) <block>
                 e.printStackTrace();
               </block>
-              return result;
-              </block>
-
-              @Override
-              public CompletableFuture{lt}sayHello_result{gt} applyAsync(I iface, {method.name}_args {method.name}_args) <block>
-              CompletableFuture{lt}sayHello_result{gt} future = CompletableFuture.supplyAsync(() -> apply(iface,{method.name}_args));
-              return future;
+                return result;
               </block>
 
             </block>
@@ -242,7 +239,7 @@ class JavaCodecGenerator extends CodeGenerator {
           </block>
         </block>
 
-        public static class GetServiceMetadata_argsSerializer implements TCommonBeanSerializer{lt}getServiceMetadata_args{gt} <block>
+        public static class GetServiceMetadata_argsSerializer implements BeanSerializer{lt}getServiceMetadata_args{gt} <block>
 
           @Override
           public getServiceMetadata_args read(TProtocol iprot) throws TException <block>
@@ -288,7 +285,7 @@ class JavaCodecGenerator extends CodeGenerator {
 
         </block>
 
-        public static class GetServiceMetadata_resultSerializer implements TCommonBeanSerializer{lt}getServiceMetadata_result{gt} <block>
+        public static class GetServiceMetadata_resultSerializer implements BeanSerializer{lt}getServiceMetadata_result{gt} <block>
           @Override
           public getServiceMetadata_result read(TProtocol iprot) throws TException <block>
 
@@ -347,13 +344,13 @@ class JavaCodecGenerator extends CodeGenerator {
           </block>
         </block>
 
-        public static class getServiceMetadata{lt}I extends {service.namespace}.{service.name}{gt} extends SoaProcessFunction{lt}I, getServiceMetadata_args, getServiceMetadata_result, GetServiceMetadata_argsSerializer, GetServiceMetadata_resultSerializer{gt} <block>
+        public static class getServiceMetadata{lt}I extends {service.namespace}.{service.name}{gt} extends SoaFunctionDefinition.Sync{lt}I, getServiceMetadata_args, getServiceMetadata_result{gt} <block>
           public getServiceMetadata() <block>
             super("getServiceMetadata", new GetServiceMetadata_argsSerializer(), new GetServiceMetadata_resultSerializer());
           </block>
 
           @Override
-          public getServiceMetadata_result getResult(I iface, getServiceMetadata_args args) throws TException <block>
+          public getServiceMetadata_result apply(I iface, getServiceMetadata_args args) <block>
             getServiceMetadata_result result = new getServiceMetadata_result();
 
             try (InputStreamReader isr = new InputStreamReader({service.name}Codec.class.getClassLoader().getResourceAsStream("{service.namespace}.{service.name}.xml"));
@@ -380,15 +377,6 @@ class JavaCodecGenerator extends CodeGenerator {
             return result;
           </block>
 
-          @Override
-          public getServiceMetadata_args getEmptyArgsInstance() <block>
-            return new getServiceMetadata_args();
-          </block>
-
-          @Override
-          protected boolean isOneway() <block>
-            return false;
-          </block>
         </block>
 
         @SuppressWarnings("unchecked")
@@ -404,17 +392,18 @@ class JavaCodecGenerator extends CodeGenerator {
           private static {lt}I extends {service.getNamespace + "." + service.name}{gt} java.util.Map{lt}String, SoaFunctionDefinition{lt}I, ?, ?{gt}{gt} buildMap(java.util.Map{lt}String, SoaFunctionDefinition{lt}I, ?, ?{gt}{gt} processMap)
           <block>
             {
-              toMethodArrayBuffer(service.methods).map(method => {
-                <div>
-                  processMap.put("{method.name}", new {method.name}());
-                </div>
-              })
+            toMethodArrayBuffer(service.methods).map(method => {
+              <div>
+                processMap.put("{method.name}", new {method.name}());
+              </div>
+            })
             }
+            processMap.put("getServiceMetadata", new getServiceMetadata());
             return processMap;
           </block>
         </block>
 
-        </block>
+      </block>
       </div>
     }
   }
@@ -443,7 +432,7 @@ class JavaCodecGenerator extends CodeGenerator {
         * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
         *  @generated
         **/
-        {<div>public class {struct.name}Serializer implements TCommonBeanSerializer{lt}{struct.getNamespace() + "." + struct.name}{gt}<block>
+        {<div>public class {struct.name}Serializer implements BeanSerializer{lt}{struct.getNamespace() + "." + struct.name}{gt}<block>
         {getReadMethod(struct)}{getWriteMethod(struct)}{getValidateMethod(struct)}
         @Override
         public String toString({struct.getNamespace() + "." + struct.name} bean)
@@ -568,7 +557,7 @@ class JavaCodecGenerator extends CodeGenerator {
 
   def getJavaReadAndSetElement(field: Field):Elem = {
     <div>{getJavaReadElement(field.getDataType, 0)}
-         {getJavaSetElement(field)}</div>
+      {getJavaSetElement(field)}</div>
   }
 
   def getReadMethod(struct: Struct): Elem = {
@@ -576,40 +565,40 @@ class JavaCodecGenerator extends CodeGenerator {
       @Override
       public {toStructName(struct)} read(TProtocol iprot) throws TException<block>
 
-        {toStructName(struct)} bean = new {toStructName(struct)}();
-        com.isuwang.org.apache.thrift.protocol.TField schemeField;
-        iprot.readStructBegin();
+      {toStructName(struct)} bean = new {toStructName(struct)}();
+      com.isuwang.org.apache.thrift.protocol.TField schemeField;
+      iprot.readStructBegin();
 
-        while(true)<block>
-          schemeField = iprot.readFieldBegin();
-          if(schemeField.type == com.isuwang.org.apache.thrift.protocol.TType.STOP)<block> break;</block>
+      while(true)<block>
+        schemeField = iprot.readFieldBegin();
+        if(schemeField.type == com.isuwang.org.apache.thrift.protocol.TType.STOP)<block> break;</block>
 
-          switch(schemeField.id)<block>
+        switch(schemeField.id)<block>
           {
-            toFieldArrayBuffer(struct.getFields).map{(field : Field) =>{
-              <div>
-              case {field.tag}:
-                if(schemeField.type == {toThriftDateType(field.dataType)})<block>
-                {getJavaReadAndSetElement(field)}
-                </block>else<block>
-                     com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
-                </block>
-                break;
-              </div>
-            }}
-          }
+          toFieldArrayBuffer(struct.getFields).map{(field : Field) =>{
             <div>
-                default:
-                  com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              case {field.tag}:
+              if(schemeField.type == {toThriftDateType(field.dataType)})<block>
+              {getJavaReadAndSetElement(field)}
+            </block>else<block>
+              com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            </block>
+              break;
             </div>
-          </block>
-          iprot.readFieldEnd();
+          }}
+          }
+          <div>
+            default:
+            com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          </div>
         </block>
-        iprot.readStructEnd();
-
-        validate(bean);
-        return bean;
+        iprot.readFieldEnd();
       </block>
+      iprot.readStructEnd();
+
+      validate(bean);
+      return bean;
+    </block>
     </div>
   }
 
