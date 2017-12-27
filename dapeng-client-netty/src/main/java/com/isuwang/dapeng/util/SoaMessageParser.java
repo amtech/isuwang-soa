@@ -78,9 +78,7 @@ public class SoaMessageParser<RESP> {
         this.seqid = headerProtocol.readI32();
         SoaHeader soaHeader =new SoaHeaderSerializer().read( headerProtocol);
         this.header = soaHeader;
-        bodyProtocol.readMessageBegin();
         this.body=bodySerializer.read(bodyProtocol);
-        bodyProtocol.readMessageEnd();
 
         byte etx = headerProtocol.readByte();
         if(etx != ETX){

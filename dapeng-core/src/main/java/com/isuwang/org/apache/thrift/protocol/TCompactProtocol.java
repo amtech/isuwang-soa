@@ -194,8 +194,11 @@ public class TCompactProtocol extends TProtocol {
    * Write a message header to the wire. Compact Protocol messages contain the
    * protocol version so we can migrate forwards in the future if need be.
    */
-  public void writeMessageBegin() throws TException {
-
+  public void writeMessageBegin(TMessage message) throws TException {
+    writeByteDirect(PROTOCOL_ID);
+    writeByteDirect((VERSION & VERSION_MASK) | ((message.type << TYPE_SHIFT_AMOUNT) & TYPE_MASK));
+    writeVarint32(message.seqid);
+    writeString(message.name);
   }
 
   /**
@@ -494,8 +497,20 @@ public class TCompactProtocol extends TProtocol {
   /**
    * Read a message header.
    */
-  public void readMessageBegin() throws TException {
-
+  public TMessage readMessageBegin() throws TException {
+    byte protocolId = readByte();
+    if (protocolId != PROTOCOL_ID) {
+      throw new TProtocolException("Expected protocol id " + Integer.toHexString(PROTOCOL_ID) + " but got " + Integer.toHexString(protocolId));
+    }
+    byte versionAndType = readByte();
+    byte version = (byte)(versionAndType & VERSION_MASK);
+    if (version != VERSION) {
+      throw new TProtocolException("Expected version " + VERSION + " but got " + version);
+    }
+    byte type = (byte)((versionAndType >> TYPE_SHIFT_AMOUNT) & TYPE_BITS);
+    int seqid = readVarint32();
+    String messageName = readString();
+    return new TMessage(messageName, type, seqid);
   }
 
   /**
