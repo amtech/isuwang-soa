@@ -10,7 +10,6 @@ public class JsonReader {
     char cursorChar;
 
     public JsonReader(CharSequence input, JsonCallback callback) {
-       // TODO
     }
 
     class Line {

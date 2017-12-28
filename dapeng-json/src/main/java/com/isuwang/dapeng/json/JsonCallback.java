@@ -1,19 +1,21 @@
 package com.isuwang.dapeng.json;
 
+import com.isuwang.org.apache.thrift.TException;
+
 public interface JsonCallback {
 
-    void onStartObject();
-    void onEndObject();
+    void onStartObject() throws TException;
+    void onEndObject() throws TException;
 
-    void onStartArray();
-    void onEndArray();
+    void onStartArray() throws TException;
+    void onEndArray() throws TException;
 
-    void onStartField(String name);
-    void onEndField();
+    void onStartField(String name) throws TException;
+    void onEndField() throws TException;
 
-    void onBoolean(boolean value);
-    void onNumber(double value);
-    void onNull();
+    void onBoolean(boolean value) throws TException;
+    void onNumber(double value) throws TException;
+    void onNull() throws TException;
 
-    void onString(String value);
+    void onString(String value) throws TException;
 }
