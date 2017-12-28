@@ -170,6 +170,13 @@ class ScalaGenerator extends CodeGenerator {
       codecWriter.close()
       println(s"生成Codec:${service.name}Codec.scala 完成")
 
+      println(s"生成Codec:${service.name}Codec.scala")
+      val asyncCodecTemplate = new StringTemplate(new ScalaCodecGenerator().toAsyncCodecTemplate(service,structNamespaces, oriNamespaces.get(service).getOrElse("")))
+      val asyncCodecWriter = new PrintWriter(new File(rootDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))), s"${service.name}Codec.scala"), "UTF-8")
+      asyncCodecWriter.write(asyncCodecTemplate.toString())
+      asyncCodecWriter.close()
+      println(s"生成Codec:${service.name}Codec.scala 完成")
+
 
       //scala & java client should use the same xml
       if (!service.namespace.contains("scala")) {
@@ -265,6 +272,11 @@ class ScalaGenerator extends CodeGenerator {
         **/
         class {service.name}Client extends {service.name} <block>
 
+        import java.util.function.<block> Function ⇒ JFunction, Predicate ⇒ JPredicate, BiPredicate </block>
+          implicit def toJavaFunction[A, B](f: Function1[A, B]) = new JFunction[A, B] <block>
+          override def apply(a: A): B = f(a)
+        </block>
+
           val serviceName = "{service.namespace + "." + service.name }"
           val version = "{service.meta.version}"
           val pool = <block>
@@ -284,7 +296,7 @@ class ScalaGenerator extends CodeGenerator {
           new getServiceMetadata_args,
           new GetServiceMetadata_argsSerializer,
           new GetServiceMetadata_resultSerializer
-        ).getSuccess
+        ).success
         </block>
 
 
@@ -311,7 +323,7 @@ class ScalaGenerator extends CodeGenerator {
             new {method.response.name.charAt(0).toUpper + method.response.name.substring(1)}Serializer()
             ,timeout).asInstanceOf[CompletableFuture[{method.response.name}]]
 
-            {if(method.getResponse.getFields.get(0).getDataType.kind != DataType.KIND.VOID) <div>response.success</div>}
+            {if(method.getResponse.getFields.get(0).getDataType.kind != DataType.KIND.VOID) <div>response.thenApply(_.success).get</div>}
 
           </block>
 
