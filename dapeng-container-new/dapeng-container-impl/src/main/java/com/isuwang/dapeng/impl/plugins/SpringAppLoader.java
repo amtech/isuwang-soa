@@ -65,12 +65,15 @@ public class SpringAppLoader implements Plugin {
                 System.out.println(" ------------ SpringClassLoader: " + ContainerFactory.getContainer().getApplications());
 
                 //Start spring context
-                Thread.currentThread().setContextClassLoader(classLoader);
+                System.out.println(" start to boot app");
                 Method startMethod = appClass.getMethod("start");
                 startMethod.invoke(context);
 
             } catch (Exception e) {
                 e.printStackTrace();
+                System.out.println(e.getCause() + "  : "+ e.getMessage());
+            } finally {
+                Thread.currentThread().setContextClassLoader(classLoader);
             }
         }
     }
