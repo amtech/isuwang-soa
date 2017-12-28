@@ -2,7 +2,7 @@ package com.isuwang.dapeng.spring;
 
 import com.isuwang.dapeng.core.Processor;
 import com.isuwang.dapeng.core.Service;
-import com.isuwang.dapeng.core.SoaBaseProcessor;
+import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
 import org.springframework.beans.factory.FactoryBean;
 
 import java.lang.reflect.Constructor;
@@ -17,7 +17,7 @@ import static java.util.stream.Collectors.toList;
  * @author craneding
  * @date 16/1/19
  */
-public class SoaProcessorFactory implements FactoryBean<SoaBaseProcessor<?>> {
+public class SoaProcessorFactory implements FactoryBean<SoaServiceDefinition<?>> {
 
     private Object serviceRef;
     private String refId;
@@ -29,7 +29,7 @@ public class SoaProcessorFactory implements FactoryBean<SoaBaseProcessor<?>> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public SoaBaseProcessor<?> getObject() throws Exception {
+    public SoaServiceDefinition<?> getObject() throws Exception {
         final Class<?> aClass = serviceRef.getClass();
         final List<Class<?>> interfaces = Arrays.asList(aClass.getInterfaces());
 
@@ -38,25 +38,24 @@ public class SoaProcessorFactory implements FactoryBean<SoaBaseProcessor<?>> {
                 .map(anInterface -> anInterface)
                 .collect(toList());
 
-        if (filterInterfaces.isEmpty())
+        if (filterInterfaces.isEmpty()) {
             throw new RuntimeException("not config @Service & @Processor in " + refId);
+        }
 
         Class<?> interfaceClass = filterInterfaces.get(filterInterfaces.size() - 1);
 
         Processor processor = interfaceClass.getAnnotation(Processor.class);
 
         Class<?> processorClass = Class.forName(processor.className(), true, interfaceClass.getClassLoader());
-        Constructor<?> constructor = processorClass.getConstructor(interfaceClass);
-        SoaBaseProcessor soaBaseProcessor = (SoaBaseProcessor) constructor.newInstance(serviceRef);
+        Constructor<?> constructor = processorClass.getConstructor(interfaceClass,Class.class);
+        SoaServiceDefinition tProcessor = (SoaServiceDefinition) constructor.newInstance(serviceRef,interfaceClass);
 
-        soaBaseProcessor.setInterfaceClass(interfaceClass);
-
-        return soaBaseProcessor;
+        return tProcessor;
     }
 
     @Override
     public Class<?> getObjectType() {
-        return SoaBaseProcessor.class;
+        return SoaServiceDefinition.class;
     }
 
     @Override

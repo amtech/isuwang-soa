@@ -17,4 +17,6 @@ public @interface Service {
 
     String version();
 
+    String name();
+
 }

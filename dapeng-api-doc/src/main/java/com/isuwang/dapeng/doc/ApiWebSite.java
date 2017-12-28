@@ -9,6 +9,7 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collection;
 
 /**
  * Created by tangliu on 2016/3/3.

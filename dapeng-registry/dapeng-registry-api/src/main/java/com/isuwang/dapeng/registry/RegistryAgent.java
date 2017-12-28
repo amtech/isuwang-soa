@@ -1,7 +1,7 @@
 package com.isuwang.dapeng.registry;
 
 import com.isuwang.dapeng.core.ProcessorKey;
-import com.isuwang.dapeng.core.SoaBaseProcessor;
+import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
 import com.isuwang.dapeng.route.Route;
 
 import java.util.List;
@@ -37,12 +37,12 @@ public interface RegistryAgent {
      *
      * @param processorMap 处理器集合
      */
-    void setProcessorMap(Map<ProcessorKey, SoaBaseProcessor<?>> processorMap);
+    void setProcessorMap(Map<ProcessorKey, SoaServiceDefinition<?>> processorMap);
 
     /**
      * 获取处理器集合
      */
-    Map<ProcessorKey, SoaBaseProcessor<?>> getProcessorMap();
+    Map<ProcessorKey, SoaServiceDefinition<?>> getProcessorMap();
 
     /**
      * 加载匹配的服务

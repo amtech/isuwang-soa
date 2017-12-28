@@ -1,18 +1,18 @@
 package com.isuwang.dapeng.core.filter;
 
+import com.isuwang.dapeng.core.filter.FilterContext;
 import com.isuwang.org.apache.thrift.TException;
 
 /**
- * Filter Chain
- *
- * @author craneding
- * @date 16/1/20
+ * Created by lihuimin on 2017/12/11.
  */
 public interface FilterChain {
 
-    void doFilter() throws TException;
+    // execute current filter's onEntry
+    void onEntry(FilterContext ctx) throws TException;
 
-    Object getAttribute(String name);
+    // execute current filter's onExit
+    void onExit(FilterContext ctx)throws TException;
 
-    void setAttribute(String name, Object value);
+
 }

@@ -1,19 +1,19 @@
 package com.isuwang.dapeng.message.consumer.kafka;
 
-import com.isuwang.dapeng.core.SoaProcessFunction;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
-import com.isuwang.dapeng.core.TBeanSerializer;
+import com.isuwang.dapeng.core.definition.SoaFunctionDefinition;
 import com.isuwang.dapeng.message.consumer.api.context.ConsumerContext;
-import kafka.consumer.ConsumerConfig;
-import kafka.consumer.ConsumerIterator;
-import kafka.consumer.KafkaStream;
-import kafka.javaapi.consumer.ConsumerConnector;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.common.serialization.ByteBufferDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 
 /**
  * Created by tangliu on 2016/8/3.
@@ -32,9 +32,9 @@ public class KafkaConsumer extends Thread {
         init();
     }
 
-    private String zookeeperConnect = SoaSystemEnvProperties.SOA_ZOOKEEPER_KAFKA_HOST;
+    private String kafkaConnect = SoaSystemEnvProperties.SOA_KAFKA_PORT;
 
-    protected ConsumerConnector consumer;
+    protected org.apache.kafka.clients.consumer.KafkaConsumer<ByteBuffer, ByteBuffer> consumer;
 //    protected final static String ZookeeperSessionTimeoutMs = "40000";
 //    protected final static String ZookeeperSyncTimeMs = "200";
 //    protected final static String AutoCommitIntervalMs = "1000";
@@ -42,19 +42,23 @@ public class KafkaConsumer extends Thread {
     public void init() {
 
         logger.info(new StringBuffer("[KafkaConsumer] [init] ")
-                .append("zookeeperConnect(").append(zookeeperConnect)
+                .append("kafkaConnect(").append(kafkaConnect)
                 .append(") groupId(").append(groupId)
                 .append(") topic(").append(topic).append(")").toString());
 
         Properties props = new Properties();
-        props.put("zookeeper.connect", zookeeperConnect);
+        props.put("bootstrap.servers", kafkaConnect);
         props.put("group.id", groupId);
+        props.put("enable.auto.commit", "true");
+        props.put("auto.commit.interval.ms", "1000");
+        props.put("key.deserializer", ByteBufferDeserializer.class);
+        props.put("value.deserializer", ByteBufferDeserializer.class);
 
 //        props.put("zookeeper.session.timeout.ms", ZookeeperSessionTimeoutMs);
 //        props.put("zookeeper.sync.time.ms", ZookeeperSyncTimeMs);
 //        props.put("auto.commit.interval.ms", AutoCommitIntervalMs);
+        consumer = new org.apache.kafka.clients.consumer.KafkaConsumer<>(props);
 
-        consumer = kafka.consumer.Consumer.createJavaConsumerConnector(new ConsumerConfig(props));
     }
 
     @Override
@@ -63,16 +67,12 @@ public class KafkaConsumer extends Thread {
         try {
             logger.info("[KafkaConsumer][{}][run] ", groupId + ":" + topic);
 
-            Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
-            topicCountMap.put(topic, new Integer(1));
-
-            Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumer.createMessageStreams(topicCountMap);
-            KafkaStream<byte[], byte[]> stream = consumerMap.get(topic).get(0);
-
-            ConsumerIterator<byte[], byte[]> it = stream.iterator();
-
-            while (it.hasNext()) {
-                receive(it.next().message());
+            consumer.subscribe(Arrays.asList(topic));
+            while (true) {
+                ConsumerRecords<ByteBuffer, ByteBuffer> records = consumer.poll(100);
+                for (ConsumerRecord<ByteBuffer, ByteBuffer> record : records) {
+                    receive(record.value());
+                }
             }
         } catch (Exception e) {
             logger.error("[KafkaConsumer][{}][run] " + e.getMessage(), groupId + ":" + topic, e);
@@ -85,11 +85,11 @@ public class KafkaConsumer extends Thread {
      *
      * @param message
      */
-    private void receive(byte[] message) {
+    private void receive(ByteBuffer message) {
 
         logger.info("KafkaConsumer groupId({}) topic({}) 收到消息", groupId, topic);
         for (ConsumerContext customer : customers) {
-           dealMessage(customer, message);
+            dealMessage(customer, message);
         }
     }
 
@@ -111,9 +111,9 @@ public class KafkaConsumer extends Thread {
     }
 
 
-    private void dealMessage(ConsumerContext customer, byte[] message) {
+    private void dealMessage(ConsumerContext customer, ByteBuffer message) {
 
-        SoaProcessFunction<Object, Object, Object, ? extends TBeanSerializer<Object>, ? extends TBeanSerializer<Object>> soaProcessFunction = customer.getSoaProcessFunction();
+        SoaFunctionDefinition.Sync functionDefinition = (SoaFunctionDefinition.Sync)customer.getSoaFunctionDefinition();
         Object iface = customer.getIface();
 
         long count = new ArrayList<>(Arrays.asList(iface.getClass().getInterfaces()))
@@ -129,19 +129,17 @@ public class KafkaConsumer extends Thread {
             ifaceClass = iface.getClass();
         }
 
-        Object args = soaProcessFunction.getEmptyArgsInstance();
-        Field field = args.getClass().getDeclaredFields()[0];
-        field.setAccessible(true);//暴力访问，取消私有权限,让对象可以访问
-
-        ByteBuffer buf = ByteBuffer.wrap(message);
+        //Object args = soaProcessFunction.getEmptyArgsInstance();
+//        Field field = args.getClass().getDeclaredFields()[0];
+//        field.setAccessible(true);//暴力访问，取消私有权限,让对象可以访问
+//        ByteBuffer buf = message;
+        //field.set(args, buf);
         try {
-            field.set(args, buf);
-
-            logger.info("{}收到kafka消息，执行{}方法", ifaceClass.getName(), soaProcessFunction.getMethodName());
-            soaProcessFunction.getResult(iface, args);
-            logger.info("{}收到kafka消息，执行{}方法完成", ifaceClass.getName(), soaProcessFunction.getMethodName());
+            logger.info("{}收到kafka消息，执行{}方法", ifaceClass.getName(), functionDefinition.methodName);
+            functionDefinition.apply(iface,null);
+            logger.info("{}收到kafka消息，执行{}方法完成", ifaceClass.getName(), functionDefinition.methodName);
         } catch (Exception e) {
-            logger.error("{}收到kafka消息，执行{}方法异常", ifaceClass.getName(), soaProcessFunction.getMethodName());
+            logger.error("{}收到kafka消息，执行{}方法异常", ifaceClass.getName(), functionDefinition.methodName);
             logger.error(e.getMessage(), e);
         }
     }

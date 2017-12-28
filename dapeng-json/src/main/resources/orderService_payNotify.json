@@ -1,0 +1,7 @@
+{
+  "payNotifyRequest":{ 
+        "orderNum": "2017111702453",
+        "transactionId":"2017111702453",
+        "payType":"WECHAT"
+      }
+  }
