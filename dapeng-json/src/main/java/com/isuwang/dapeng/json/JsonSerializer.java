@@ -8,37 +8,47 @@ import io.netty.buffer.ByteBuf;
 
 import java.util.List;
 import java.util.Stack;
-import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class JsonSerializer implements BeanSerializer<String> {
 
-    private final Struct struct;
+    private final Struct respStruct;
     private final ByteBuf byteBuf;
+    private final Service service;
+    private final Method method;
 
-    public JsonSerializer(Struct struct, ByteBuf byteBuf) {
-        this.struct = struct;
+    public JsonSerializer(Struct respStruct, ByteBuf byteBuf, Service service, Method method) {
+        this.respStruct = respStruct;
         this.byteBuf = byteBuf;
+        this.service = service;
+        this.method = method;
     }
 
     // thrift -> json
     private void read(TProtocol iproto, JsonCallback writer) throws TException {
         iproto.readStructBegin();
+        writer.onStartObject();
 
         while (true) {
             TField field = iproto.readFieldBegin();
             if (field.type == TType.STOP)
                 break;
 
-            Field fld = struct.getFields().get(0); // TODO get fld by field.id
+            List<Field> flds = respStruct.getFields().stream().filter(_field->{return _field.tag == field.id;}).collect(Collectors.toList()); // TODO get fld by field.id
+
+            Field fld = flds.isEmpty()?null:flds.get(0);
+
             boolean skip = fld == null;
 
             switch (field.type) {
                 case TType.VOID:
                     break;
                 case TType.BOOL:
-                    boolean value = iproto.readBool();
+                    boolean boolValue = iproto.readBool();
                     if (!skip) {
-                        writer.onBoolean(value);
+                        writer.onStartField(fld.name);
+                        writer.onBoolean(boolValue);
+                        writer.onEndField();
                     }
                     break;
                 case TType.BYTE:
@@ -52,12 +62,20 @@ public class JsonSerializer implements BeanSerializer<String> {
                 case TType.I64:
                     // TODO:
                 case TType.STRING:
-                    // TODO:
+                    String strValue = iproto.readString();
+                    if (!skip) {
+                        writer.onStartField(fld.name);
+                        writer.onString(strValue);
+                        writer.onEndField();
+                    }
+                    break;
                 case TType.STRUCT:
                     if (!skip) {
                         String subStructName = fld.dataType.qualifiedName;
-                        Struct subStruct = null;    // findStruct(subStructName)
-                        new JsonSerializer(subStruct, byteBuf).read(iproto, writer);
+                        Struct subStruct = findStruct(subStructName, service);
+                        writer.onStartField(subStructName);
+                        new JsonSerializer(subStruct, byteBuf, service, method).read(iproto, writer);
+                        writer.onEndField();
                     } else {
                         // skip contents
                     }
@@ -72,6 +90,7 @@ public class JsonSerializer implements BeanSerializer<String> {
 
 
         iproto.readStructEnd();
+        writer.onEndObject();
     }
 
     @Override
@@ -93,12 +112,9 @@ public class JsonSerializer implements BeanSerializer<String> {
      * <p>
      * InvocationContext and SoaHeader should be ready before
      */
-    static class Json2ThriftCallback implements JsonCallback {
+    class Json2ThriftCallback implements JsonCallback {
 
         private final TProtocol oproto;
-        private final Method method;
-        private final Service service;
-        private final ByteBuf byteBuf;
 
         class StackNode {
             final DataType dataType;
@@ -106,14 +122,17 @@ public class JsonSerializer implements BeanSerializer<String> {
              * byteBuf position when this node created
              */
             final int byteBufPosition;
+
+            final Struct struct;
             /**
              * if dataType is a Collection(such as LIST, MAP, SET etc), elSize represents the size of the Collection.
              */
             private int elCount = 0;
 
-            StackNode(DataType dataType, int byteBufPosition) {
+            StackNode(final DataType dataType, final int byteBufPosition, final Struct struct) {
                 this.dataType = dataType;
                 this.byteBufPosition = byteBufPosition;
+                this.struct = struct;
             }
 
             void increaseElement() {
@@ -131,18 +150,13 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         /**
          * @param oproto
-         * @param service
-         * @param method
-         * @param byteBuf
          */
-        public Json2ThriftCallback(TProtocol oproto, Service service, Method method, ByteBuf byteBuf) {
+        public Json2ThriftCallback(TProtocol oproto) {
             this.oproto = oproto;
-            this.method = method;
-            this.service = service;
-            this.byteBuf = byteBuf;
             DataType initDataType = new DataType();
             initDataType.setKind(DataType.KIND.STRUCT);
-            this.current = new StackNode(initDataType, byteBuf.writerIndex());
+            initDataType.qualifiedName = method.request.name;
+            this.current = new StackNode(initDataType, byteBuf.writerIndex(), method.request);
         }
 
 
@@ -176,12 +190,12 @@ public class JsonSerializer implements BeanSerializer<String> {
             //TODO 多重struct的处理
             //TODO MAP的处理, key, value的类型
             if (!inited) {
-                oproto.writeStructBegin(new TStruct(method.name));
+                oproto.writeStructBegin(new TStruct(current.struct.name));
                 inited = true;
             } else {
                 switch (current.dataType.kind) {
                     case STRUCT:
-                        Struct struct = findStruct(current.dataType.qualifiedName, service);
+                        Struct struct = current.struct;//findStruct(current.dataType.qualifiedName, service);
                         if (struct == null) {
                             //TODO
                         }
@@ -231,7 +245,7 @@ public class JsonSerializer implements BeanSerializer<String> {
 
             if (isCollectionKind(current.dataType.valueType.kind)) {
                 current.increaseElement();
-                stackNew(new StackNode(current.dataType.valueType, byteBuf.writerIndex()));
+                stackNew(new StackNode(current.dataType.valueType, byteBuf.writerIndex(), findStruct(current.dataType.valueType.qualifiedName, service)));
             }
         }
 
@@ -256,15 +270,16 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onStartField(String name) throws TException {
-            Field field = findField(name, method.request);
+            Field field = findField(name, current.struct);
             if (field == null) return;
 
-            stackNew(new StackNode(field.dataType, byteBuf.writerIndex()));
+            stackNew(new StackNode(field.dataType, byteBuf.writerIndex(), findStruct(field.dataType.qualifiedName, service)));
             oproto.writeFieldBegin(new TField(field.name, dataType2Byte(field.dataType), (short) field.getTag()));
         }
 
         @Override
         public void onEndField() throws TException {
+            //TODO field == null的情况
             pop();
             oproto.writeFieldEnd();
         }
@@ -332,30 +347,6 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         private StackNode peek() {
             return history.peek();
-        }
-
-        private Field findField(String fieldName, Struct struct) {
-            List<Field> fields = struct.getFields();
-
-            for (Field field : fields) {
-                if (field.getName().equals(fieldName)) {
-                    return field;
-                }
-            }
-
-            return null;
-        }
-
-        protected Struct findStruct(String qualifiedName, Service service) {
-            List<Struct> structDefinitions = service.getStructDefinitions();
-
-            for (Struct structDefinition : structDefinitions) {
-                if ((structDefinition.getNamespace() + "." + structDefinition.getName()).equals(qualifiedName)) {
-                    return structDefinition;
-                }
-            }
-
-            return null;
         }
 
         private byte dataType2Byte(DataType type) {
@@ -480,10 +471,7 @@ public class JsonSerializer implements BeanSerializer<String> {
     // json -> thrift
     @Override
     public void write(String input, TProtocol oproto) throws TException {
-
-
-        new JsonParser(input, new Json2ThriftCallback(oproto, null, null, byteBuf));
-
+        new JsonParser(input, new Json2ThriftCallback(oproto)).parseJsValue();
     }
 
     @Override
@@ -496,5 +484,31 @@ public class JsonSerializer implements BeanSerializer<String> {
         return s;
     }
 
+    private Field findField(String fieldName, Struct struct) {
+        List<Field> fields = struct.getFields();
+
+        for (Field field : fields) {
+            if (field.getName().equals(fieldName)) {
+                return field;
+            }
+        }
+
+        return null;
+    }
+
+    private Struct findStruct(String qualifiedName, Service service) {
+        if (qualifiedName == null) {
+            return null;
+        }
+        List<Struct> structDefinitions = service.getStructDefinitions();
+
+        for (Struct structDefinition : structDefinitions) {
+            if ((structDefinition.getNamespace() + "." + structDefinition.getName()).equals(qualifiedName)) {
+                return structDefinition;
+            }
+        }
+
+        return null;
+    }
 
 }

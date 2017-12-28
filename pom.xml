@@ -52,6 +52,7 @@
         <module>dapeng-container-new</module>
         <module>dapeng-common</module>
         <module>dapeng-client-netty</module>
+        <module>dapeng-json</module>
     </modules>
 
     <properties>
