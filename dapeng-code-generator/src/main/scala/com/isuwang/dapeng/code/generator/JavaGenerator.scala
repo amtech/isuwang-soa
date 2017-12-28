@@ -273,7 +273,7 @@ class JavaGenerator extends CodeGenerator {
             * {method.doc}
             **/
             <div>
-              public {if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType) else <div>CompletableFuture{lt}{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}{gt}</div>}  {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+              public {if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) <div>CompletableFuture{lt}Void{gt}</div> else <div>CompletableFuture{lt}{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}{gt}</div>}  {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
               <div>{toDataTypeTemplate(field.getDataType())} {field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}}{if(toFieldArrayBuffer(method.getRequest.getFields).size==0) "long timeout" else ", long timeout"}) throws SoaException<block>
 
               String methodName = "{method.name}";
@@ -293,7 +293,7 @@ class JavaGenerator extends CodeGenerator {
                 <div>
                   {
                   if(field.getDataType.getKind == DataType.KIND.VOID) {
-                    <div></div>
+                    <div>return response.thenApply(({method.response.name} result )->  null);</div>
                   } else {
                     <div>
                       return response.thenApply(({method.response.name} result )->  result.getSuccess());
@@ -409,7 +409,7 @@ class JavaGenerator extends CodeGenerator {
             * {method.doc}
             **/
             <div>
-              public {if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType) else <div>CompletableFuture{lt}{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}{gt}</div>} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+              public {if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) <div>CompletableFuture{lt}Void{gt}</div> else <div>CompletableFuture{lt}{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}{gt}</div>} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
               <div>{toDataTypeTemplate(field.getDataType())} {field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}}{if(toFieldArrayBuffer(method.getRequest.getFields).size==0) "long timeout" else ", long timeout"}) throws SoaException<block>
 
               String methodName = "{method.name}";
@@ -429,7 +429,7 @@ class JavaGenerator extends CodeGenerator {
                 <div>
                   {
                   if(field.getDataType.getKind == DataType.KIND.VOID) {
-                    <div></div>
+                    <div>return response.thenApply(({method.response.name} result )->  null);</div>
                   } else {
                     <div>
                       return response.thenApply(({method.response.name} result )->  result.getSuccess());
@@ -595,7 +595,7 @@ class JavaGenerator extends CodeGenerator {
             {if(method.doc != null && method.doc.contains("@SoaGlobalTransactional")) <div>@SoaGlobalTransactional</div>}
               <div>
 
-                {if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType) else <div>Future{lt}{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}{gt}</div>} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+                {if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) <div>Future{lt}Void{gt}</div> else <div>Future{lt}{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}{gt}</div>} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
                 <div> {toDataTypeTemplate(field.getDataType())} {field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}
               }}{if(toFieldArrayBuffer(method.getRequest.getFields).size>0) ","}long timeout) throws com.isuwang.dapeng.core.SoaException;
               </div>
@@ -640,7 +640,7 @@ class JavaGenerator extends CodeGenerator {
             **/
             {if(method.doc != null && method.doc.contains("@SoaGlobalTransactional")) <div>@SoaGlobalTransactional</div>}
             <div>
-              {if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType) else <div>Future{lt}{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}{gt}</div>} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+              {if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) <div>Future{lt}Void{gt}</div> else <div>Future{lt}{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}{gt}</div>} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
               <div> {toDataTypeTemplate(field.getDataType())} {field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}
             }} {if(toFieldArrayBuffer(method.getRequest.getFields).size>0) ","} long timeout) throws com.isuwang.dapeng.core.SoaException;
             </div>
