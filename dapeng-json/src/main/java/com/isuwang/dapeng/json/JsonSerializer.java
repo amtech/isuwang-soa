@@ -8,6 +8,7 @@ import io.netty.buffer.ByteBuf;
 
 import java.util.List;
 import java.util.Stack;
+import java.util.function.Consumer;
 
 public class JsonSerializer implements BeanSerializer<String> {
 
@@ -172,7 +173,7 @@ public class JsonSerializer implements BeanSerializer<String> {
         @Override
         public void onStartObject() throws TException {
             assert current.dataType.kind == DataType.KIND.STRUCT || current.dataType.kind == DataType.KIND.MAP;
-            //TODO
+            //TODO 多重struct的处理
             if (!inited) {
                 oproto.writeStructBegin(new TStruct(method.name));
                 inited = true;
@@ -193,40 +194,29 @@ public class JsonSerializer implements BeanSerializer<String> {
         public void onEndObject() throws TException {
             assert current.dataType.kind == DataType.KIND.STRUCT || current.dataType.kind == DataType.KIND.MAP;
 
-            oproto.writeFieldStop();
-
             switch (current.dataType.kind) {
                 case STRUCT:
+                    oproto.writeFieldStop();
                     oproto.writeStructEnd();
                     break;
                 case MAP:
                     oproto.writeMapEnd();
 
-                    //拿到当前node的开始位置以及集合元素大小
-                    int beginPosition = current.byteBufPosition;
-                    int elCount = current.elCount;
-
-                    //备份最新的writerIndex
-                    int currentIndex = byteBuf.writerIndex();
-
-                    //reWriteListBegin
-                    byteBuf.writerIndex(beginPosition);
-
-                    oproto.writeMapBegin(new TMap(dataType2Byte(current.dataType.keyType), dataType2Byte(current.dataType.valueType), elCount));
-
-                    byteBuf.writerIndex(currentIndex);
+                    reWriteByteBuf();
                     break;
             }
         }
 
         /**
          * 由于目前拿不到集合的元素个数, 暂时设置为0个
+         * TODO 多重ARRAY的处理
          *
          * @throws TException
          */
         @Override
         public void onStartArray() throws TException {
-            assert current.dataType.kind == DataType.KIND.LIST || current.dataType.kind == DataType.KIND.SET;
+            assert isCollectionKind(current.dataType.kind);
+
             switch (current.dataType.kind) {
                 case LIST:
                     oproto.writeListBegin(new TList(dataType2Byte(current.dataType.valueType), 0));
@@ -240,28 +230,18 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onEndArray() throws TException {
-            assert current.dataType.kind == DataType.KIND.LIST || current.dataType.kind == DataType.KIND.SET;
-            //拿到当前node的开始位置以及集合元素大小
-            int beginPosition = current.byteBufPosition;
-            int elCount = current.elCount;
+            assert isCollectionKind(current.dataType.kind);
 
-            //备份最新的writerIndex
-            int currentIndex = byteBuf.writerIndex();
-
-            //reWriteListBegin
-            byteBuf.writerIndex(beginPosition);
             switch (current.dataType.kind) {
                 case LIST:
-                    oproto.writeListBegin(new TList(dataType2Byte(current.dataType.valueType), elCount));
+                    oproto.writeListEnd();
+                    reWriteByteBuf();
                     break;
                 case SET:
-                    oproto.writeSetBegin(new TSet(dataType2Byte(current.dataType.valueType), elCount));
+                    oproto.writeSetEnd();
+                    reWriteByteBuf();
                     break;
             }
-
-            byteBuf.writerIndex(currentIndex);
-
-            oproto.writeListEnd();
         }
 
         @Override
@@ -417,6 +397,37 @@ public class JsonSerializer implements BeanSerializer<String> {
             }
 
             return TType.STOP;
+        }
+
+        /**
+         * 根据current 节点重写集合元素长度
+         */
+        private void reWriteByteBuf() throws TException {
+            assert isMultiElementKind(current.dataType.kind);
+
+            //拿到当前node的开始位置以及集合元素大小
+            int beginPosition = current.byteBufPosition;
+            int elCount = current.elCount;
+
+            //备份最新的writerIndex
+            int currentIndex = byteBuf.writerIndex();
+
+            //reWriteListBegin
+            byteBuf.writerIndex(beginPosition);
+
+            switch (current.dataType.kind) {
+                case MAP:
+                    oproto.writeMapBegin(new TMap(dataType2Byte(current.dataType.keyType), dataType2Byte(current.dataType.valueType), elCount));
+                    break;
+                case SET:
+                    oproto.writeSetBegin(new TSet(dataType2Byte(current.dataType.valueType), elCount));
+                    break;
+                case LIST:
+                    oproto.writeListBegin(new TList(dataType2Byte(current.dataType.valueType), elCount));
+                    break;
+            }
+
+            byteBuf.writerIndex(currentIndex);
         }
 
         /**
