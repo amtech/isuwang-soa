@@ -252,85 +252,85 @@ class ScalaGenerator extends CodeGenerator {
     return {
       <div>package {service.namespace.substring(0, service.namespace.lastIndexOf("."))}
 
-        import com.isuwang.dapeng.core._
-        import com.isuwang.org.apache.thrift._
-        import com.isuwang.dapeng.remoting.BaseCommonServiceClient
-        import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + "." + service.name + "Codec._"}
+        import com.isuwang.dapeng.core._;
+        import com.isuwang.org.apache.thrift._;
+        import java.util.concurrent.CompletableFuture;
+        import java.util.concurrent.Future;
+        import java.util.ServiceLoader;
+        import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + "." + service.name + "Codec._"};
+        import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + ".service." + service.name };
 
         /**
         {notice}
         **/
-        object {service.name}Client extends BaseCommonServiceClient("{oriNamespace}.{service.name}", "{service.meta.version}")<block>
+        class {service.name}Client extends {service.name} <block>
 
-        override def isSoaTransactionalProcess: Boolean = <block>
+          val serviceName = "{service.namespace + "." + service.name }"
+          val version = "{service.meta.version}"
+          val pool = <block>
+            val serviceLoader = ServiceLoader.load(classOf[SoaConnectionPoolFactory])
+          if (serviceLoader.iterator().hasNext) <block>
+          val poolImpl = serviceLoader.iterator().next().getPool
+          poolImpl.registerClientInfo(serviceName,version)
+          poolImpl
+          </block> else null
+           </block>
 
-          var isSoaTransactionalProcess = false
-          {toMethodArrayBuffer(service.methods).map{(method:Method)=>{
-
-            if(method.doc != null && method.doc.contains("@IsSoaTransactionProcess")){
-              <div>
-                if(InvocationContext.Factory.getCurrentInstance().getHeader().getMethodName().equals("{method.name}"))<block>
-                      isSoaTransactionalProcess = true</block>
-              </div>}
-          }}}
-          isSoaTransactionalProcess
-        </block>
 
         {
         toMethodArrayBuffer(service.methods).map{(method:Method)=>{
           <div>
-         /**
-         * {method.doc}
-         **/
+            /**
+            * {method.doc}
+            **/
+            def {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+            <div>{nameAsId(field.name)}:{toDataTypeTemplate(field.getDataType())} {if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}}
+            , timeout: Long = 5000) : {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} = <block>
 
+            val response = pool.sendAsync(
+            serviceName,
+            version,
+            "{method.name}",
+            {method.request.name}({
+            toFieldArrayBuffer(method.getRequest.getFields).map{(field: Field)=>{
+              <div>{nameAsId(field.name)}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>
+            }
+            }}),
+            new {method.request.name.charAt(0).toUpper + method.request.name.substring(1)}Serializer(),
+            new {method.response.name.charAt(0).toUpper + method.response.name.substring(1)}Serializer()
+            ,timeout).asInstanceOf[CompletableFuture[{method.response.name}]]
+
+            {if(method.getResponse.getFields.get(0).getDataType.kind != DataType.KIND.VOID) <div>response.success</div>}
+
+          </block>
+
+
+             /**
+             * {method.doc}
+             **/
             def {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
               <div>{nameAsId(field.name)}:{toDataTypeTemplate(field.getDataType())} {if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}}) : {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} = <block>
 
-            initContext("{method.name}");
-
-            try <block>
-              val response = sendBase({method.request.name}({
+              val response = pool.send(
+              serviceName,
+              version,
+              "{method.name}",
+              {method.request.name}({
               toFieldArrayBuffer(method.getRequest.getFields).map{(field: Field)=>{
                 <div>{nameAsId(field.name)}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>
               }
-              }
-              }), new {method.request.name.charAt(0).toUpper + method.request.name.substring(1)}Serializer(), new {method.response.name.charAt(0).toUpper + method.response.name.substring(1)}Serializer())
+              }}),
+              new {method.request.name.charAt(0).toUpper + method.request.name.substring(1)}Serializer(),
+              new {method.response.name.charAt(0).toUpper + method.response.name.substring(1)}Serializer())
 
               {if(method.getResponse.getFields.get(0).getDataType.kind != DataType.KIND.VOID) <div>response.success</div>}
 
-            </block>catch<block>
-              case e: SoaException => throw e
-              case e: TException => throw new SoaException(e)
-            </block>
-            finally <block>
-              destoryContext();
-            </block>
             </block>
           </div>
         }
         }
         }
-
-        /**
-        * getServiceMetadata
-        **/
-        @throws[SoaException]
-        def getServiceMetadata: String = <block>
-          initContext("getServiceMetadata")
-          try <block>
-            val _request = new getServiceMetadata_args()
-            val _response = sendBase(_request, new GetServiceMetadata_argsSerializer(), new GetServiceMetadata_resultSerializer())
-            _response.success
-          </block>catch<block>
-            case e: SoaException => throw e
-            case e: TException => throw new SoaException(e)
-          </block>
-          finally <block>
-            destoryContext()
-          </block>
-        </block>
-
-        </block>
+      </block>
       </div>
     }
   }
