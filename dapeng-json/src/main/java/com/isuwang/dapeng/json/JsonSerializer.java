@@ -174,6 +174,7 @@ public class JsonSerializer implements BeanSerializer<String> {
         public void onStartObject() throws TException {
             assert current.dataType.kind == DataType.KIND.STRUCT || current.dataType.kind == DataType.KIND.MAP;
             //TODO 多重struct的处理
+            //TODO MAP的处理, key, value的类型
             if (!inited) {
                 oproto.writeStructBegin(new TStruct(method.name));
                 inited = true;
@@ -181,6 +182,9 @@ public class JsonSerializer implements BeanSerializer<String> {
                 switch (current.dataType.kind) {
                     case STRUCT:
                         Struct struct = findStruct(current.dataType.qualifiedName, service);
+                        if (struct == null) {
+                            //TODO
+                        }
                         oproto.writeStructBegin(new TStruct(struct.name));
                         break;
                     case MAP:
@@ -209,7 +213,6 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         /**
          * 由于目前拿不到集合的元素个数, 暂时设置为0个
-         * TODO 多重ARRAY的处理
          *
          * @throws TException
          */
@@ -226,6 +229,10 @@ public class JsonSerializer implements BeanSerializer<String> {
                     break;
             }
 
+            if (isCollectionKind(current.dataType.valueType.kind)) {
+                current.increaseElement();
+                stackNew(new StackNode(current.dataType.valueType, byteBuf.writerIndex()));
+            }
         }
 
         @Override
@@ -242,13 +249,18 @@ public class JsonSerializer implements BeanSerializer<String> {
                     reWriteByteBuf();
                     break;
             }
+            if (isCollectionKind(peek().dataType.kind)) {
+                pop();
+            }
         }
 
         @Override
         public void onStartField(String name) throws TException {
             Field field = findField(name, method.request);
-            oproto.writeFieldBegin(new TField(field.name, dataType2Byte(field.dataType), (short) field.getTag()));
+            if (field == null) return;
+
             stackNew(new StackNode(field.dataType, byteBuf.writerIndex()));
+            oproto.writeFieldBegin(new TField(field.name, dataType2Byte(field.dataType), (short) field.getTag()));
         }
 
         @Override
@@ -297,8 +309,8 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onNull() throws TException {
-            //TODO
-            throw new TException("DataType(" + current.dataType.kind + ") for " + current.dataType.qualifiedName + " is a null");
+            //重置writerIndex
+            byteBuf.writerIndex(current.byteBufPosition);
         }
 
         @Override
@@ -316,6 +328,10 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         private StackNode pop() {
             return this.current = history.pop();
+        }
+
+        private StackNode peek() {
+            return history.peek();
         }
 
         private Field findField(String fieldName, Struct struct) {

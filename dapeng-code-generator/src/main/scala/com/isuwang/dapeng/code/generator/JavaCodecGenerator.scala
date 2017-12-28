@@ -192,18 +192,17 @@ class JavaCodecGenerator extends CodeGenerator {
 
                 {method.name}_result result = new {method.name}_result();
 
-                {if(method.response.getFields.get(0).getDataType.kind!= DataType.KIND.VOID)
 
                 {<div>try <block>
-                result.success = iface.{method.name}{toFieldArrayBuffer(method.getRequest.getFields).map((field:Field) => {method.name} + "_args." + field.name).mkString("(",",",")")};
-              </block> catch (SoaException e) <block>
+                {if (method.response.getFields.get(0).getDataType.kind != DataType.KIND.VOID)
+                  <div>result.success = iface.{method.name}{toFieldArrayBuffer(method.getRequest.getFields).map((field: Field) => {method.name} + "_args." + field.name).mkString("(", ",", ")")};</div>
+                else {<div> iface.{method.name}{toFieldArrayBuffer(method.getRequest.getFields).map((field: Field) => {method.name} + "_args." + field.name).mkString("(", ",", ")")};</div>}
+                }
+                </block> catch (SoaException e) <block>
                 e.printStackTrace();
               </block>
                 </div>}
-                else{
-                <div> </div>
-              }
-                }
+
                 return result;
 
               </block>
