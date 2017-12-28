@@ -15,6 +15,10 @@ public class AppClassLoader extends URLClassLoader {
         super(urls, ClassLoader.getSystemClassLoader());
     }
 
+    public AppClassLoader(URL[] urls, ClassLoader parent) {
+        super(urls, parent);
+    }
+
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
 

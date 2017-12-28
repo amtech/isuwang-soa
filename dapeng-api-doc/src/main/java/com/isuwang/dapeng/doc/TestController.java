@@ -1,11 +1,11 @@
 package com.isuwang.dapeng.doc;
 
+import com.isuwang.dapeng.api.ContainerFactory;
+import com.isuwang.dapeng.client.json.JSONPost;
 import com.isuwang.dapeng.core.metadata.Service;
 import com.isuwang.dapeng.core.SoaHeader;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.doc.cache.ServiceCache;
-import com.isuwang.dapeng.remoting.fake.json.JSONPost;
-import com.isuwang.dapeng.remoting.filter.LoadBalanceFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,21 +58,8 @@ public class TestController {
         header.setMethodName(methodName);
         header.setCallerFrom(Optional.of("TestController"));
 
-        header.setAttachment("userId","1");
-        header.setAttachment("userLevel","1");
-        header.setAttachment("userScore","50");
-
-        String callerInfo = LoadBalanceFilter.getCallerInfo(serviceName, versionName, methodName);
-
-        if (callerInfo == null && SoaSystemEnvProperties.SOA_REMOTING_MODE.equals("local")) {
-            jsonPost = new JSONPost(SoaSystemEnvProperties.SOA_SERVICE_IP, SoaSystemEnvProperties.SOA_SERVICE_PORT, true);
-        } else if (callerInfo != null) {
-            String[] infos = callerInfo.split(":");
-            jsonPost = new JSONPost(infos[0], Integer.valueOf(infos[1]), true);
-        } else {
-            return "{\"message\":\"没找到可用服务\"}";
-        }
         try {
+            jsonPost = new JSONPost(SoaSystemEnvProperties.SOA_SERVICE_IP, SoaSystemEnvProperties.SOA_SERVICE_PORT, true);
             return jsonPost.callServiceMethod(header, jsonParameter, service);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);

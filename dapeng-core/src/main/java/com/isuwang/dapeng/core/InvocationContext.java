@@ -1,70 +1,64 @@
 package com.isuwang.dapeng.core;
 
-import java.util.Map;
+import com.isuwang.dapeng.core.enums.CodecProtocol;
+
 import java.util.Optional;
 
 /**
- * 客户端上下文
- *
- * @author craneding
- * @date 15/9/24
+ * Created by lihuimin on 2017/12/21.
  */
-public class InvocationContext extends Context {
+public interface InvocationContext {
 
-    public static class Factory {
-        private static ThreadLocal<InvocationContext> threadLocal = new ThreadLocal<>();
-        private static ISoaHeaderProxy soaHeaderProxy;
+    void setCodecProtocol(CodecProtocol protocol);
 
-        public static interface ISoaHeaderProxy {
+    CodecProtocol getCodecProtocol();
 
-            Optional<String> callerFrom();
+    Optional<String> getCalleeIp();
 
-            Optional<Integer> customerId();
+    void setCalleeIp(Optional<String> calleeIp);
 
-            Optional<String> customerName();
+    Optional<Integer> getCalleePort();
 
-            Optional<Integer> operatorId();
+    void setCalleePort(Optional<Integer> calleePort);
 
-            Optional<String> operatorName();
+    void setLastInfo(InvocationInfo invocationInfo);
 
-            Optional<String> sessionId();
+    InvocationInfo getLastInfo();
 
-            Map<String, String> attachments();
-        }
+    SoaHeader getHeader();
 
-        public static void setSoaHeaderProxy(ISoaHeaderProxy soaHeaderProxy) {
-            Factory.soaHeaderProxy = soaHeaderProxy;
-        }
+    void setHeader(SoaHeader soaHeader);
 
-        public static ISoaHeaderProxy getSoaHeaderProxy() {
-            return soaHeaderProxy;
-        }
-
-        public static InvocationContext getNewInstance() {
-            return new InvocationContext();
-        }
-
-        public static InvocationContext setCurrentInstance(InvocationContext context) {
-            threadLocal.set(context);
-
-            return context;
-        }
-
-        public static InvocationContext getCurrentInstance() {
-            InvocationContext context = threadLocal.get();
-
-            if (context == null) {
-                context = getNewInstance();
-
-                threadLocal.set(context);
-            }
-
-            return context;
-        }
-
-        public static void removeCurrentInstance() {
-            threadLocal.remove();
-        }
+    // seqid
+    // tid
+    interface InvocationInfo {
     }
+
+//    interface Set {
+//        // codecProtocol
+//        // calleeIp, calleePort
+//        // loadbalance
+//        // timeout
+//        // sessionid
+//        // cookie
+//        // uid
+//        // staffid
+//    }
+
+
+
+
+    /*
+        InvocationContext context = InvocationContextFactory.getInvocationContext();
+
+        context.setCalleeIp("....");
+        context.setTimeout(10s);
+
+        someclient.somethod();
+
+        context.getLastInfo().getCalleeIp();
+        context.getLastInfo().getTid();
+
+     */
 
 }

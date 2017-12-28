@@ -1,6 +1,7 @@
 package com.isuwang.dapeng.monitor.api;
 
 import com.isuwang.dapeng.core.*;
+import com.isuwang.dapeng.monitor.api.domain.QPSStat;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.TProtocol;
 
@@ -9,11 +10,12 @@ import java.io.InputStreamReader;
 import java.util.Optional;
 
 public class MonitorServiceCodec {
-    public static class QPSStatSerializer implements TBeanSerializer<com.isuwang.dapeng.monitor.api.domain.QPSStat> {
+    public static class QPSStatSerializer implements BeanSerializer<QPSStat> {
 
         @Override
-        public void read(com.isuwang.dapeng.monitor.api.domain.QPSStat bean, TProtocol iprot) throws TException {
+        public com.isuwang.dapeng.monitor.api.domain.QPSStat read( TProtocol iprot) throws TException {
 
+            com.isuwang.dapeng.monitor.api.domain.QPSStat bean =new com.isuwang.dapeng.monitor.api.domain.QPSStat();
             com.isuwang.org.apache.thrift.protocol.TField schemeField;
             iprot.readStructBegin();
 
@@ -107,6 +109,7 @@ public class MonitorServiceCodec {
             iprot.readStructEnd();
 
             validate(bean);
+            return bean;
         }
 
         @Override
@@ -997,8 +1000,8 @@ public class MonitorServiceCodec {
                             com.isuwang.org.apache.thrift.protocol.TList _list0 = iprot.readListBegin();
                             java.util.List<com.isuwang.dapeng.monitor.api.domain.QPSStat> elem0 = new java.util.ArrayList<>(_list0.size);
                             for (int _i0 = 0; _i0 < _list0.size; ++_i0) {
-                                com.isuwang.dapeng.monitor.api.domain.QPSStat elem1 = new com.isuwang.dapeng.monitor.api.domain.QPSStat();
-                                new QPSStatSerializer().read(elem1, iprot);
+                                com.isuwang.dapeng.monitor.api.domain.QPSStat elem1;
+                                elem1=new QPSStatSerializer().read(iprot);
                                 elem0.add(elem1);
                             }
                             iprot.readListEnd();
@@ -1741,7 +1744,7 @@ public class MonitorServiceCodec {
     }
 
     @SuppressWarnings("unchecked")
-    public static class Processor<I extends com.isuwang.dapeng.monitor.api.service.MonitorService> extends SoaBaseProcessor {
+    public static class Processor<I extends com.isuwang.dapeng.monitor.api.service.MonitorService> extends SoaCommonBaseProcessor {
         public Processor(I iface) {
             super(iface, getProcessMap(new java.util.HashMap<>()));
         }

@@ -1,6 +1,7 @@
 package com.isuwang.dapeng.registry.zookeeper;
 
 import com.isuwang.dapeng.core.*;
+import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
 import com.isuwang.dapeng.registry.ConfigKey;
 import com.isuwang.dapeng.registry.RegistryAgent;
 import com.isuwang.dapeng.registry.ServiceInfo;
@@ -16,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * RegistryAgent using Synchronous zookeeper requesting
@@ -34,7 +34,7 @@ public class RegistryAgentImpl implements RegistryAgent {
 
     private ZookeeperWatcher siw, zkfbw;
 
-    private Map<ProcessorKey, SoaBaseProcessor<?>> processorMap;
+    private Map<ProcessorKey, SoaServiceDefinition<?>> processorMap;
 
     public RegistryAgentImpl() {
         this(true);
@@ -70,11 +70,13 @@ public class RegistryAgentImpl implements RegistryAgent {
     @Override
     public void stop() {
         zooKeeperHelper.destroy();
-        if (siw != null)
+        if (siw != null) {
             siw.destroy();
+        }
 
-        if (zkfbw != null)
+        if (zkfbw != null) {
             zkfbw.destroy();
+        }
     }
 
     @Override
@@ -84,10 +86,12 @@ public class RegistryAgentImpl implements RegistryAgent {
             String data = "";
             zooKeeperHelper.addOrUpdateServerInfo(path, data);
 
-            if (SoaSystemEnvProperties.SOA_ZOOKEEPER_MASTER_ISCONFIG)
+            if (SoaSystemEnvProperties.SOA_ZOOKEEPER_MASTER_ISCONFIG) {
                 zooKeeperMasterHelper.createCurrentNode(ZookeeperHelper.generateKey(serverName, versionName));
-            else
+            }
+            else {
                 zooKeeperHelper.createCurrentNode(ZookeeperHelper.generateKey(serverName, versionName));
+            }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
@@ -95,18 +99,19 @@ public class RegistryAgentImpl implements RegistryAgent {
 
     @Override
     public void registerAllServices() {
-        if (processorMap == null)
+        if (processorMap == null) {
             return;
+        }
 
         Set<ProcessorKey> keys = processorMap.keySet();
 
         for (ProcessorKey key : keys) {
-            SoaBaseProcessor<?> processor = processorMap.get(key);
+            SoaServiceDefinition<?> processor = processorMap.get(key);
 
-            if (processor.getInterfaceClass().getClass() != null) {
-                Service service = processor.getInterfaceClass().getAnnotation(Service.class);
+            if (processor.ifaceClass!= null) {
+                Service service = processor.ifaceClass.getAnnotation(Service.class);
 
-                this.registerService(processor.getInterfaceClass().getName(), service.version());
+                this.registerService(service.name(), service.version());
             }
         }
 
@@ -117,12 +122,12 @@ public class RegistryAgentImpl implements RegistryAgent {
     }
 
     @Override
-    public void setProcessorMap(Map<ProcessorKey, SoaBaseProcessor<?>> processorMap) {
+    public void setProcessorMap(Map<ProcessorKey, SoaServiceDefinition<?>> processorMap) {
         this.processorMap = processorMap;
     }
 
     @Override
-    public Map<ProcessorKey, SoaBaseProcessor<?>> getProcessorMap() {
+    public Map<ProcessorKey, SoaServiceDefinition<?>> getProcessorMap() {
         return this.processorMap;
     }
 
@@ -139,7 +144,7 @@ public class RegistryAgentImpl implements RegistryAgent {
         //使用路由规则，过滤可用服务器 （local模式不考虑）
         final boolean isLocal = SoaSystemEnvProperties.SOA_REMOTING_MODE.equals("local");
         if (!isLocal) {
-            InvocationContext context = InvocationContext.Factory.getCurrentInstance();
+            InvocationContext context = InvocationContextImpl.Factory.getCurrentInstance();
             List<Route> routes = usingFallbackZookeeper ? zkfbw.getRoutes() : siw.getRoutes();
             List<ServiceInfo> tmpList = new ArrayList<>();
 
@@ -154,9 +159,9 @@ public class RegistryAgentImpl implements RegistryAgent {
                 }
             }
 
-            LOGGER.info("路由过滤前可用列表{}", serviceInfos.stream().map(s -> s.getHost()).collect(Collectors.toList()));
+            //LOGGER.debug("路由过滤前可用列表{}", serviceInfos.stream().map(s -> s.getHost()).collect(Collectors.toList()));
             serviceInfos = tmpList;
-            LOGGER.info("路由过滤后可用列表{}", serviceInfos.stream().map(s -> s.getHost()).collect(Collectors.toList()));
+            //LOGGER.debug("路由过滤后可用列表{}", serviceInfos.stream().map(s -> s.getHost()).collect(Collectors.toList()));
         }
 
         return new ServiceInfos(usingFallbackZookeeper, serviceInfos);
@@ -166,16 +171,18 @@ public class RegistryAgentImpl implements RegistryAgent {
     public Map<ConfigKey, Object> getConfig(boolean usingFallback, String serviceKey) {
 
         if (usingFallback) {
-            if (zkfbw.getConfigWithKey(serviceKey).entrySet().size() <= 0)
+            if (zkfbw.getConfigWithKey(serviceKey).entrySet().size() <= 0) {
                 return null;
-            else
+            } else {
                 return zkfbw.getConfigWithKey(serviceKey);
+            }
         } else {
 
-            if (siw.getConfigWithKey(serviceKey).entrySet().size() <= 0)
+            if (siw.getConfigWithKey(serviceKey).entrySet().size() <= 0) {
                 return null;
-            else
+            } else {
                 return siw.getConfigWithKey(serviceKey);
+            }
         }
     }
 

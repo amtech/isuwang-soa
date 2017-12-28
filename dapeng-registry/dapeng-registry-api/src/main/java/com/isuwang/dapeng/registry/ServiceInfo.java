@@ -23,7 +23,6 @@ public class ServiceInfo {
 
     public String getHost() {
         return host;
-
     }
 
     public Integer getPort() {

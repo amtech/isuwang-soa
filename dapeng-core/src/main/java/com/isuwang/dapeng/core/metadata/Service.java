@@ -52,6 +52,10 @@ public class Service {
     @XmlElement(name = "tenum")
     public List<TEnum> enumDefinitions;
 
+    @XmlElementWrapper(name = "annotations")
+    @XmlElement(name = "annotation")
+    public List<Annotation> annotations;
+
     private transient boolean initialized = false;
     private transient Map<String, Struct> structByName = new java.util.HashMap<String, Struct>();
 
@@ -130,6 +134,14 @@ public class Service {
 
     public void setEnumDefinitions(List<TEnum> enumDefinitions) {
         this.enumDefinitions = enumDefinitions;
+    }
+
+    public List<Annotation> getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(List<Annotation> annotations) {
+        this.annotations = annotations;
     }
 
 }

@@ -38,10 +38,9 @@ abstract class CodeGenerator {
     val newArray: ArrayBuffer[Field] = ArrayBuffer()
 
     for (index <- (0 until array.size())) {
-      newArray += array.get(index)
+        newArray += array.get(index)
     }
-
-    return newArray
+    newArray
   }
 
   protected def toTEnumArrayBuffer(array: util.List[TEnum]): ArrayBuffer[TEnum] = {

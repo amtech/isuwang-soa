@@ -1,6 +1,7 @@
 package com.isuwang.dapeng.route.parse;
 
 import com.isuwang.dapeng.core.InvocationContext;
+import com.isuwang.dapeng.core.InvocationContextImpl;
 import com.isuwang.dapeng.core.SoaHeader;
 import com.isuwang.dapeng.route.Route;
 import com.isuwang.dapeng.route.RouteExecutor;
@@ -36,7 +37,7 @@ public class RouteParserTest {
         servers.add("1.2.3.4");
         servers.add("1.2.3.5");
 
-        InvocationContext ctx = new InvocationContext();
+        InvocationContext ctx = new InvocationContextImpl();
         SoaHeader soaHeader = new SoaHeader();
         soaHeader.setOperatorId(Optional.of(1024));
         soaHeader.setCallerIp(Optional.of("192.168.3.39"));
