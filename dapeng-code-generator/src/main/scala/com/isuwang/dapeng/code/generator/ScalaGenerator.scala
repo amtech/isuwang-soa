@@ -170,12 +170,12 @@ class ScalaGenerator extends CodeGenerator {
       codecWriter.close()
       println(s"生成Codec:${service.name}Codec.scala 完成")
 
-      println(s"生成Codec:${service.name}Codec.scala")
-      val asyncCodecTemplate = new StringTemplate(new ScalaCodecGenerator().toAsyncCodecTemplate(service,structNamespaces, oriNamespaces.get(service).getOrElse("")))
-      val asyncCodecWriter = new PrintWriter(new File(rootDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))), s"${service.name}Codec.scala"), "UTF-8")
-      asyncCodecWriter.write(asyncCodecTemplate.toString())
-      asyncCodecWriter.close()
-      println(s"生成Codec:${service.name}Codec.scala 完成")
+//      println(s"生成Codec:${service.name}Codec.scala")
+//      val asyncCodecTemplate = new StringTemplate(new ScalaCodecGenerator().toAsyncCodecTemplate(service,structNamespaces, oriNamespaces.get(service).getOrElse("")))
+//      val asyncCodecWriter = new PrintWriter(new File(rootDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))), s"${service.name}Codec.scala"), "UTF-8")
+//      asyncCodecWriter.write(asyncCodecTemplate.toString())
+//      asyncCodecWriter.close()
+//      println(s"生成Codec:${service.name}Codec.scala 完成")
 
 
       //scala & java client should use the same xml
@@ -308,7 +308,7 @@ class ScalaGenerator extends CodeGenerator {
             **/
             def {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
             <div>{nameAsId(field.name)}:{toDataTypeTemplate(field.getDataType())} {if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}}
-            , timeout: Long = 5000) : {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} = <block>
+            {if(method.getRequest.fields.size() > 0) <span>,</span>} timeout: Long = 5000) : {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} = <block>
 
             val response = pool.sendAsync(
             serviceName,
