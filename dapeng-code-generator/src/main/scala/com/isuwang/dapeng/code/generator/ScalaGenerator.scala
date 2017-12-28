@@ -276,6 +276,17 @@ class ScalaGenerator extends CodeGenerator {
           </block> else null
            </block>
 
+        def getServiceMetadata: String = <block>
+        pool.send(
+          serviceName,
+          version,
+          "getServiceMetadata",
+          new getServiceMetadata_args,
+          new GetServiceMetadata_argsSerializer,
+          new GetServiceMetadata_resultSerializer
+        ).getSuccess
+        </block>
+
 
         {
         toMethodArrayBuffer(service.methods).map{(method:Method)=>{
