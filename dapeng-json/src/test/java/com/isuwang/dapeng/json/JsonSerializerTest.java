@@ -28,12 +28,8 @@ public class JsonSerializerTest {
         return IOUtils.toString(JsonSerializerTest.class.getResource(jsonPath), "UTF-8");
     }
 
-    public static void main(String[] args) throws IOException, TException {
-        final String crmDescriptorXmlPath = "/crm.xml";
+    private static void simpleStructTest() throws TException, IOException {
         final String orderDescriptorXmlPath = "/order.xml";
-
-        Service crmService = getService(crmDescriptorXmlPath);
-
         Service orderService = getService(orderDescriptorXmlPath);
 
         Method orderServicePayNotify = orderService.methods.stream().filter(method->{return method.name.equals("payNotify");}).collect(Collectors.toList()).get(0);
@@ -52,5 +48,13 @@ public class JsonSerializerTest {
         System.out.println("origJson:\n" + payNotifyJson);
 
         System.out.println("after enCode and decode:\n" + jsonSerializer.read(inProtocol));
+    }
+
+    public static void main(String[] args) throws IOException, TException {
+        final String crmDescriptorXmlPath = "/crm.xml";
+
+        Service crmService = getService(crmDescriptorXmlPath);
+
+        simpleStructTest();
     }
 }
