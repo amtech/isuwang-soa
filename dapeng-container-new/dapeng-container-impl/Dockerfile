@@ -1,5 +1,5 @@
 #soa-container:base
-FROM docker.oa.isuwang.com:5000/system/jdk8:2.0
+FROM docker.oa.51xinzhi.com:5000/basic/openjdk:8-jre-alpine
 MAINTAINER ever@iplas.com.cn
 
 # Setting Envirnoment
