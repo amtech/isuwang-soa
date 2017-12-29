@@ -17,16 +17,17 @@
 
 
     <dependencies>
-        <dependency>
-            <groupId>com.isuwang</groupId>
-            <artifactId>dapeng-core</artifactId>
-        </dependency>
-
 
         <dependency>
             <groupId>com.isuwang</groupId>
-            <artifactId>dapeng-bootstrap</artifactId>
-            <version>${project.version}</version>
+            <artifactId>dapeng-container-impl</artifactId>
+            <version>1.3.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com</groupId>
+                    <artifactId>dapeng-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

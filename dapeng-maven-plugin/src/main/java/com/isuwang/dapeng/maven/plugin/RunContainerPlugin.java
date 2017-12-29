@@ -1,7 +1,14 @@
 package com.isuwang.dapeng.maven.plugin;
 
-import com.isuwang.dapeng.bootstrap.Bootstrap;
-import com.isuwang.dapeng.bootstrap.classloader.*;
+import com.isuwang.dapeng.api.ContainerFactory;
+import com.isuwang.dapeng.api.Plugin;
+import com.isuwang.dapeng.impl.classloader.*;
+import com.isuwang.dapeng.impl.container.DapengContainer;
+import com.isuwang.dapeng.impl.plugins.ApiDocPlugin;
+import com.isuwang.dapeng.impl.plugins.SpringAppLoader;
+import com.isuwang.dapeng.impl.plugins.TaskSchedulePlugin;
+import com.isuwang.dapeng.impl.plugins.ZookeeperRegistryPlugin;
+import com.isuwang.dapeng.impl.plugins.netty.NettyPlugin;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -14,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Run Container Plugin
@@ -33,12 +41,9 @@ public class RunContainerPlugin extends SoaAbstractMojo {
         System.setProperty("soa.base", new File(project.getBuild().getOutputDirectory()).getAbsolutePath().replace("/target/classes", ""));
         System.setProperty("soa.run.mode", "maven");
 
-        final String mainClass = Bootstrap.class.getName();
-
-        IsolatedThreadGroup threadGroup = new IsolatedThreadGroup(mainClass);
+        IsolatedThreadGroup threadGroup = new IsolatedThreadGroup("RunContainerPlugin");
         Thread bootstrapThread = new Thread(threadGroup, () -> {
             try {
-                //ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 
                 URL[] urls = ((URLClassLoader) Thread.currentThread().getContextClassLoader()).getURLs();
 
@@ -53,27 +58,17 @@ public class RunContainerPlugin extends SoaAbstractMojo {
                         continue;
                     }
 
-                    if (removeContainerAndBootstrap(iterator, url)) continue;
+                    if (removeContainer(iterator, url)) continue;
 
                     if (removeServiceProjectArtifact(iterator, url)) continue;
                 }
-//                List<URL> pluginUrls = new ArrayList<>(Arrays.asList(urls));
-//                iterator = pluginUrls.iterator();
-//                while (iterator.hasNext()) {
-//                    URL url = iterator.next();
-//                    if (url.getFile().matches("^.*/dapeng-transaction-impl.*\\.jar$")) {
-//                        iterator.remove();
-//                        continue;
-//                    }
-//                    if (removeContainerAndBootstrap(iterator, url)) continue;
-//                    if (removeServiceProjectArtifact(iterator, url)) continue;
-//                }
 
                 List<URL> appUrls = new ArrayList<>(Arrays.asList(urls));
                 iterator = appUrls.iterator();
                 while (iterator.hasNext()) {
                     URL url = iterator.next();
-                    if (removeContainerAndBootstrap(iterator, url)) continue;
+
+                    if (removeCore(iterator, url)) continue;
                 }
 
                 List<URL> platformUrls = new ArrayList<>(Arrays.asList(urls));
@@ -83,30 +78,62 @@ public class RunContainerPlugin extends SoaAbstractMojo {
                     if (removeServiceProjectArtifact(iterator, url)) continue;
                 }
 
-                ClassLoaderManager.shareClassLoader = new ShareClassLoader(shareUrls.toArray(new URL[shareUrls.size()]));
-                ClassLoaderManager.platformClassLoader = new PlatformClassLoader(platformUrls.toArray(new URL[platformUrls.size()]));
-                ClassLoaderManager.appClassLoaders.add(new AppClassLoader(appUrls.toArray(new URL[appUrls.size()])));
-                ClassLoaderManager.pluginClassLoaders.add(new PluginClassLoader(shareUrls.toArray(new URL[shareUrls.size()])));
+                List<List<URL>> appURLsList = new ArrayList<>();
+                appURLsList.add(appUrls);
 
-                Bootstrap.main(new String[]{});
+                DapengContainer dapengContainer = new DapengContainer();
+                ContainerFactory.initDapengContainer(dapengContainer);
+
+                List<AppClassLoader> appClassLoaders = appURLsList.stream().map(i -> new AppClassLoader(i.toArray(new URL[i.size()]))).collect(Collectors.toList());
+
+                PlatformClassLoader platformClassLoader = new PlatformClassLoader(platformUrls.toArray(new URL[platformUrls.size()]));
+                ClassLoaderManager.platformClassLoader = platformClassLoader;
+                ShareClassLoader shareClassLoader = new ShareClassLoader(shareUrls.toArray(new URL[shareUrls.size()]));
+                ClassLoaderManager.shareClassLoader = shareClassLoader;
+                ClassLoaderManager.pluginClassLoader= new ArrayList<>();
+                ClassLoaderManager.pluginClassLoader.add(new PluginClassLoader(shareUrls.toArray(new URL[shareUrls.size()])));
+
+                Thread.currentThread().setContextClassLoader(appClassLoaders.get(0));
+                //3. 初始化appLoader,dapengPlugin
+                Plugin springAppLoader = new SpringAppLoader(dapengContainer,appClassLoaders);
+                Plugin apiDocPlugin = new ApiDocPlugin(dapengContainer);
+                Plugin zookeeperPlugin = new ZookeeperRegistryPlugin(dapengContainer);
+                Plugin taskSchedulePlugin = new TaskSchedulePlugin(dapengContainer);
+                Plugin nettyPlugin = new NettyPlugin(dapengContainer);
+
+                //ApiDocPlugin优先启动(为了Spring触发注册事件时，ServiceCache已经实例化，能收到消息)
+                dapengContainer.registerPlugin(springAppLoader);
+                dapengContainer.registerPlugin(zookeeperPlugin);
+                dapengContainer.registerPlugin(taskSchedulePlugin);
+                dapengContainer.registerPlugin(nettyPlugin);
+                dapengContainer.registerPlugin(apiDocPlugin);
+
+
+                //4.启动Apploader， plugins
+                ContainerFactory.getContainer().getPlugins().forEach(Plugin::start);
+
             } catch (Exception e) {
                 Thread.currentThread().getThreadGroup().uncaughtException(Thread.currentThread(), e);
             }
-        }, mainClass + ".main()");
+        }, "RunContainerPlugin" + ".main()");
         bootstrapThread.setContextClassLoader(getClassLoader());
         bootstrapThread.start();
 
         joinNonDaemonThreads(threadGroup);
     }
 
-    private boolean removeContainerAndBootstrap(Iterator<URL> iterator, URL url) {
-        if (url.getFile().matches("^.*/dapeng-container.*\\.jar$")) {
+    private boolean removeContainer(Iterator<URL> iterator, URL url) {
+        if (url.getFile().matches("^.*/dapeng-container-impl.*\\.jar$")) {
             iterator.remove();
 
             return true;
         }
+        return false;
+    }
 
-        if (url.getFile().matches("^.*/dapeng-bootstrap.*\\.jar$")) {
+    private boolean removeCore(Iterator<URL> iterator, URL url) {
+
+        if (url.getFile().matches("^.*/dapeng-core.*\\.jar$")) {
             iterator.remove();
 
             return true;
