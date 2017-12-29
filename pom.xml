@@ -42,7 +42,7 @@
         <module>dapeng-maven-plugin</module>
         <module>dapeng-registry</module>
         <module>dapeng-code-generator</module>
-        <module>dapeng-bootstrap</module>
+        <!--<module>dapeng-bootstrap</module>-->
         <module>dapeng-api-doc</module>
         <!--<module>dapeng-monitor</module>-->
         <module>dapeng-route</module>

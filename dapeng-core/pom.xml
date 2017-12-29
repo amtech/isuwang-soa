@@ -10,26 +10,4 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>dapeng-core</artifactId>
-
-    <distributionManagement>
-        <repository>
-            <id>nexus-releases</id>
-            <name>Nexus Releases Repository</name>
-            <url>http://maven.tuikor.com/content/repositories/releases/</url>
-        </repository>
-
-        <snapshotRepository>
-            <id>nexus-snapshots</id>
-            <name>Nexus Snapshots Repository</name>
-            <url>http://maven.tuikor.com/content/repositories/snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
-
-
-    <dependencies>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-    </dependencies>
 </project>
