@@ -71,12 +71,20 @@ class ScalaGenerator extends CodeGenerator {
       println("=========================================================")
       toStructArrayBuffer(structs).map{(struct: Struct)=>{
         struct.setNamespace(toScalaNamespace(struct.namespace))
-        println(s"生成struct:${struct.name}.scala")
+        println(s"生成struct:${struct.namespace}.${struct.name}.scala")
         val domainTemplate = new StringTemplate(toDomainTemplate(struct))
         val domainWriter = new PrintWriter(new File(rootDir(outDir, struct.getNamespace), s"${struct.name}.scala"), "UTF-8")
         domainWriter.write(domainTemplate.toString)
         domainWriter.close()
-        println(s"生成struct:${struct.name}.scala 完成")
+        println(s"生成struct:${struct.namespace}.${struct.name}.scala 完成")
+
+        println(s"生成serializer: ${struct.namespace+".serializer."}${struct.name}Serializer.scala")
+        //struct.setNamespace(toScalaNamespace(struct.namespace))
+        val structSerializerTemplate = new StringTemplate(new ScalaCodecGenerator().toStructSerializerTemplate(struct,structNamespaces))
+        val structSerializerWriter = new PrintWriter(new File(rootDir(outDir, struct.namespace+".serializer."),s"${struct.name}Serializer.scala"), "UTF-8")
+        structSerializerWriter.write(structSerializerTemplate.toString)
+        structSerializerWriter.close()
+        println(s"生成serializer:${struct.namespace+".serializer."}${struct.name}Serializer.scala 完成")
       }
       }
 
@@ -119,12 +127,12 @@ class ScalaGenerator extends CodeGenerator {
         {
           toStructArrayBuffer(service.structDefinitions).map{(struct: Struct)=>{
 
-            println(s"生成struct:${struct.name}.scala")
+            println(s"生成struct:${struct.namespace}.${struct.name}.scala")
             val domainTemplate = new StringTemplate(toDomainTemplate(struct))
             val domainWriter = new PrintWriter(new File(rootDir(outDir, struct.getNamespace), s"${struct.name}.scala"), "UTF-8")
             domainWriter.write(domainTemplate.toString)
             domainWriter.close()
-            println(s"生成struct:${struct.name}.scala 完成")
+            println(s"生成struct:${struct.namespace}${struct.name}.scala 完成")
           }
           }
         }
@@ -156,17 +164,6 @@ class ScalaGenerator extends CodeGenerator {
       asyncClientWriter.write(asyncClientTemplate.toString())
       asyncClientWriter.close()
       println(s"生成client:${service.name}AsyncClient.scala 完成")
-
-
-      println(s"生成serializer")
-      toStructArrayBuffer(service.structDefinitions).map{(struct:Struct)=>{
-        val structSerializerTemplate = new StringTemplate(new ScalaCodecGenerator().toStructSerializerTemplate(service.name,struct,structNamespaces))
-        val structSerializerWriter = new PrintWriter(new File(rootDir(outDir, struct.namespace+".serializer."),s"${struct.name}Serializer.scala"), "UTF-8")
-        structSerializerWriter.write(structSerializerTemplate.toString)
-        structSerializerWriter.close()
-        println(s"生成serializer:${struct.name}Serializer.scala 完成")
-      }}
-
 
       println(s"生成Codec:${service.name}Codec.scala")
       val codecTemplate = new StringTemplate(new ScalaCodecGenerator().toCodecTemplate(service,structNamespaces, oriNamespaces.get(service).getOrElse("")))
@@ -364,60 +361,78 @@ class ScalaGenerator extends CodeGenerator {
     return {
       <div>package {service.namespace.substring(0, service.namespace.lastIndexOf("."))}
 
-        import com.isuwang.dapeng.core._
-        import com.isuwang.org.apache.thrift._
-        import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + "." + service.name + "Codec._"}
-        import scala.concurrent.<block>Future, Promise</block>
-        import java.util.function.BiConsumer
+        import com.isuwang.dapeng.core._;
+        import com.isuwang.org.apache.thrift._;
+        import java.util.ServiceLoader;
+        import java.util.concurrent.CompletableFuture;
+        import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + "." + service.name + "AsyncCodec._"};
+        import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + ".service." + service.name }Async;
 
         /**
         {notice}
         **/
-        object {service.name}AsyncClient extends BaseCommonServiceClient("{oriNamespace}.{service.name}", "{service.meta.version}")<block>
+        class {service.name}Client extends {service.name}Async <block>
+
+        import java.util.function.<block> Function ⇒ JFunction, Predicate ⇒ JPredicate, BiPredicate </block>
+        implicit def toJavaFunction[A, B](f: Function1[A, B]) = new JFunction[A, B] <block>
+          override def apply(a: A): B = f(a)
+        </block>
+
+        val serviceName = "{service.namespace + "." + service.name }"
+        val version = "{service.meta.version}"
+        val pool = <block>
+          val serviceLoader = ServiceLoader.load(classOf[SoaConnectionPoolFactory])
+          if (serviceLoader.iterator().hasNext) <block>
+            val poolImpl = serviceLoader.iterator().next().getPool
+            poolImpl.registerClientInfo(serviceName,version)
+            poolImpl
+          </block> else null
+        </block>
+
+        def getServiceMetadata: String = <block>
+          pool.send(
+          serviceName,
+          version,
+          "getServiceMetadata",
+          new getServiceMetadata_args,
+          new GetServiceMetadata_argsSerializer,
+          new GetServiceMetadata_resultSerializer
+          ).success
+        </block>
+
 
         {
         toMethodArrayBuffer(service.methods).map{(method:Method)=>{
           <div>
+
             /**
             * {method.doc}
             **/
             def {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
-            <div>{nameAsId(field.name)}:{toDataTypeTemplate(field.getDataType())} ,</div>}}} timeout: Long) : scala.concurrent.Future[{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}] = <block>
+            <div>{nameAsId(field.name)}:{toDataTypeTemplate(field.getDataType())} {if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}}
+            {if(method.getRequest.fields.size() > 0) <span>,</span>} timeout: Long = 5000) : {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} = <block>
 
-            initContext("{method.name}");
+            val response = pool.sendAsync(
+            serviceName,
+            version,
+            "{method.name}",
+            {method.request.name}({
+            toFieldArrayBuffer(method.getRequest.getFields).map{(field: Field)=>{
+              <div>{nameAsId(field.name)}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>
+            }
+            }}),
+            new {method.request.name.charAt(0).toUpper + method.request.name.substring(1)}Serializer(),
+            new {method.response.name.charAt(0).toUpper + method.response.name.substring(1)}Serializer()
+            ,timeout).asInstanceOf[CompletableFuture[{method.response.name}]]
 
-            try <block>
-              val _responseFuture = sendBaseAsync({method.request.name}({
-              toFieldArrayBuffer(method.getRequest.getFields).map{(field: Field)=>{
-                <div>{nameAsId(field.name)}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>
-              }
-              }
-              }), new {method.request.name.charAt(0).toUpper + method.request.name.substring(1)}Serializer(), new {method.response.name.charAt(0).toUpper + method.response.name.substring(1)}Serializer(), timeout).asInstanceOf[java.util.concurrent.CompletableFuture[{method.response.name}]]
+            {if(method.getResponse.getFields.get(0).getDataType.kind != DataType.KIND.VOID) <div>response.thenApply(_.success).get</div>}
 
-              val promise = Promise[{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}]()
-
-              _responseFuture.whenComplete(new BiConsumer[{method.response.name}, Throwable]<block>
-
-              override def accept(r: {method.response.name}, e: Throwable): Unit = <block>
-                if(e != null)
-                  promise.failure(e)
-                else
-                  promise.success({if(method.getResponse.getFields.get(0).getDataType.kind != DataType.KIND.VOID) <div>r.success</div>})
-                </block>
-              </block>)
-              promise.future
-            </block>catch<block>
-              case e: SoaException => throw e
-              case e: TException => throw new SoaException(e)
-            </block>finally <block>
-              destoryContext()
-            </block>
           </block>
+
           </div>
         }
         }
         }
-
       </block>
       </div>
     }
@@ -502,8 +517,6 @@ class ScalaGenerator extends CodeGenerator {
         import com.isuwang.dapeng.core.<block>Processor, Service</block>
         import com.isuwang.dapeng.core.SoaGlobalTransactional
 
-        import java.util.concurrent.Future
-
         /**
         {notice}
         * {service.doc}
@@ -528,18 +541,6 @@ class ScalaGenerator extends CodeGenerator {
 
           </div>
 
-            <div>
-              /**
-              * {method.doc}
-              **/
-              {if(method.doc != null && method.doc.contains("@SoaGlobalTransactional")) <div>@SoaGlobalTransactional</div>}
-              <div>@throws[com.isuwang.dapeng.core.SoaException]</div>
-              def {method.name}(
-              {toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
-              <div>{nameAsId(field.name)}: {toDataTypeTemplate(field.getDataType())} {if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}
-            }}{if(method.getResponse.getFields().get(0).getDataType.kind!=KIND.VOID) ","} timeout : Long): Future[{if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) <div>Void</div> else toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}]
-
-            </div>
         }
         }
         }

@@ -485,7 +485,7 @@ class ScalaCodecGenerator extends CodeGenerator {
   }
 
 
-  def toStructSerializerTemplate(serviceName:String, struct:Struct ,structNamespaces:util.Set[String]): Elem ={
+  def toStructSerializerTemplate(struct:Struct ,structNamespaces:util.Set[String]): Elem ={
     return {
       <div> package {struct.namespace}.serializer;
 
