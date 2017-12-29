@@ -19,9 +19,6 @@
 
 package com.isuwang.org.apache.thrift.transport;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -34,8 +31,6 @@ import java.io.OutputStream;
  *
  */
 public class TIOStreamTransport extends TTransport {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(TIOStreamTransport.class.getName());
 
   /** Underlying inputStream */
   protected InputStream inputStream_ = null;
@@ -101,7 +96,6 @@ public class TIOStreamTransport extends TTransport {
       try {
         inputStream_.close();
       } catch (IOException iox) {
-        LOGGER.warn("Error closing input stream.", iox);
       }
       inputStream_ = null;
     }
@@ -109,7 +103,6 @@ public class TIOStreamTransport extends TTransport {
       try {
         outputStream_.close();
       } catch (IOException iox) {
-        LOGGER.warn("Error closing output stream.", iox);
       }
       outputStream_ = null;
     }

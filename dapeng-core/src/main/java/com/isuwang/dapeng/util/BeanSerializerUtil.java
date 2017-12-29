@@ -6,7 +6,7 @@ import com.isuwang.org.apache.thrift.protocol.TCompactProtocol;
 /**
  * Created by lihuimin on 2017/10/27.
  */
-public class BeanSerializer {
+public class BeanSerializerUtil {
 
     public static <T> byte[] serialize(T structBean, com.isuwang.dapeng.core.BeanSerializer<T> structSerializer) throws TException {
 

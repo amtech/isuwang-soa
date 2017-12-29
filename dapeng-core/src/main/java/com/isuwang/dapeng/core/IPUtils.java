@@ -1,8 +1,5 @@
 package com.isuwang.dapeng.core;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.*;
 import java.util.Enumeration;
 
@@ -14,7 +11,6 @@ import java.util.Enumeration;
  */
 public class IPUtils {
 
-    static final Logger LOGGER = LoggerFactory.getLogger(IPUtils.class);
     static InetAddress inetAddress = null;
 
     static {
@@ -35,9 +31,9 @@ public class IPUtils {
                 }
             }
         } catch (UnknownHostException e) {
-            LOGGER.error("InetAddress.getLocalHost error.", e);
+            e.printStackTrace();
         } catch (SocketException e) {
-            LOGGER.error("InetAddress.getLocalHost error.", e);
+            e.printStackTrace();
         }
     }
 
