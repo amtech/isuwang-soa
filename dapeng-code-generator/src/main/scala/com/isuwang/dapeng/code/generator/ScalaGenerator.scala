@@ -110,6 +110,13 @@ class ScalaGenerator extends CodeGenerator {
       writer.close()
       println(s"生成service:${service.name}.scala 完成")
 
+      println(s"生成AsyncService:${service.name}Async.scala")
+      val asyncServiceTemplate = new StringTemplate(toAsyncServiceTemplate(service,oriNamespaces.get(service).getOrElse("")))
+      val writer2 = new PrintWriter(new File(rootDir(outDir, service.getNamespace), s"${service.name}Async.scala"), "UTF-8")
+      writer2.write(asyncServiceTemplate.toString())
+      writer2.close()
+      println(s"生成AsyncService:${service.name}Async.scala 完成")
+
       if(!generateAll){
         {
           toStructArrayBuffer(service.structDefinitions).map{(struct: Struct)=>{
@@ -170,12 +177,12 @@ class ScalaGenerator extends CodeGenerator {
       codecWriter.close()
       println(s"生成Codec:${service.name}Codec.scala 完成")
 
-//      println(s"生成Codec:${service.name}Codec.scala")
-//      val asyncCodecTemplate = new StringTemplate(new ScalaCodecGenerator().toAsyncCodecTemplate(service,structNamespaces, oriNamespaces.get(service).getOrElse("")))
-//      val asyncCodecWriter = new PrintWriter(new File(rootDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))), s"${service.name}Codec.scala"), "UTF-8")
-//      asyncCodecWriter.write(asyncCodecTemplate.toString())
-//      asyncCodecWriter.close()
-//      println(s"生成Codec:${service.name}Codec.scala 完成")
+      println(s"生成Codec:${service.name}AsyncCodec.scala")
+      val asyncCodecTemplate = new StringTemplate(new ScalaCodecGenerator().toAsyncCodecTemplate(service,structNamespaces, oriNamespaces.get(service).getOrElse("")))
+      val asyncCodecWriter = new PrintWriter(new File(rootDir(outDir, service.namespace.substring(0, service.namespace.lastIndexOf("."))), s"${service.name}AsyncCodec.scala"), "UTF-8")
+      asyncCodecWriter.write(asyncCodecTemplate.toString())
+      asyncCodecWriter.close()
+      println(s"生成Codec:${service.name}AsyncCodec.scala 完成")
 
 
       //scala & java client should use the same xml
@@ -308,7 +315,7 @@ class ScalaGenerator extends CodeGenerator {
             **/
             def {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
             <div>{nameAsId(field.name)}:{toDataTypeTemplate(field.getDataType())} {if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}}
-            {if(method.getRequest.fields.size() > 0) <span>,</span>} timeout: Long = 5000) : {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} = <block>
+            , timeout: Long = 5000) : {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} = <block>
 
             val response = pool.sendAsync(
             serviceName,
@@ -515,6 +522,8 @@ class ScalaGenerator extends CodeGenerator {
         import com.isuwang.dapeng.core.<block>Processor, Service</block>
         import com.isuwang.dapeng.core.SoaGlobalTransactional
 
+        import java.util.concurrent.Future
+
         /**
         {notice}
         * {service.doc}
@@ -530,6 +539,7 @@ class ScalaGenerator extends CodeGenerator {
             * {method.doc}
             **/
             {if(method.doc != null && method.doc.contains("@SoaGlobalTransactional")) <div>@SoaGlobalTransactional</div>}
+            <div>@throws[com.isuwang.dapeng.core.SoaException]</div>
             def {method.name}(
             {toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
             <div>{nameAsId(field.name)}: {toDataTypeTemplate(field.getDataType())} {if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}
@@ -537,6 +547,19 @@ class ScalaGenerator extends CodeGenerator {
             }): {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}
 
           </div>
+
+            <div>
+              /**
+              * {method.doc}
+              **/
+              {if(method.doc != null && method.doc.contains("@SoaGlobalTransactional")) <div>@SoaGlobalTransactional</div>}
+              <div>@throws[com.isuwang.dapeng.core.SoaException]</div>
+              def {method.name}(
+              {toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+              <div>{nameAsId(field.name)}: {toDataTypeTemplate(field.getDataType())} {if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}
+            }}{if(method.getResponse.getFields().get(0).getDataType.kind!=KIND.VOID) ","} timeout : Long): Future[{if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) <div>Void</div> else toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}]
+
+            </div>
         }
         }
         }
@@ -544,6 +567,47 @@ class ScalaGenerator extends CodeGenerator {
         </div>
     }
   }
+
+
+  private def toAsyncServiceTemplate(service:Service, oriNamespace: String): Elem = {
+    return {
+      <div>
+        package {service.namespace}
+
+        import com.isuwang.dapeng.core.<block>Processor, Service</block>
+        import com.isuwang.dapeng.core.SoaGlobalTransactional
+        import java.util.concurrent.Future
+
+        /**
+        {notice}
+        * {service.doc}
+        **/
+        @Service(name ="{oriNamespace+"."+service.name}Async" , version = "{service.meta.version}")
+        @Processor(className = "{service.namespace.substring(0, service.namespace.lastIndexOf("service"))}{service.name}AsyncCodec$Processor")
+        trait {service.name}Async <block>
+        {
+        toMethodArrayBuffer(service.methods).map { (method: Method) =>
+        {
+          <div>
+            /**
+            * {method.doc}
+            **/
+            {if(method.doc != null && method.doc.contains("@SoaGlobalTransactional")) <div>@SoaGlobalTransactional</div>}
+            <div>@throws[com.isuwang.dapeng.core.SoaException]</div>
+            def {method.name}(
+            {toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+            <div>{nameAsId(field.name)}: {toDataTypeTemplate(field.getDataType())} {if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}
+          }}{if(method.getRequest.getFields().size()>0) ","} timeout : Long): Future[{if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) <div>Void</div> else toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}]
+
+          </div>
+        }
+        }
+        }
+      </block>
+      </div>
+    }
+  }
+
 
   /**
     * idl解析类型转为scala对应类型
