@@ -27,7 +27,7 @@ public class JsonWriter implements JsonCallback {
     @Override
     public void onStartField(String name) {
         // TODO emit ','
-        builder.append('\'').append(name).append('\'').append(':');
+        builder.append('\"').append(name).append('\"').append(':');
     }
 
     @Override
