@@ -2,6 +2,7 @@ package com.isuwang.dapeng.impl.plugins.netty;
 
 
 import com.isuwang.dapeng.api.*;
+import com.isuwang.dapeng.client.netty.TSoaTransport;
 import com.isuwang.dapeng.core.*;
 import com.isuwang.dapeng.core.definition.SoaFunctionDefinition;
 import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
@@ -11,7 +12,6 @@ import com.isuwang.dapeng.core.filter.FilterContext;
 import com.isuwang.dapeng.core.filter.SharedChain;
 import com.isuwang.dapeng.core.filter.HandlerFilterContext;
 import com.isuwang.dapeng.impl.filters.TimeoutFilter;
-import com.isuwang.dapeng.remoting.netty.TSoaTransport;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.TProtocol;
 import io.netty.buffer.ByteBuf;
