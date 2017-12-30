@@ -2,6 +2,7 @@ package com.isuwang.dapeng.metadata;
 
 import com.isuwang.dapeng.client.netty.SoaConnectionImpl;
 import com.isuwang.dapeng.core.SoaException;
+import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.org.apache.thrift.TException;
 
 /**
@@ -22,7 +23,7 @@ public class MetadataClient {
      * getServiceMetadata
      **/
     public String getServiceMetadata() throws Exception {
-        getServiceMetadata_result result = new SoaConnectionImpl("127.0.0.1",9090)
+        getServiceMetadata_result result = new SoaConnectionImpl("127.0.0.1", SoaSystemEnvProperties.SOA_CONTAINER_PORT)
                 .send(serviceName,version,methodName, new getServiceMetadata_args(),
                         new GetServiceMetadata_argsSerializer(),new GetServiceMetadata_resultSerializer());
 
