@@ -30,6 +30,8 @@ public class Bootstrap {
         DapengContainer dapengContainer = new DapengContainer();
         ContainerFactory.initDapengContainer(dapengContainer);
 
+        System.out.println("enginePath:" + enginePath);
+
 
         loadAllUrls();
         List<AppClassLoader> appClassLoaders = appURLs.stream().map(i -> new AppClassLoader(i.toArray(new URL[i.size()]))).collect(Collectors.toList());
