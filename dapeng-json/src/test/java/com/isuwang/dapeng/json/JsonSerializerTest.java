@@ -25,8 +25,10 @@ public class JsonSerializerTest {
     public static void main(String[] args) throws IOException, TException {
 
         simpleStructTest();
-        simpleMapTest();
-        intArrayTest();
+//        simpleMapTest();
+//        intArrayTest();
+//        intMapTest();
+        enumTest();
     }
 
     private static void simpleStructTest() throws TException, IOException {
@@ -40,6 +42,11 @@ public class JsonSerializerTest {
         doTest(orderService, orderServicePayNotify, orderServicePayNotify.request, payNotifyJson);
     }
 
+    /**
+     * Map<String,String>
+     * @throws IOException
+     * @throws TException
+     */
     private static void simpleMapTest() throws IOException, TException {
         final String orderDescriptorXmlPath = "/order.xml";
         Service orderService = getService(orderDescriptorXmlPath);
@@ -48,6 +55,23 @@ public class JsonSerializerTest {
         String json = loadJson("/orderService_payNotifyForAlipay-map.json");
 
         doTest(orderService, method, method.request, json);
+    }
+
+    /**
+     * Map<Integer, String>
+     * @throws IOException
+     * @throws TException
+     */
+    private static void intMapTest() throws IOException, TException {
+        final String crmDescriptorXmlPath = "/crm.xml";
+
+        Service crmService = getService(crmDescriptorXmlPath);
+
+        String json = loadJson("/crmService_listDoctorsNameById-map.json");
+
+        Method method = crmService.methods.stream().filter(_method -> _method.name.equals("listDoctorsNameById")).collect(Collectors.toList()).get(0);
+
+        doTest(crmService, method, method.response, json);
     }
 
     private static void intArrayTest() throws IOException, TException {
@@ -61,6 +85,19 @@ public class JsonSerializerTest {
 
         doTest(crmService, method, method.request, json);
     }
+
+    private static void enumTest() throws IOException, TException {
+        final String crmDescriptorXmlPath = "/crm.xml";
+
+        Service crmService = getService(crmDescriptorXmlPath);
+
+        String json = loadJson("/crmService_modifyDoctorType-enum.json");
+
+        Method method = crmService.methods.stream().filter(_method -> _method.name.equals("modifyDoctorType")).collect(Collectors.toList()).get(0);
+
+        doTest(crmService, method, method.request, json);
+    }
+
 
     private static void doTest(Service service, Method method, Struct struct, String json) throws TException {
 

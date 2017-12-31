@@ -11,14 +11,15 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class JsonSerializer implements BeanSerializer<String> {
+    private final Logger logger = new Logger();
 
-    private final Struct respStruct;
+    private final Struct struct;
     private final ByteBuf byteBuf;
     private final Service service;
     private final Method method;
 
-    public JsonSerializer(Struct respStruct, ByteBuf byteBuf, Service service, Method method) {
-        this.respStruct = respStruct;
+    public JsonSerializer(Struct struct, ByteBuf byteBuf, Service service, Method method) {
+        this.struct = struct;
         this.byteBuf = byteBuf;
         this.service = service;
         this.method = method;
@@ -34,7 +35,7 @@ public class JsonSerializer implements BeanSerializer<String> {
             if (field.type == TType.STOP)
                 break;
 
-            List<Field> flds = respStruct.getFields().stream().filter(_field -> {
+            List<Field> flds = struct.getFields().stream().filter(_field -> {
                 return _field.tag == field.id;
             }).collect(Collectors.toList()); // TODO get fld by field.id
 
@@ -124,8 +125,6 @@ public class JsonSerializer implements BeanSerializer<String> {
                 boolean boolValue = iproto.readBool();
                 if (!skip) {
                     writer.onBoolean(boolValue);
-                } else {
-                    TProtocolUtil.skip(iproto, TType.BOOL);
                 }
                 break;
             case TType.BYTE:
@@ -135,40 +134,35 @@ public class JsonSerializer implements BeanSerializer<String> {
                 double dValue = iproto.readDouble();
                 if (!skip) {
                     writer.onNumber(dValue);
-                } else {
-                    TProtocolUtil.skip(iproto, fieldType);
                 }
                 break;
             case TType.I16:
                 short sValue = iproto.readI16();
                 if (!skip) {
                     writer.onNumber(sValue);
-                } else {
-                    TProtocolUtil.skip(iproto, fieldType);
                 }
                 break;
             case TType.I32:
                 int iValue = iproto.readI32();
                 if (!skip) {
-                    writer.onNumber(iValue);
-                } else {
-                    TProtocolUtil.skip(iproto, fieldType);
+                    if (fld != null && fld.dataType.kind == DataType.KIND.ENUM) {
+                        String enumLabel = findEnumItemLabel(findEnum(fld.dataType.qualifiedName, service), iValue);
+                        writer.onString(enumLabel);
+                    } else {
+                        writer.onNumber(iValue);
+                    }
                 }
                 break;
             case TType.I64:
                 long lValue = iproto.readI64();
                 if (!skip) {
                     writer.onNumber(lValue);
-                } else {
-                    TProtocolUtil.skip(iproto, fieldType);
                 }
                 break;
             case TType.STRING:
                 String strValue = iproto.readString();
                 if (!skip) {
                     writer.onString(strValue);
-                } else {
-                    TProtocolUtil.skip(iproto, fieldType);
                 }
                 break;
             case TType.STRUCT:
@@ -285,6 +279,7 @@ public class JsonSerializer implements BeanSerializer<String> {
         // current struct
         StackNode current;
         boolean inited = false;
+        boolean foundField = true;
 
         /**
          * @param oproto
@@ -293,8 +288,8 @@ public class JsonSerializer implements BeanSerializer<String> {
             this.oproto = oproto;
             DataType initDataType = new DataType();
             initDataType.setKind(DataType.KIND.STRUCT);
-            initDataType.qualifiedName = method.request.name;
-            this.current = new StackNode(initDataType, byteBuf.writerIndex(), method.request);
+            initDataType.qualifiedName = struct.name;
+            this.current = new StackNode(initDataType, byteBuf.writerIndex(), struct);
         }
 
 
@@ -336,6 +331,7 @@ public class JsonSerializer implements BeanSerializer<String> {
                         Struct struct = current.struct;//findStruct(current.dataType.qualifiedName, service);
                         if (struct == null) {
                             //TODO
+                            logger.info("struct not found");
                         }
                         oproto.writeStructBegin(new TStruct(struct.name));
                         break;
@@ -417,7 +413,13 @@ public class JsonSerializer implements BeanSerializer<String> {
                 }
             } else {
                 Field field = findField(name, current.struct);
-                if (field == null) return;
+                if (field == null) {
+                    foundField = false;
+                    logger.info("field(" + name + ") not found. just skip");
+                    return;
+                } else {
+                    foundField = true;
+                }
 
                 oproto.writeFieldBegin(new TField(field.name, dataType2Byte(field.dataType), (short) field.getTag()));
                 stackNew(new StackNode(field.dataType, byteBuf.writerIndex(), findStruct(field.dataType.qualifiedName, service)));
@@ -426,7 +428,8 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onEndField() throws TException {
-            //TODO field == null的情况
+            if (!foundField) return;
+
             pop();
             if (current.dataType.kind == DataType.KIND.MAP) {
 
@@ -492,6 +495,12 @@ public class JsonSerializer implements BeanSerializer<String> {
                 current.increaseElement();
             } else if (peek().dataType.kind == DataType.KIND.MAP) {
                 peek().increaseElement();
+            }
+
+            if (current.dataType.kind == DataType.KIND.ENUM) {
+                TEnum tEnum = findEnum(current.dataType.qualifiedName, service);
+                oproto.writeI32(findEnumItemValue(tEnum, value));
+                return;
             }
             oproto.writeString(value);
         }
@@ -584,6 +593,46 @@ public class JsonSerializer implements BeanSerializer<String> {
         return null;
     }
 
+    private TEnum findEnum(String qualifiedName, Service service) {
+        List<TEnum> enumDefinitions = service.getEnumDefinitions();
+
+        for (TEnum enumDefinition : enumDefinitions) {
+            if ((enumDefinition.getNamespace() + "." + enumDefinition.getName()).equals(qualifiedName)) {
+                return enumDefinition;
+            }
+        }
+
+        return null;
+    }
+
+    private String findEnumItemLabel(TEnum tEnum, Integer value) {
+        List<TEnum.EnumItem> enumItems = tEnum.getEnumItems();
+        for (TEnum.EnumItem enumItem : enumItems) {
+            if (enumItem.getValue() == value) {
+                return enumItem.getLabel();
+            }
+        }
+
+        return null;
+    }
+
+    private Integer findEnumItemValue(TEnum tEnum, String label) {
+        List<TEnum.EnumItem> enumItems = tEnum.getEnumItems();
+        for (TEnum.EnumItem enumItem : enumItems) {
+            if (enumItem.getLabel().equals(label)) {
+                return enumItem.getValue();
+            }
+        }
+
+        for (TEnum.EnumItem enumItem : enumItems) {
+            if (String.valueOf(enumItem.getValue()).equals(label)) {
+                return enumItem.getValue();
+            }
+        }
+
+        return null;
+    }
+
     private byte dataType2Byte(DataType type) {
         switch (type.kind) {
             case BOOLEAN:
@@ -668,6 +717,21 @@ public class JsonSerializer implements BeanSerializer<String> {
      */
     private boolean isComplexKind(DataType.KIND kind) {
         return isMultiElementKind(kind) || kind == DataType.KIND.STRUCT;
+    }
+
+    class Logger {
+        void debug(String msg) {
+            System.out.println(msg);
+        }
+        void info(String msg) {
+            System.out.println(msg);
+        }
+        void warning(String msg) {
+            System.out.println(msg);
+        }
+        void error(String msg) {
+            System.out.println(msg);
+        }
     }
 
 }
