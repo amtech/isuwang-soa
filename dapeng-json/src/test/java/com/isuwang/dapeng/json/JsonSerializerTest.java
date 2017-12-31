@@ -24,11 +24,13 @@ public class JsonSerializerTest {
 
     public static void main(String[] args) throws IOException, TException {
 
-        simpleStructTest();
+//        simpleStructTest();
 //        simpleMapTest();
 //        intArrayTest();
 //        intMapTest();
-        enumTest();
+//        enumTest();
+//        simpleStructWithEnumTest();
+        simpleStructWithOptionTest();
     }
 
     private static void simpleStructTest() throws TException, IOException {
@@ -38,12 +40,13 @@ public class JsonSerializerTest {
         Method orderServicePayNotify = orderService.methods.stream().filter(method -> method.name.equals("payNotify")).collect(Collectors.toList()).get(0);
         String payNotifyJson = loadJson("/orderService_payNotify.json");
 
-
-        doTest(orderService, orderServicePayNotify, orderServicePayNotify.request, payNotifyJson);
+        String desc = "simpleStructTest";
+        doTest(orderService, orderServicePayNotify, orderServicePayNotify.request, payNotifyJson, desc);
     }
 
     /**
      * Map<String,String>
+     *
      * @throws IOException
      * @throws TException
      */
@@ -54,11 +57,12 @@ public class JsonSerializerTest {
         Method method = orderService.methods.stream().filter(_method -> _method.name.equals("payNotifyForAlipay")).collect(Collectors.toList()).get(0);
         String json = loadJson("/orderService_payNotifyForAlipay-map.json");
 
-        doTest(orderService, method, method.request, json);
+        doTest(orderService, method, method.request, json, "simpleMapTest");
     }
 
     /**
      * Map<Integer, String>
+     *
      * @throws IOException
      * @throws TException
      */
@@ -71,7 +75,7 @@ public class JsonSerializerTest {
 
         Method method = crmService.methods.stream().filter(_method -> _method.name.equals("listDoctorsNameById")).collect(Collectors.toList()).get(0);
 
-        doTest(crmService, method, method.response, json);
+        doTest(crmService, method, method.response, json, "intMapTest");
     }
 
     private static void intArrayTest() throws IOException, TException {
@@ -83,7 +87,7 @@ public class JsonSerializerTest {
 
         Method method = crmService.methods.stream().filter(_method -> _method.name.equals("listDoctorsNameById")).collect(Collectors.toList()).get(0);
 
-        doTest(crmService, method, method.request, json);
+        doTest(crmService, method, method.request, json, "intArrayTest");
     }
 
     private static void enumTest() throws IOException, TException {
@@ -95,11 +99,35 @@ public class JsonSerializerTest {
 
         Method method = crmService.methods.stream().filter(_method -> _method.name.equals("modifyDoctorType")).collect(Collectors.toList()).get(0);
 
-        doTest(crmService, method, method.request, json);
+        doTest(crmService, method, method.request, json, "enumTest");
+    }
+
+    private static void simpleStructWithEnumTest() throws IOException, TException {
+        final String crmDescriptorXmlPath = "/crm.xml";
+
+        Service crmService = getService(crmDescriptorXmlPath);
+
+        String json = loadJson("/crmService_saveFocusDoctor-structWithEnum.json");
+
+        Method method = crmService.methods.stream().filter(_method -> _method.name.equals("saveFocusDoctor")).collect(Collectors.toList()).get(0);
+
+        doTest(crmService, method, method.request, json, "simpleStructWithEnumTest");
+    }
+
+    private static void simpleStructWithOptionTest() throws IOException, TException {
+        final String crmDescriptorXmlPath = "/crm.xml";
+
+        Service crmService = getService(crmDescriptorXmlPath);
+
+        String json = loadJson("/crmService_getPatient-option.json");
+
+        Method method = crmService.methods.stream().filter(_method -> _method.name.equals("getPatient")).collect(Collectors.toList()).get(0);
+
+        doTest(crmService, method, method.request, json, "simpleStructWithOptionTest");
     }
 
 
-    private static void doTest(Service service, Method method, Struct struct, String json) throws TException {
+    private static void doTest(Service service, Method method, Struct struct, String json, String desc) throws TException {
 
         final ByteBuf requestBuf = PooledByteBufAllocator.DEFAULT.buffer(8192);
 
@@ -113,7 +141,7 @@ public class JsonSerializerTest {
         System.out.println("origJson:\n" + json);
 
         System.out.println("after enCode and decode:\n" + jsonSerializer.read(inProtocol));
-        System.out.println("=====================");
+        System.out.println(desc + " ends=====================");
 
     }
 
