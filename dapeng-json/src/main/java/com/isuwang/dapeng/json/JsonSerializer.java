@@ -34,63 +34,150 @@ public class JsonSerializer implements BeanSerializer<String> {
             if (field.type == TType.STOP)
                 break;
 
-            List<Field> flds = respStruct.getFields().stream().filter(_field->{return _field.tag == field.id;}).collect(Collectors.toList()); // TODO get fld by field.id
+            List<Field> flds = respStruct.getFields().stream().filter(_field -> {
+                return _field.tag == field.id;
+            }).collect(Collectors.toList()); // TODO get fld by field.id
 
-            Field fld = flds.isEmpty()?null:flds.get(0);
+            Field fld = flds.isEmpty() ? null : flds.get(0);
 
             boolean skip = fld == null;
 
-            switch (field.type) {
-                case TType.VOID:
-                    break;
-                case TType.BOOL:
-                    boolean boolValue = iproto.readBool();
-                    if (!skip) {
-                        writer.onStartField(fld.name);
-                        writer.onBoolean(boolValue);
-                        writer.onEndField();
-                    }
-                    break;
-                case TType.BYTE:
-                    // TODO
-                case TType.DOUBLE:
-                    // TODO
-                case TType.I16:
-                    // TODO
-                case TType.I32:
-                    // TODO:
-                case TType.I64:
-                    // TODO:
-                case TType.STRING:
-                    String strValue = iproto.readString();
-                    if (!skip) {
-                        writer.onStartField(fld.name);
-                        writer.onString(strValue);
-                        writer.onEndField();
-                    }
-                    break;
-                case TType.STRUCT:
-                    if (!skip) {
-                        String subStructName = fld.dataType.qualifiedName;
-                        Struct subStruct = findStruct(subStructName, service);
-                        writer.onStartField(subStructName);
-                        new JsonSerializer(subStruct, byteBuf, service, method).read(iproto, writer);
-                        writer.onEndField();
-                    } else {
-                        // skip contents
-                    }
-                    break;
-                case TType.MAP:
-                case TType.SET:
-                case TType.LIST:
-                default:
 
+            if (!skip) {
+                writer.onStartField(fld.name);
+                readField(iproto, field, fld, field.type, writer, skip);
+                writer.onEndField();
             }
+
+            iproto.readFieldEnd();
+
+//            switch (field.type) {
+//                case TType.VOID:
+//                    break;
+//                case TType.BOOL:
+//                    boolean boolValue = iproto.readBool();
+//                    if (!skip) {
+//                        writer.onStartField(fld.name);
+//                        writer.onBoolean(boolValue);
+//                        writer.onEndField();
+//                    }
+//                    break;
+//                case TType.BYTE:
+//                    // TODO
+//                case TType.DOUBLE:
+//                    // TODO
+//                case TType.I16:
+//                    // TODO
+//                case TType.I32:
+//                    // TODO:
+//                case TType.I64:
+//                    // TODO:
+//                case TType.STRING:
+//                    String strValue = iproto.readString();
+//                    if (!skip) {
+//                        writer.onStartField(fld.name);
+//                        writer.onString(strValue);
+//                        writer.onEndField();
+//                    }
+//                    break;
+//                case TType.STRUCT:
+//                    if (!skip) {
+//                        String subStructName = fld.dataType.qualifiedName;
+//                        Struct subStruct = findStruct(subStructName, service);
+//                        writer.onStartField(subStructName);
+//                        new JsonSerializer(subStruct, byteBuf, service, method).read(iproto, writer);
+//                        writer.onEndField();
+//                    } else {
+//                        // skip contents
+//                    }
+//                    break;
+//                case TType.MAP:
+//                    if (!skip) {
+//                        String subStructName = fld.dataType.qualifiedName;
+//                        Struct subStruct = findStruct(subStructName, service);
+//                        writer.onStartField(field.name);
+//                        TMap map = iproto.readMapBegin();
+//                        map.keyType
+//                        new JsonSerializer(subStruct, byteBuf, service, method).read(iproto, writer);
+//                        writer.onEndField();
+//                    } else {
+//                        // skip contents
+//                    }
+//                    break;
+//                case TType.SET:
+//                case TType.LIST:
+//                default:
+//
+//            }
         }
 
 
         iproto.readStructEnd();
         writer.onEndObject();
+    }
+
+    private void readField(TProtocol iproto, TField field, Field fld, byte fieldType, JsonCallback writer, boolean skip) throws TException {
+        switch (fieldType) {
+            case TType.VOID:
+                break;
+            case TType.BOOL:
+                boolean boolValue = iproto.readBool();
+                if (!skip) {
+                    writer.onBoolean(boolValue);
+                }
+                break;
+            case TType.BYTE:
+                // TODO
+            case TType.DOUBLE:
+                // TODO
+            case TType.I16:
+                // TODO
+            case TType.I32:
+                // TODO:
+            case TType.I64:
+                // TODO:
+            case TType.STRING:
+                String strValue = iproto.readString();
+                if (!skip) {
+                    writer.onString(strValue);
+                } else {
+                    TProtocolUtil.skip(iproto, fieldType);
+                }
+                break;
+            case TType.STRUCT:
+                if (!skip) {
+                    String subStructName = fld.dataType.qualifiedName;
+                    Struct subStruct = findStruct(subStructName, service);
+                    new JsonSerializer(subStruct, byteBuf, service, method).read(iproto, writer);
+                } else {
+                    TProtocolUtil.skip(iproto, field.type);
+                }
+                break;
+            case TType.MAP:
+                if (!skip) {
+                    TMap map = iproto.readMapBegin();
+                    writer.onStartObject();
+                    for (int index = 0; index < map.size; index++) {
+//                        if (map.keyType == TType.STRUCT) {
+//                            String subStructName = fld.dataType.qualifiedName;
+//                            Struct subStruct = findStruct(subStructName, service);
+//                        }
+                        if (map.keyType == TType.STRING) {
+                            writer.onStartField(iproto.readString());
+                        }
+                        readField(iproto, null, null, map.valueType, writer, false);
+                        writer.onEndField();
+                    }
+                    writer.onEndObject();
+                } else {
+                    // skip contents
+                }
+                break;
+            case TType.SET:
+            case TType.LIST:
+            default:
+
+        }
     }
 
     @Override
@@ -202,7 +289,8 @@ public class JsonSerializer implements BeanSerializer<String> {
                         oproto.writeStructBegin(new TStruct(struct.name));
                         break;
                     case MAP:
-                        oproto.writeMapBegin(new TMap(dataType2Byte(current.dataType.keyType), dataType2Byte(current.dataType.valueType), 0));
+                        // default size不能设置为0...
+                        oproto.writeMapBegin(new TMap(dataType2Byte(current.dataType.keyType), dataType2Byte(current.dataType.valueType), 1));
                         break;
                 }
             }
@@ -270,32 +358,47 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onStartField(String name) throws TException {
-            Field field = findField(name, current.struct);
-            if (field == null) return;
+            if (current.dataType.kind == DataType.KIND.MAP) {
+                stackNew(new StackNode(current.dataType.keyType, byteBuf.writerIndex(), null));
+                if (!isMultiElementKind(current.dataType.kind)) { //TODO
+                    oproto.writeString(name);
+                }
+            } else {
+                Field field = findField(name, current.struct);
+                if (field == null) return;
 
-            stackNew(new StackNode(field.dataType, byteBuf.writerIndex(), findStruct(field.dataType.qualifiedName, service)));
-            oproto.writeFieldBegin(new TField(field.name, dataType2Byte(field.dataType), (short) field.getTag()));
+                oproto.writeFieldBegin(new TField(field.name, dataType2Byte(field.dataType), (short) field.getTag()));
+                stackNew(new StackNode(field.dataType, byteBuf.writerIndex(), findStruct(field.dataType.qualifiedName, service)));
+            }
         }
 
         @Override
         public void onEndField() throws TException {
             //TODO field == null的情况
             pop();
-            oproto.writeFieldEnd();
+            if (current.dataType.kind == DataType.KIND.MAP) {
+
+            } else {
+                oproto.writeFieldEnd();
+            }
         }
 
         @Override
         public void onBoolean(boolean value) throws TException {
-            if (isMultiElementKind(current.dataType.kind)) {
+            if (isCollectionKind(current.dataType.kind)) {
                 current.increaseElement();
+            } else if (peek().dataType.kind == DataType.KIND.MAP) {
+                peek().increaseElement();
             }
             oproto.writeBool(value);
         }
 
         @Override
         public void onNumber(double value) throws TException {
-            if (isMultiElementKind(current.dataType.kind)) {
+            if (isCollectionKind(current.dataType.kind)) {
                 current.increaseElement();
+            } else if (peek().dataType.kind == DataType.KIND.MAP) {
+                peek().increaseElement();
             }
             switch (current.dataType.kind) {
                 case SHORT:
@@ -330,8 +433,10 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onString(String value) throws TException {
-            if (isMultiElementKind(current.dataType.kind)) {
+            if (isCollectionKind(current.dataType.kind)) {
                 current.increaseElement();
+            } else if (peek().dataType.kind == DataType.KIND.MAP) {
+                peek().increaseElement();
             }
             oproto.writeString(value);
         }
@@ -347,63 +452,6 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         private StackNode peek() {
             return history.peek();
-        }
-
-        private byte dataType2Byte(DataType type) {
-            switch (type.kind) {
-                case BOOLEAN:
-                    return TType.BOOL;
-
-                case BYTE:
-                    return TType.BYTE;
-
-                case DOUBLE:
-                    return TType.DOUBLE;
-
-                case SHORT:
-                    return TType.I16;
-
-                case INTEGER:
-                    return TType.I32;
-
-                case LONG:
-                    return TType.I64;
-
-                case STRING:
-                    return TType.STRING;
-
-                case STRUCT:
-                    return TType.STRUCT;
-
-                case MAP:
-                    return TType.MAP;
-
-                case SET:
-                    return TType.SET;
-
-                case LIST:
-                    return TType.LIST;
-
-                case ENUM:
-                    return TType.I32;
-
-                case VOID:
-                    return TType.VOID;
-
-                case DATE:
-                    return TType.I64;
-
-                case BIGDECIMAL:
-                    return TType.STRING;
-
-                case BINARY:
-                    return TType.STRING;
-
-                default:
-                    break;
-            }
-
-            return TType.STOP;
         }
 
         /**
@@ -509,6 +557,63 @@ public class JsonSerializer implements BeanSerializer<String> {
         }
 
         return null;
+    }
+
+    private byte dataType2Byte(DataType type) {
+        switch (type.kind) {
+            case BOOLEAN:
+                return TType.BOOL;
+
+            case BYTE:
+                return TType.BYTE;
+
+            case DOUBLE:
+                return TType.DOUBLE;
+
+            case SHORT:
+                return TType.I16;
+
+            case INTEGER:
+                return TType.I32;
+
+            case LONG:
+                return TType.I64;
+
+            case STRING:
+                return TType.STRING;
+
+            case STRUCT:
+                return TType.STRUCT;
+
+            case MAP:
+                return TType.MAP;
+
+            case SET:
+                return TType.SET;
+
+            case LIST:
+                return TType.LIST;
+
+            case ENUM:
+                return TType.I32;
+
+            case VOID:
+                return TType.VOID;
+
+            case DATE:
+                return TType.I64;
+
+            case BIGDECIMAL:
+                return TType.STRING;
+
+            case BINARY:
+                return TType.STRING;
+
+            default:
+                break;
+        }
+
+        return TType.STOP;
     }
 
 }

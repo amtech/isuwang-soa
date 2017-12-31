@@ -25,12 +25,9 @@ public class Bootstrap {
 
 
     public static void main(String[] args) throws MalformedURLException {
-
         //1. 初始化dapeng容器
         DapengContainer dapengContainer = new DapengContainer();
         ContainerFactory.initDapengContainer(dapengContainer);
-
-        System.out.println("enginePath:" + enginePath);
 
 
         loadAllUrls();

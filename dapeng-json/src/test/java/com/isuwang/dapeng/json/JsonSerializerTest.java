@@ -48,6 +48,30 @@ public class JsonSerializerTest {
         System.out.println("origJson:\n" + payNotifyJson);
 
         System.out.println("after enCode and decode:\n" + jsonSerializer.read(inProtocol));
+        System.out.println("=====================");
+    }
+
+    private static void simpleMapTest() throws IOException, TException {
+        final String orderDescriptorXmlPath = "/order.xml";
+        Service orderService = getService(orderDescriptorXmlPath);
+
+        Method method = orderService.methods.stream().filter(_method->{return _method.name.equals("payNotifyForAlipay");}).collect(Collectors.toList()).get(0);
+        String json = loadJson("/orderService_payNotifyForAlipay-map.json");
+
+
+        final ByteBuf requestBuf = PooledByteBufAllocator.DEFAULT.buffer(8192);
+
+        JsonSerializer jsonSerializer = new JsonSerializer(method.request, requestBuf, orderService, method);
+
+        TProtocol outProtocol = new TCompactProtocol(new TSoaTransport(requestBuf));
+        jsonSerializer.write(json, outProtocol);
+
+        TProtocol inProtocol = new TCompactProtocol(new TSoaTransport(requestBuf));
+
+        System.out.println("origJson:\n" + json);
+
+        System.out.println("after enCode and decode:\n" + jsonSerializer.read(inProtocol));
+        System.out.println("=====================");
     }
 
     public static void main(String[] args) throws IOException, TException {
@@ -56,5 +80,6 @@ public class JsonSerializerTest {
         Service crmService = getService(crmDescriptorXmlPath);
 
         simpleStructTest();
+        simpleMapTest();
     }
 }
