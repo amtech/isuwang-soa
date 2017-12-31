@@ -1,8 +1,7 @@
 {
-  "payNotifyRequest":{ 
+  "params":{
         "transactionId":"2017111702453",
         "orderNum": "2017111702453",
-        "payType":"WECHAT",
-        "wrongKey":"should be skip"
+        "payType":"WECHAT"
       }
   }

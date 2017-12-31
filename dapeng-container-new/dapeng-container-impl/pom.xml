@@ -30,9 +30,7 @@
             </activation>
 
             <build>
-                <!--
                 <finalName>${project.artifactId}</finalName>
-                -->
                 <resources>
                     <resource>
                         <filtering>true</filtering>
@@ -92,7 +90,7 @@
                                     <overWriteIfNewer>true</overWriteIfNewer>
                                     <excludeArtifactIds>
                                         dapeng-core,slf4j-api,logback-classic,logback-core,janino,commons-compiler,dapeng-transaction-api,gson,
-                                        dapeng-message-api,dapeng-message-kafka,kafka_2.11,kafka-clients,jopt-simple,metrics-core
+                                        dapeng-message-api,dapeng-message-kafka,kafka_2.12,kafka-clients,jopt-simple,metrics-core
                                     </excludeArtifactIds>
                                 </configuration>
                             </execution>
@@ -148,7 +146,7 @@
         </dependency>
         <dependency>
             <groupId>com.isuwang</groupId>
-            <artifactId>dapeng-registry-zookeeper</artifactId>
+            <artifactId>dapeng-transaction-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
