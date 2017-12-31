@@ -124,18 +124,45 @@ public class JsonSerializer implements BeanSerializer<String> {
                 boolean boolValue = iproto.readBool();
                 if (!skip) {
                     writer.onBoolean(boolValue);
+                } else {
+                    TProtocolUtil.skip(iproto, TType.BOOL);
                 }
                 break;
             case TType.BYTE:
                 // TODO
+                break;
             case TType.DOUBLE:
-                // TODO
+                double dValue = iproto.readDouble();
+                if (!skip) {
+                    writer.onNumber(dValue);
+                } else {
+                    TProtocolUtil.skip(iproto, fieldType);
+                }
+                break;
             case TType.I16:
-                // TODO
+                short sValue = iproto.readI16();
+                if (!skip) {
+                    writer.onNumber(sValue);
+                } else {
+                    TProtocolUtil.skip(iproto, fieldType);
+                }
+                break;
             case TType.I32:
-                // TODO:
+                int iValue = iproto.readI32();
+                if (!skip) {
+                    writer.onNumber(iValue);
+                } else {
+                    TProtocolUtil.skip(iproto, fieldType);
+                }
+                break;
             case TType.I64:
-                // TODO:
+                long lValue = iproto.readI64();
+                if (!skip) {
+                    writer.onNumber(lValue);
+                } else {
+                    TProtocolUtil.skip(iproto, fieldType);
+                }
+                break;
             case TType.STRING:
                 String strValue = iproto.readString();
                 if (!skip) {
@@ -162,7 +189,7 @@ public class JsonSerializer implements BeanSerializer<String> {
 //                            String subStructName = fld.dataType.qualifiedName;
 //                            Struct subStruct = findStruct(subStructName, service);
 //                        }
-                        if (map.keyType == TType.STRING) {
+                        if (map.keyType != TType.STRUCT && map.keyType != TType.LIST && map.keyType != TType.SET) {
                             writer.onStartField(iproto.readString());
                         }
                         readField(iproto, null, null, map.valueType, writer, false);
@@ -170,11 +197,35 @@ public class JsonSerializer implements BeanSerializer<String> {
                     }
                     writer.onEndObject();
                 } else {
-                    // skip contents
+                    TProtocolUtil.skip(iproto, TType.MAP);
                 }
                 break;
             case TType.SET:
+                if (!skip) {
+                    TSet set = iproto.readSetBegin();
+                    writer.onStartArray();
+                    for (int index = 0; index < set.size; index++) {
+                        readField(iproto, null, null, set.elemType, writer, false);
+                        writer.onEndField();
+                    }
+                    writer.onEndArray();
+                } else {
+                    TProtocolUtil.skip(iproto, TType.SET);
+                }
+                break;
             case TType.LIST:
+                if (!skip) {
+                    TList list = iproto.readListBegin();
+                    writer.onStartArray();
+                    for (int index = 0; index < list.size; index++) {
+                        readField(iproto, null, null, list.elemType, writer, false);
+                        writer.onEndField();
+                    }
+                    writer.onEndArray();
+                } else {
+                    TProtocolUtil.skip(iproto, TType.SET);
+                }
+                break;
             default:
 
         }
@@ -289,7 +340,7 @@ public class JsonSerializer implements BeanSerializer<String> {
                         oproto.writeStructBegin(new TStruct(struct.name));
                         break;
                     case MAP:
-                        // default size不能设置为0...
+                        // 压缩模式下, default size不能设置为0...
                         oproto.writeMapBegin(new TMap(dataType2Byte(current.dataType.keyType), dataType2Byte(current.dataType.valueType), 1));
                         break;
                 }
@@ -324,6 +375,7 @@ public class JsonSerializer implements BeanSerializer<String> {
 
             switch (current.dataType.kind) {
                 case LIST:
+                    //TODO 压缩模式下, size > 14的时候如何处理?
                     oproto.writeListBegin(new TList(dataType2Byte(current.dataType.valueType), 0));
                     break;
                 case SET:
@@ -395,12 +447,15 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onNumber(double value) throws TException {
+            DataType.KIND currentType = current.dataType.kind;
             if (isCollectionKind(current.dataType.kind)) {
                 current.increaseElement();
+                currentType = current.dataType.valueType.kind;
             } else if (peek().dataType.kind == DataType.KIND.MAP) {
                 peek().increaseElement();
             }
-            switch (current.dataType.kind) {
+
+            switch (currentType) {
                 case SHORT:
                     oproto.writeI16((short) value);
                     break;
@@ -483,36 +538,6 @@ public class JsonSerializer implements BeanSerializer<String> {
             }
 
             byteBuf.writerIndex(currentIndex);
-        }
-
-        /**
-         * 是否集合类型
-         *
-         * @param kind
-         * @return
-         */
-        private boolean isCollectionKind(DataType.KIND kind) {
-            return kind == DataType.KIND.LIST || kind == DataType.KIND.SET;
-        }
-
-        /**
-         * 是否容器类型
-         *
-         * @param kind
-         * @return
-         */
-        private boolean isMultiElementKind(DataType.KIND kind) {
-            return isCollectionKind(kind) || kind == DataType.KIND.MAP;
-        }
-
-        /**
-         * 是否复杂类型
-         *
-         * @param kind
-         * @return
-         */
-        private boolean isComplexKind(DataType.KIND kind) {
-            return isMultiElementKind(kind) || kind == DataType.KIND.STRUCT;
         }
     }
 
@@ -614,6 +639,35 @@ public class JsonSerializer implements BeanSerializer<String> {
         }
 
         return TType.STOP;
+    }
+    /**
+     * 是否集合类型
+     *
+     * @param kind
+     * @return
+     */
+    private boolean isCollectionKind(DataType.KIND kind) {
+        return kind == DataType.KIND.LIST || kind == DataType.KIND.SET;
+    }
+
+    /**
+     * 是否容器类型
+     *
+     * @param kind
+     * @return
+     */
+    private boolean isMultiElementKind(DataType.KIND kind) {
+        return isCollectionKind(kind) || kind == DataType.KIND.MAP;
+    }
+
+    /**
+     * 是否复杂类型
+     *
+     * @param kind
+     * @return
+     */
+    private boolean isComplexKind(DataType.KIND kind) {
+        return isMultiElementKind(kind) || kind == DataType.KIND.STRUCT;
     }
 
 }
