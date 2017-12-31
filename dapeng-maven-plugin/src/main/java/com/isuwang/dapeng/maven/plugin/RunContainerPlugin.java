@@ -58,9 +58,14 @@ public class RunContainerPlugin extends SoaAbstractMojo {
                         continue;
                     }
 
-                    if (removeContainer(iterator, url)) continue;
+                    if (url.getFile().matches("^.*/dapeng-core.*\\.jar$")) {
+                        getLog().info(" sharedUrl found dapeng-core.jar");
+                        System.out.println(" sout sharedUrl found dapeng-core.jar....");
+                    }
 
-                    if (removeServiceProjectArtifact(iterator, url)) continue;
+//                    if (removeContainer(iterator, url)) continue;
+//
+//                    if (removeServiceProjectArtifact(iterator, url)) continue;
                 }
 
                 List<URL> appUrls = new ArrayList<>(Arrays.asList(urls));
@@ -84,7 +89,8 @@ public class RunContainerPlugin extends SoaAbstractMojo {
                 DapengContainer dapengContainer = new DapengContainer();
                 ContainerFactory.initDapengContainer(dapengContainer);
 
-                List<AppClassLoader> appClassLoaders = appURLsList.stream().map(i -> new AppClassLoader(i.toArray(new URL[i.size()]))).collect(Collectors.toList());
+                List<AppClassLoader> appClassLoaders = appURLsList.stream().map(i ->
+                        new AppClassLoader(i.toArray(new URL[i.size()]))).collect(Collectors.toList());
 
                 PlatformClassLoader platformClassLoader = new PlatformClassLoader(platformUrls.toArray(new URL[platformUrls.size()]));
                 ClassLoaderManager.platformClassLoader = platformClassLoader;
@@ -93,7 +99,8 @@ public class RunContainerPlugin extends SoaAbstractMojo {
                 ClassLoaderManager.pluginClassLoader= new ArrayList<>();
                 ClassLoaderManager.pluginClassLoader.add(new PluginClassLoader(shareUrls.toArray(new URL[shareUrls.size()])));
 
-                Thread.currentThread().setContextClassLoader(appClassLoaders.get(0));
+                System.out.println("------set classloader-------------");
+                Thread.currentThread().setContextClassLoader(shareClassLoader);
                 //3. 初始化appLoader,dapengPlugin
                 Plugin springAppLoader = new SpringAppLoader(dapengContainer,appClassLoaders);
                 Plugin apiDocPlugin = new ApiDocPlugin(dapengContainer);
@@ -103,9 +110,9 @@ public class RunContainerPlugin extends SoaAbstractMojo {
 
                 //ApiDocPlugin优先启动(为了Spring触发注册事件时，ServiceCache已经实例化，能收到消息)
                 dapengContainer.registerPlugin(springAppLoader);
+                dapengContainer.registerPlugin(nettyPlugin);
                 dapengContainer.registerPlugin(zookeeperPlugin);
                 dapengContainer.registerPlugin(taskSchedulePlugin);
-                dapengContainer.registerPlugin(nettyPlugin);
                 dapengContainer.registerPlugin(apiDocPlugin);
 
 
@@ -134,6 +141,7 @@ public class RunContainerPlugin extends SoaAbstractMojo {
     private boolean removeCore(Iterator<URL> iterator, URL url) {
 
         if (url.getFile().matches("^.*/dapeng-core.*\\.jar$")) {
+            System.out.println("app found dapeng-core.jar.. remove it");
             iterator.remove();
 
             return true;
