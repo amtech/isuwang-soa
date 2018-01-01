@@ -26,15 +26,29 @@ public class JsonSerializerTest {
 
 //        simpleStructTest();
 //        simpleMapTest();
-//        intArrayTest();
-//        intMapTest();
-//        enumTest();
-//        simpleStructWithEnumTest();
+        intArrayTest();
+        intMapTest();
+        enumTest();
+        simpleStructWithEnumTest();
         simpleStructWithOptionTest();
+
+        complexStructTest();
+    }
+
+    private static void complexStructTest() throws IOException, TException {
+        final String orderDescriptorXmlPath = "/com.isuwang.dapeng.json.demo.service.OrderService.xml";
+        Service orderService = getService(orderDescriptorXmlPath);
+
+        Method orderServicePayNotify = orderService.methods.stream().filter(method -> method.name.equals("createAppointmentForAvailable")).collect(Collectors.toList()).get(0);
+        String payNotifyJson = loadJson("/orderService_createAppointmentForAvailable-complexStruct.json");
+
+        String desc = "complexStructTest";
+        doTest(orderService, orderServicePayNotify, orderServicePayNotify.request, payNotifyJson, desc);
+
     }
 
     private static void simpleStructTest() throws TException, IOException {
-        final String orderDescriptorXmlPath = "/order.xml";
+        final String orderDescriptorXmlPath = "/com.isuwang.dapeng.json.demo.service.OrderService.xml";
         Service orderService = getService(orderDescriptorXmlPath);
 
         Method orderServicePayNotify = orderService.methods.stream().filter(method -> method.name.equals("payNotify")).collect(Collectors.toList()).get(0);
@@ -51,7 +65,7 @@ public class JsonSerializerTest {
      * @throws TException
      */
     private static void simpleMapTest() throws IOException, TException {
-        final String orderDescriptorXmlPath = "/order.xml";
+        final String orderDescriptorXmlPath = "/com.isuwang.dapeng.json.demo.service.OrderService.xml";
         Service orderService = getService(orderDescriptorXmlPath);
 
         Method method = orderService.methods.stream().filter(_method -> _method.name.equals("payNotifyForAlipay")).collect(Collectors.toList()).get(0);

@@ -1,0 +1,25 @@
+{
+  "request":{
+        "doctorId":12345,
+        "appointmentDate": ["20171117", "20171118", "20171119", "20171120"],
+        "pageRequest": {
+          "start":0,
+          "limit":20,
+          "sortFields":"id"
+        },
+        "requests": [
+          {"doctorId":2,"patientId":3,"patientInformationContent":"头晕","appointmentId":20,"payType":"WECHAT","couponId":20},
+          {"doctorId":3,"patientId":4,"appointmentId":21, "payType":"ALIPAY", "remark":"test"},
+          {"doctorId":4,"patientId":5,"appointmentId":22, "payType":"ALIPAY", "recommendDoctorId":23, "remark":"test"}
+        ],
+        "requestLists":[
+          [
+            {"doctorId":2,"patientId":3,"patientInformationContent":"头晕","appointmentId":20,"payType":"WECHAT","couponId":20},
+            {"doctorId":4,"patientId":5,"appointmentId":22, "payType":"ALIPAY", "recommendDoctorId":23, "remark":"test"}
+          ],
+          [
+            {"doctorId":3,"patientId":4,"appointmentId":21, "payType":"ALIPAY", "remark":"test"}
+          ]
+        ]
+      }
+  }

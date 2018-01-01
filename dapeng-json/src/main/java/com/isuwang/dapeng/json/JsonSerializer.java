@@ -35,9 +35,7 @@ public class JsonSerializer implements BeanSerializer<String> {
             if (field.type == TType.STOP)
                 break;
 
-            List<Field> flds = struct.getFields().stream().filter(_field -> {
-                return _field.tag == field.id;
-            }).collect(Collectors.toList()); // TODO get fld by field.id
+            List<Field> flds = struct.getFields().stream().filter(_field -> _field.tag == field.id).collect(Collectors.toList()); // TODO get fld by field.id
 
             Field fld = flds.isEmpty() ? null : flds.get(0);
 
@@ -378,8 +376,8 @@ public class JsonSerializer implements BeanSerializer<String> {
                     oproto.writeSetBegin(new TSet(dataType2Byte(current.dataType.valueType), 0));
                     break;
             }
-
-            if (isCollectionKind(current.dataType.valueType.kind)) {
+            //List<List<>>/List<Struct>
+            if (isComplexKind(current.dataType.valueType.kind)) {
                 current.increaseElement();
                 stackNew(new StackNode(current.dataType.valueType, byteBuf.writerIndex(), findStruct(current.dataType.valueType.qualifiedName, service)));
             }
