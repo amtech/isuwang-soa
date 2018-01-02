@@ -10,7 +10,7 @@ import com.isuwang.dapeng.core.filter.Filter;
 import com.isuwang.dapeng.core.filter.FilterChain;
 import com.isuwang.dapeng.core.filter.FilterContext;
 import com.isuwang.dapeng.core.filter.SharedChain;
-import com.isuwang.dapeng.core.filter.HandlerFilterContext;
+import com.isuwang.dapeng.core.filter.FilterContextImpl;
 import com.isuwang.dapeng.impl.filters.TimeoutFilter;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.TProtocol;
@@ -128,7 +128,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
         };
         SharedChain sharedChain = new SharedChain(new TimeoutFilter(), container.getFilters(), dispatchFilter, 0);
 
-        HandlerFilterContext filterContext = new HandlerFilterContext();
+        FilterContextImpl filterContext = new FilterContextImpl();
         filterContext.setAttach(dispatchFilter, "chain", sharedChain);
 
         sharedChain.onEntry(filterContext);

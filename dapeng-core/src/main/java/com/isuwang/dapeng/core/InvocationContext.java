@@ -21,13 +21,14 @@ public interface InvocationContext {
 
     void setCalleePort(Optional<Integer> calleePort);
 
+    public Optional<Integer> getTransactionId();
+
+    public void setTransactionId(Optional<Integer> transactionId);
+
     void setLastInfo(InvocationInfo invocationInfo);
 
     InvocationInfo getLastInfo();
 
-    SoaHeader getHeader();
-
-    void setHeader(SoaHeader soaHeader);
 
     // seqid
     // tid

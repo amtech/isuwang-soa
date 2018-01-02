@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Created by lihuimin on 2017/12/11.
  */
-public class HandlerFilterContext implements FilterContext {
+public class FilterContextImpl implements FilterContext {
 
     private Map<Filter, Map<String, Object>> attachments = new HashMap<>();
 

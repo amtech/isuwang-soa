@@ -26,7 +26,7 @@ public class DapengApplication implements Application {
 
     private ClassLoader appClassLoader;
 
-    public DapengApplication(List<ServiceInfo> serviceInfos,ClassLoader appClassLoader ) {
+    public  DapengApplication(List<ServiceInfo> serviceInfos,ClassLoader appClassLoader ) {
         this.serviceInfos=Collections.unmodifiableList(serviceInfos);
         this.appClassLoader=appClassLoader;
     }

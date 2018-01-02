@@ -8,7 +8,7 @@ import com.isuwang.dapeng.core.enums.CodecProtocol;
  * @author craneding
  * @date 15/9/24
  */
-public class TransactionContext extends Context{
+public class TransactionContext {
 
     private CodecProtocol codecProtocol = CodecProtocol.CompressedBinary;
 
