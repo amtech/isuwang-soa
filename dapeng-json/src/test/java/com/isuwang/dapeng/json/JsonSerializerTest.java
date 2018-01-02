@@ -24,8 +24,8 @@ public class JsonSerializerTest {
 
     public static void main(String[] args) throws IOException, TException {
 
-//        simpleStructTest();
-//        simpleMapTest();
+        simpleStructTest();
+        simpleMapTest();
         intArrayTest();
         intMapTest();
         enumTest();

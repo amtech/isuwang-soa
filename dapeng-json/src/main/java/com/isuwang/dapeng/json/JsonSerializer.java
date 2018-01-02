@@ -44,7 +44,7 @@ public class JsonSerializer implements BeanSerializer<String> {
 
             if (!skip) {
                 writer.onStartField(fld.name);
-                readField(iproto, field, fld, field.type, writer, skip);
+                readField(iproto, fld, field.type, writer, skip);
                 writer.onEndField();
             }
 
@@ -115,7 +115,8 @@ public class JsonSerializer implements BeanSerializer<String> {
         writer.onEndObject();
     }
 
-    private void readField(TProtocol iproto, TField field, Field fld, byte fieldType, JsonCallback writer, boolean skip) throws TException {
+    private void readField(TProtocol iproto, Field fld, byte fieldType,
+                           JsonCallback writer, boolean skip) throws TException {
         switch (fieldType) {
             case TType.VOID:
                 break;
@@ -169,7 +170,7 @@ public class JsonSerializer implements BeanSerializer<String> {
                     Struct subStruct = findStruct(subStructName, service);
                     new JsonSerializer(subStruct, byteBuf, service, method).read(iproto, writer);
                 } else {
-                    TProtocolUtil.skip(iproto, field.type);
+                    TProtocolUtil.skip(iproto, TType.STRUCT);
                 }
                 break;
             case TType.MAP:
@@ -184,7 +185,7 @@ public class JsonSerializer implements BeanSerializer<String> {
                         if (map.keyType != TType.STRUCT && map.keyType != TType.LIST && map.keyType != TType.SET) {
                             writer.onStartField(iproto.readString());
                         }
-                        readField(iproto, null, null, map.valueType, writer, false);
+                        readField(iproto, null, map.valueType, writer, false);
                         writer.onEndField();
                     }
                     writer.onEndObject();
@@ -195,11 +196,9 @@ public class JsonSerializer implements BeanSerializer<String> {
             case TType.SET:
                 if (!skip) {
                     TSet set = iproto.readSetBegin();
+//                    _writeCollection(set.size, set.elemType, fld.dataType.valueType, iproto, writer);
                     writer.onStartArray();
-                    for (int index = 0; index < set.size; index++) {
-                        readField(iproto, null, null, set.elemType, writer, false);
-                        writer.onEndField();
-                    }
+                    writeCollection(set.size, set.elemType, fld.dataType.valueType,  fld.dataType.valueType.valueType,iproto, writer);
                     writer.onEndArray();
                 } else {
                     TProtocolUtil.skip(iproto, TType.SET);
@@ -208,19 +207,49 @@ public class JsonSerializer implements BeanSerializer<String> {
             case TType.LIST:
                 if (!skip) {
                     TList list = iproto.readListBegin();
+//                    _writeCollection(list.size, list.elemType, fld.dataType.valueType, iproto, writer);
                     writer.onStartArray();
-                    for (int index = 0; index < list.size; index++) {
-                        readField(iproto, null, null, list.elemType, writer, false);
-                        writer.onEndField();
-                    }
+                    writeCollection(list.size, list.elemType, fld.dataType.valueType, fld.dataType.valueType.valueType, iproto, writer);
                     writer.onEndArray();
                 } else {
-                    TProtocolUtil.skip(iproto, TType.SET);
+                    TProtocolUtil.skip(iproto, TType.LIST);
                 }
                 break;
             default:
 
         }
+    }
+
+    /**
+     * @param size
+     * @param elemType     thrift的数据类型
+     * @param metadataType metaData的DataType
+     * @param iproto
+     * @param writer
+     * @throws TException
+     */
+    private void writeCollection(int size, byte elemType, DataType metadataType, DataType subMetadataType, TProtocol iproto, JsonCallback writer) throws TException {
+        Struct struct = null;
+        if (metadataType.kind == DataType.KIND.STRUCT) {
+            struct = findStruct(metadataType.qualifiedName, service);
+        }
+        for (int index = 0; index < size; index++) {
+            if (!isComplexKind(metadataType.kind)) {//没有嵌套结构,也就是原始数据类型, 例如int, boolean,string等
+                readField(iproto, null, elemType, writer, false);
+            } else {
+                if (struct != null) {
+                    new JsonSerializer(struct, byteBuf, service, method).read(iproto, writer);
+                } else if (isCollectionKind(metadataType.kind)) {
+                    //处理List<list<>>
+                    TList list = iproto.readListBegin();
+                    writer.onStartArray();
+                    writeCollection(list.size, list.elemType, subMetadataType,  subMetadataType.valueType, iproto, writer);
+                    writer.onEndArray();
+                }
+            }
+            writer.onEndField();
+        }
+
     }
 
     @Override
@@ -324,6 +353,7 @@ public class JsonSerializer implements BeanSerializer<String> {
                 oproto.writeStructBegin(new TStruct(current.struct.name));
                 inited = true;
             } else {
+                if (peek() != null && isMultiElementKind(peek().dataType.kind)) peek().increaseElement();
                 switch (current.dataType.kind) {
                     case STRUCT:
                         Struct struct = current.struct;//findStruct(current.dataType.qualifiedName, service);
@@ -367,6 +397,12 @@ public class JsonSerializer implements BeanSerializer<String> {
         public void onStartArray() throws TException {
             assert isCollectionKind(current.dataType.kind);
 
+            if (peek() != null && isMultiElementKind(peek().dataType.kind)) {
+                peek().increaseElement();
+                //TODO 集合套集合的变态处理方式
+                current = new StackNode(peek().dataType.valueType, byteBuf.writerIndex(), current.struct);
+            }
+
             switch (current.dataType.kind) {
                 case LIST:
                     //TODO 压缩模式下, size > 14的时候如何处理?
@@ -377,15 +413,17 @@ public class JsonSerializer implements BeanSerializer<String> {
                     break;
             }
             //List<List<>>/List<Struct>
-            if (isComplexKind(current.dataType.valueType.kind)) {
-                current.increaseElement();
-                stackNew(new StackNode(current.dataType.valueType, byteBuf.writerIndex(), findStruct(current.dataType.valueType.qualifiedName, service)));
-            }
+//            if (isComplexKind(current.dataType.valueType.kind)) {
+//                current.increaseElement();
+            stackNew(new StackNode(current.dataType.valueType, byteBuf.writerIndex(), findStruct(current.dataType.valueType.qualifiedName, service)));
+//            }
         }
 
         @Override
         public void onEndArray() throws TException {
             assert isCollectionKind(current.dataType.kind);
+//todo assert fail
+            pop();
 
             switch (current.dataType.kind) {
                 case LIST:
@@ -396,9 +434,6 @@ public class JsonSerializer implements BeanSerializer<String> {
                     oproto.writeSetEnd();
                     reWriteByteBuf();
                     break;
-            }
-            if (isCollectionKind(peek().dataType.kind)) {
-                pop();
             }
         }
 
@@ -438,23 +473,25 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onBoolean(boolean value) throws TException {
-            if (isCollectionKind(current.dataType.kind)) {
-                current.increaseElement();
-            } else if (peek().dataType.kind == DataType.KIND.MAP) {
-                peek().increaseElement();
-            }
+//            if (isCollectionKind(current.dataType.kind)) {
+//                current.increaseElement();
+//            } else if (peek().dataType.kind == DataType.KIND.MAP) {
+//                peek().increaseElement();
+//            }
+            if (peek() != null && isMultiElementKind(peek().dataType.kind)) peek().increaseElement();
             oproto.writeBool(value);
         }
 
         @Override
         public void onNumber(double value) throws TException {
             DataType.KIND currentType = current.dataType.kind;
-            if (isCollectionKind(current.dataType.kind)) {
-                current.increaseElement();
-                currentType = current.dataType.valueType.kind;
-            } else if (peek().dataType.kind == DataType.KIND.MAP) {
-                peek().increaseElement();
-            }
+//            if (isCollectionKind(current.dataType.kind)) {
+//                current.increaseElement();
+//                currentType = current.dataType.valueType.kind;
+//            } else if (peek().dataType.kind == DataType.KIND.MAP) {
+//                peek().increaseElement();
+//            }
+            if (peek() != null && isMultiElementKind(peek().dataType.kind)) peek().increaseElement();
 
             switch (currentType) {
                 case SHORT:
@@ -489,11 +526,13 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onString(String value) throws TException {
-            if (isCollectionKind(current.dataType.kind)) {
-                current.increaseElement();
-            } else if (peek().dataType.kind == DataType.KIND.MAP) {
-                peek().increaseElement();
-            }
+//            if (isCollectionKind(current.dataType.kind)) {
+//                current.increaseElement();
+//            } else if (peek().dataType.kind == DataType.KIND.MAP) {
+//                peek().increaseElement();
+//            }
+
+            if (peek() != null && isMultiElementKind(peek().dataType.kind)) peek().increaseElement();
 
             if (current.dataType.kind == DataType.KIND.ENUM) {
                 TEnum tEnum = findEnum(current.dataType.qualifiedName, service);
@@ -513,7 +552,7 @@ public class JsonSerializer implements BeanSerializer<String> {
         }
 
         private StackNode peek() {
-            return history.peek();
+            return history.empty() ? null : history.peek();
         }
 
         /**
@@ -687,6 +726,7 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         return TType.STOP;
     }
+
     /**
      * 是否集合类型
      *
@@ -721,12 +761,15 @@ public class JsonSerializer implements BeanSerializer<String> {
         void debug(String msg) {
             System.out.println(msg);
         }
+
         void info(String msg) {
             System.out.println(msg);
         }
+
         void warning(String msg) {
             System.out.println(msg);
         }
+
         void error(String msg) {
             System.out.println(msg);
         }

@@ -24,6 +24,9 @@ public class JsonWriter implements JsonCallback {
 
     @Override
     public void onEndArray() {
+        if (builder.charAt(builder.length()-1) == ',') {
+            builder.setLength(builder.length()-1);
+        }
         builder.append(']');
     }
 
