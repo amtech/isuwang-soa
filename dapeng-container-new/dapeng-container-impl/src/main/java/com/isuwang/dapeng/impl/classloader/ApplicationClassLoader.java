@@ -9,22 +9,27 @@ import java.net.URLClassLoader;
  * @author craneding
  * @date 16/1/28
  */
-public class AppClassLoader extends URLClassLoader {
+public class ApplicationClassLoader extends URLClassLoader {
 
-    public AppClassLoader(URL[] urls) {
+    private final CoreClassLoader coreClassLoader;
+
+    public ApplicationClassLoader(URL[] urls, CoreClassLoader coreClassLoader) {
         super(urls, ClassLoader.getSystemClassLoader());
+        this.coreClassLoader = coreClassLoader;
     }
 
-    public AppClassLoader(URL[] urls, ClassLoader parent) {
+    public ApplicationClassLoader(URL[] urls, ClassLoader parent, CoreClassLoader coreClassLoader) {
         super(urls, parent);
+        this.coreClassLoader =  coreClassLoader;
     }
 
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
 
         if (name.startsWith("com.isuwang.dapeng.core") || name.startsWith("com.isuwang.org.apache.thrift") || name.startsWith("com.isuwang.dapeng.transaction.api")
-                || name.startsWith("com.google.gson"))
-            return ClassLoaderManager.shareClassLoader.loadClass(name);
+                || name.startsWith("com.google.gson")) {
+            return coreClassLoader.loadClass(name);
+        }
         return super.loadClass(name, resolve);
     }
 }

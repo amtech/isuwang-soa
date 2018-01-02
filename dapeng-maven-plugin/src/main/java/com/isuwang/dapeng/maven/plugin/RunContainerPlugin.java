@@ -32,9 +32,11 @@ import java.util.stream.Collectors;
 @Mojo(name = "run", threadSafe = true, requiresDependencyResolution = ResolutionScope.TEST)
 public class RunContainerPlugin extends SoaAbstractMojo {
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        if (project == null)
+        if (project == null) {
             throw new MojoExecutionException("not found project.");
+        }
 
         getLog().info("bundle:" + project.getGroupId() + ":" + project.getArtifactId() + ":" + project.getVersion());
 
@@ -89,18 +91,16 @@ public class RunContainerPlugin extends SoaAbstractMojo {
                 DapengContainer dapengContainer = new DapengContainer();
                 ContainerFactory.initDapengContainer(dapengContainer);
 
-                List<AppClassLoader> appClassLoaders = appURLsList.stream().map(i ->
-                        new AppClassLoader(i.toArray(new URL[i.size()]))).collect(Collectors.toList());
+                CoreClassLoader coreClassLoader = new CoreClassLoader(shareUrls.toArray(new URL[shareUrls.size()]));
 
-                PlatformClassLoader platformClassLoader = new PlatformClassLoader(platformUrls.toArray(new URL[platformUrls.size()]));
-                ClassLoaderManager.platformClassLoader = platformClassLoader;
-                ShareClassLoader shareClassLoader = new ShareClassLoader(shareUrls.toArray(new URL[shareUrls.size()]));
-                ClassLoaderManager.shareClassLoader = shareClassLoader;
-                ClassLoaderManager.pluginClassLoader= new ArrayList<>();
-                ClassLoaderManager.pluginClassLoader.add(new PluginClassLoader(shareUrls.toArray(new URL[shareUrls.size()])));
+                List<ApplicationClassLoader> appClassLoaders = appURLsList.stream().map(i ->
+                        new ApplicationClassLoader(i.toArray(new URL[i.size()]),coreClassLoader)).collect(Collectors.toList());
+
+                ContainerClassLoader platformClassLoader = new ContainerClassLoader(platformUrls.toArray(new URL[platformUrls.size()]),coreClassLoader);
+
 
                 System.out.println("------set classloader-------------");
-                Thread.currentThread().setContextClassLoader(shareClassLoader);
+                Thread.currentThread().setContextClassLoader(coreClassLoader);
                 //3. 初始化appLoader,dapengPlugin
                 Plugin springAppLoader = new SpringAppLoader(dapengContainer,appClassLoaders);
                 Plugin apiDocPlugin = new ApiDocPlugin(dapengContainer);
@@ -152,8 +152,9 @@ public class RunContainerPlugin extends SoaAbstractMojo {
     private boolean removeServiceProjectArtifact(Iterator<URL> iterator, URL url) {
         String regex = project.getArtifact().getFile().getAbsolutePath().replaceAll("\\\\", "/");
 
-        if (File.separator.equals("\\"))
+        if (File.separator.equals("\\")) {
             regex = regex.replace(File.separator, File.separator + File.separator);
+        }
 
         if (url.getFile().matches("^.*" + regex + ".*$")) {
             iterator.remove();

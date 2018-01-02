@@ -31,14 +31,13 @@ public class Bootstrap {
 
 
         loadAllUrls();
-        List<AppClassLoader> appClassLoaders = appURLs.stream().map(i -> new AppClassLoader(i.toArray(new URL[i.size()]))).collect(Collectors.toList());
+        CoreClassLoader coreClassLoader = new CoreClassLoader(shareURLs.toArray(new URL[shareURLs.size()]));
 
-        PlatformClassLoader platformClassLoader = new PlatformClassLoader(platformURLs.toArray(new URL[platformURLs.size()]));
-        ClassLoaderManager.platformClassLoader = platformClassLoader;
-        ShareClassLoader shareClassLoader = new ShareClassLoader(shareURLs.toArray(new URL[shareURLs.size()]));
-        ClassLoaderManager.shareClassLoader = shareClassLoader;
-        List<PluginClassLoader> pluginClassLoaders = pluginURLs.stream().map(i -> new PluginClassLoader(i.toArray(new URL[i.size()]))).collect(Collectors.toList());
-        ClassLoaderManager.pluginClassLoader = pluginClassLoaders;
+        ContainerClassLoader platformClassLoader = new ContainerClassLoader(platformURLs.toArray(new URL[platformURLs.size()]),coreClassLoader);
+
+        List<ApplicationClassLoader> appClassLoaders = appURLs.stream().map(i -> new ApplicationClassLoader(i.toArray(new URL[i.size()]),coreClassLoader)).collect(Collectors.toList());
+
+        List<PluginClassLoader> pluginClassLoaders = pluginURLs.stream().map(i -> new PluginClassLoader(i.toArray(new URL[i.size()]),coreClassLoader)).collect(Collectors.toList());
 
         //3. 初始化appLoader,dapengPlugin
         Plugin springAppLoader = new SpringAppLoader(dapengContainer,appClassLoaders);
