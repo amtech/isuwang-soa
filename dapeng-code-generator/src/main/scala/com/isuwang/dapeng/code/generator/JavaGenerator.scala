@@ -305,7 +305,7 @@ class JavaGenerator extends CodeGenerator {
       private SoaConnectionPool pool;
 
       public {service.name}AsyncClient() <block>
-        this.serviceName = "{service.namespace+ "." + service.name}Async";
+        this.serviceName = "{service.namespace+ "." + service.name}";
         this.version = "{service.meta.version}";
 
         ServiceLoader{lt}SoaConnectionPoolFactory{gt} factories = ServiceLoader.load(SoaConnectionPoolFactory.class);
@@ -535,7 +535,7 @@ class JavaGenerator extends CodeGenerator {
         {notice}
         * {service.doc}
         **/
-        @Service(name="{s"${service.namespace}.${service.name}Async"}",version = "{service.meta.version}")
+        @Service(name="{s"${service.namespace}.${service.name}"}",version = "{service.meta.version}")
         @Processor(className = "{service.namespace.substring(0, service.namespace.lastIndexOf("service"))}{service.name}AsyncCodec$Processor")
         public interface {service.name}Async <block>
         {
