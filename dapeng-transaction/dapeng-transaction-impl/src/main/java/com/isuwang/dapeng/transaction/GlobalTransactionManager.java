@@ -1,13 +1,13 @@
 package com.isuwang.dapeng.transaction;
 
+import com.isuwang.dapeng.client.filter.LoadBalanceFilter;
+import com.isuwang.dapeng.client.json.JSONPost;
 import com.isuwang.dapeng.core.SoaException;
 import com.isuwang.dapeng.core.SoaHeader;
 import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.core.helper.MasterHelper;
 import com.isuwang.dapeng.core.metadata.Service;
-import com.isuwang.dapeng.remoting.fake.json.JSONPost;
-import com.isuwang.dapeng.remoting.fake.metadata.MetadataClient;
-import com.isuwang.dapeng.remoting.filter.LoadBalanceFilter;
+import com.isuwang.dapeng.metadata.MetadataClient;
 import com.isuwang.dapeng.transaction.api.domain.*;
 import com.isuwang.dapeng.transaction.api.service.GlobalTransactionProcessService;
 import com.isuwang.dapeng.transaction.dao.ITransactionDao;
@@ -50,8 +50,9 @@ public class GlobalTransactionManager {
             LOGGER.info("--- 定时事务管理器不是Master，跳过 ---");
             return;
         }
-        if (working.get())
+        if (working.get()) {
             return;
+        }
 
         working.set(true);
 
@@ -68,8 +69,9 @@ public class GlobalTransactionManager {
             for (TGlobalTransaction globalTransaction : globalTransactionList) {
 
                 globalTransaction = transactionDao.getGlobalByIdForUpdate(globalTransaction.getId());
-                if (globalTransaction.getStatus() != TGlobalTransactionsStatus.Fail && globalTransaction.getStatus() != TGlobalTransactionsStatus.PartiallyRollback)
+                if (globalTransaction.getStatus() != TGlobalTransactionsStatus.Fail && globalTransaction.getStatus() != TGlobalTransactionsStatus.PartiallyRollback) {
                     continue;
+                }
 
                 List<TGlobalTransactionProcess> transactionProcessList = transactionDao.findSucceedProcess(globalTransaction.getId());
 
@@ -95,13 +97,14 @@ public class GlobalTransactionManager {
                     }
 
                     //更新process的期望状态为“已回滚”
-                    if (process.getExpectedStatus() != TGlobalTransactionProcessExpectedStatus.HasRollback)
+                    if (process.getExpectedStatus() != TGlobalTransactionProcessExpectedStatus.HasRollback) {
                         try {
                             processService.updateExpectedStatus(process.getId(), TGlobalTransactionProcessExpectedStatus.HasRollback);
                         } catch (SoaException e) {
                             LOGGER.error(e.getMessage(), e);
                             break;
                         }
+                    }
 
                     String responseJson;
                     //call roll back method
@@ -157,15 +160,17 @@ public class GlobalTransactionManager {
             for (TGlobalTransaction globalTransaction : globalTransactionList) {
 
                 globalTransaction = transactionDao.getGlobalByIdForUpdate(globalTransaction.getId());
-                if (globalTransaction.getStatus() != TGlobalTransactionsStatus.Success)
+                if (globalTransaction.getStatus() != TGlobalTransactionsStatus.Success) {
                     continue;
+                }
 
                 List<TGlobalTransactionProcess> transactionProcessList = transactionDao.findFailedProcess(globalTransaction.getId());
 
                 LOGGER.info("需向前全局事务编号:{} 事务过程数量:{} 事务过程编号集合:{}", globalTransaction.getId(), transactionProcessList.size(), transactionProcessList.stream().map(gt -> gt.getId()).collect(toList()));
 
-                if (transactionProcessList.isEmpty())
+                if (transactionProcessList.isEmpty()) {
                     continue;
+                }
 
                 int i = 0;
                 for (; i < transactionProcessList.size(); i++) {
@@ -181,13 +186,14 @@ public class GlobalTransactionManager {
                     }
 
                     //更新process的期望状态为“成功”
-                    if (process.getExpectedStatus() != TGlobalTransactionProcessExpectedStatus.Success)
+                    if (process.getExpectedStatus() != TGlobalTransactionProcessExpectedStatus.Success) {
                         try {
                             processService.updateExpectedStatus(process.getId(), TGlobalTransactionProcessExpectedStatus.Success);
                         } catch (SoaException e) {
                             LOGGER.error(e.getMessage(), e);
                             break;
                         }
+                    }
 
                     String responseJson;
                     //call method
@@ -257,11 +263,11 @@ public class GlobalTransactionManager {
         //获取服务的ip和端口
         JSONPost jsonPost = null;
 
-        String callerInfo;
-        if (rollbackOrForward)
-            callerInfo = LoadBalanceFilter.getCallerInfo(process.getServiceName(), process.getVersionName(), process.getRollbackMethodName());
-        else
-            callerInfo = LoadBalanceFilter.getCallerInfo(process.getServiceName(), process.getVersionName(), process.getMethodName());
+        String callerInfo = null;
+//        if (rollbackOrForward)
+//            callerInfo = LoadBalanceFilter.getCallerInfo(process.getServiceName(), process.getVersionName(), process.getRollbackMethodName());
+//        else
+//            callerInfo = LoadBalanceFilter.getCallerInfo(process.getServiceName(), process.getVersionName(), process.getMethodName());
 
         if (callerInfo != null) {
 
@@ -280,10 +286,11 @@ public class GlobalTransactionManager {
         header.setTransactionId(Optional.of(process.getTransactionId()));
         header.setTransactionSequence(Optional.of(process.getTransactionSequence()));
 
-        if (rollbackOrForward)
+        if (rollbackOrForward) {
             responseJson = jsonPost.callServiceMethod(header, "", service);
-        else
+        } else {
             responseJson = jsonPost.callServiceMethod(header, process.getRequestJson(), service);
+        }
 
         return responseJson;
     }
