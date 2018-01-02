@@ -367,16 +367,15 @@ class ScalaGenerator extends CodeGenerator {
         import java.util.concurrent.CompletableFuture;
         import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + "." + service.name + "AsyncCodec._"};
         import {service.namespace.substring(0, service.namespace.lastIndexOf(".")) + ".service." + service.name }Async;
+        import scala.compat.java8.FutureConverters._
+        import scala.concurrent.duration._
+        import scala.concurrent.Future
+        import scala.concurrent.ExecutionContext.Implicits.global
 
         /**
         {notice}
         **/
         class {service.name}AsyncClient extends {service.name}Async <block>
-
-        import java.util.function.<block> Function ⇒ JFunction, Predicate ⇒ JPredicate, BiPredicate </block>
-        implicit def toJavaFunction[A, B](f: Function1[A, B]) = new JFunction[A, B] <block>
-          override def apply(a: A): B = f(a)
-        </block>
 
         val serviceName = "{service.namespace + "." + service.name }"
         val version = "{service.meta.version}"
@@ -410,7 +409,7 @@ class ScalaGenerator extends CodeGenerator {
             **/
             def {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
             <div>{nameAsId(field.name)}:{toDataTypeTemplate(field.getDataType())} {if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}}}
-            {if(method.getRequest.fields.size() > 0) <span>,</span>} timeout: Long = 5000) : {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} = <block>
+            {if(method.getRequest.fields.size() > 0) <span>,</span>} timeout: Long = 5000) : Future[{toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}] = <block>
 
             val response = pool.sendAsync(
             serviceName,
@@ -425,7 +424,7 @@ class ScalaGenerator extends CodeGenerator {
             new {method.response.name.charAt(0).toUpper + method.response.name.substring(1)}Serializer()
             ,timeout).asInstanceOf[CompletableFuture[{method.response.name}]]
 
-            {if(method.getResponse.getFields.get(0).getDataType.kind != DataType.KIND.VOID) <div>response.thenApply(_.success).get</div>}
+            {if(method.getResponse.getFields.get(0).getDataType.kind != DataType.KIND.VOID) <div>toScala(response).map(_.success)</div> else <div>toScala(response).map(null)</div>}
 
           </block>
 
@@ -557,7 +556,7 @@ class ScalaGenerator extends CodeGenerator {
 
         import com.isuwang.dapeng.core.<block>Processor, Service</block>
         import com.isuwang.dapeng.core.SoaGlobalTransactional
-        import java.util.concurrent.Future
+        import scala.concurrent.Future
 
         /**
         {notice}
@@ -578,7 +577,7 @@ class ScalaGenerator extends CodeGenerator {
             def {method.name}(
             {toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
             <div>{nameAsId(field.name)}: {toDataTypeTemplate(field.getDataType())} {if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}
-          }}{if(method.getRequest.getFields().size()>0) ","} timeout : Long): Future[{if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) <div>Void</div> else toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}]
+          }}{if(method.getRequest.getFields().size()>0) ","} timeout : Long): Future[{if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) <div>Unit</div> else toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}]
 
           </div>
         }
