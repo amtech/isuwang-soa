@@ -50,9 +50,10 @@
         <module>dapeng-message</module>
         <module>dapeng-service-invoke</module>
         <module>dapeng-container-new</module>
-        <module>dapeng-common</module>
+        <module>dapeng-utils</module>
         <module>dapeng-client-netty</module>
         <module>dapeng-json</module>
+        <module>dapeng-transaction</module>
     </modules>
 
     <properties>

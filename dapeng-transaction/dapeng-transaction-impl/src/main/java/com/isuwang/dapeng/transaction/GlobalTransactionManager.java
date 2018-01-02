@@ -1,16 +1,15 @@
 package com.isuwang.dapeng.transaction;
 
-import com.isuwang.dapeng.client.filter.LoadBalanceFilter;
 import com.isuwang.dapeng.client.json.JSONPost;
 import com.isuwang.dapeng.core.SoaException;
 import com.isuwang.dapeng.core.SoaHeader;
-import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.core.helper.MasterHelper;
 import com.isuwang.dapeng.core.metadata.Service;
 import com.isuwang.dapeng.metadata.MetadataClient;
 import com.isuwang.dapeng.transaction.api.domain.*;
 import com.isuwang.dapeng.transaction.api.service.GlobalTransactionProcessService;
 import com.isuwang.dapeng.transaction.dao.ITransactionDao;
+import com.isuwang.dapeng.util.SoaSystemEnvProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

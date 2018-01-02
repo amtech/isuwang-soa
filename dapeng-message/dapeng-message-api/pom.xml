@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>com.isuwang</groupId>
-            <artifactId>dapeng-core</artifactId>
+            <artifactId>dapeng-utils</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

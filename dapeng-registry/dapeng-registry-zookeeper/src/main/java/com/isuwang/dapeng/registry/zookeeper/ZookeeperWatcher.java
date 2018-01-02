@@ -1,6 +1,5 @@
 package com.isuwang.dapeng.registry.zookeeper;
 
-import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.core.version.Version;
 import com.isuwang.dapeng.registry.ConfigKey;
 import com.isuwang.dapeng.registry.RuntimeInstance;
@@ -8,6 +7,7 @@ import com.isuwang.dapeng.registry.ServiceInfo;
 import com.isuwang.dapeng.registry.ServiceZKInfo;
 import com.isuwang.dapeng.route.Route;
 import com.isuwang.dapeng.route.parse.RouteParser;
+import com.isuwang.dapeng.util.SoaSystemEnvProperties;
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;

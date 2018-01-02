@@ -1,10 +1,10 @@
 package com.isuwang.dapeng.impl.plugins;
 
 import com.isuwang.dapeng.api.Plugin;
-import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.transaction.api.GlobalTransactionFactory;
 import com.isuwang.dapeng.transaction.api.service.GlobalTransactionProcessService;
 import com.isuwang.dapeng.transaction.api.service.GlobalTransactionService;
+import com.isuwang.dapeng.util.SoaSystemEnvProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;

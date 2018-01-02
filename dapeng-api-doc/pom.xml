@@ -141,6 +141,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.isuwang</groupId>
+            <artifactId>dapeng-utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>16.0.1</version>

@@ -2,7 +2,6 @@ package com.isuwang.dapeng.util;
 
 import com.isuwang.dapeng.client.netty.TSoaTransport;
 import com.isuwang.dapeng.core.BeanSerializer;
-import com.isuwang.dapeng.core.Context;
 import com.isuwang.dapeng.core.SoaHeader;
 import com.isuwang.dapeng.core.SoaHeaderSerializer;
 import com.isuwang.dapeng.core.enums.CodecProtocol;

@@ -1,4 +1,4 @@
-package com.isuwang.dapeng.core;
+package com.isuwang.dapeng.util;
 
 import java.net.*;
 import java.util.Enumeration;

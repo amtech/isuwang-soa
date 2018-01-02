@@ -1,7 +1,7 @@
 package com.isuwang.dapeng.impl.plugins.netty;
 
 import com.isuwang.dapeng.core.SoaException;
-import com.isuwang.dapeng.core.SoaSystemEnvProperties;
+import com.isuwang.dapeng.util.SoaSystemEnvProperties;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;

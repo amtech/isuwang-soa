@@ -9,6 +9,18 @@ import java.util.Optional;
  */
 public interface InvocationContext {
 
+    void setServiceName(String serviceName);
+
+    String getServiceName();
+
+    void setMethodName(String methodName);
+
+    String getMethodName();
+
+    void setVersionName(String versionName);
+
+    String getVersionName();
+
     void setCodecProtocol(CodecProtocol protocol);
 
     CodecProtocol getCodecProtocol();
@@ -21,9 +33,31 @@ public interface InvocationContext {
 
     void setCalleePort(Optional<Integer> calleePort);
 
-    public Optional<Integer> getTransactionId();
+    Optional<Integer> getTransactionId();
 
-    public void setTransactionId(Optional<Integer> transactionId);
+    void setTransactionId(Optional<Integer> transactionId);
+
+    void setCustomerId(Optional<Integer> customerId);
+
+    Optional<Integer> getCustomerId();
+
+    void setCustomerName(Optional<String> customerName);
+
+    Optional<String> getCustomerName();
+
+    void setOperatorId(Optional<Integer> operatorId);
+
+    Optional<Integer> getOperatorId();
+
+    void setCallerFrom(Optional<String> callerFrom);
+
+    Optional<String> getCallerFrom();
+
+    void setCallerIp(Optional<String> callerIp);
+
+    Optional<String> getCallerIp();
+
+    void setTransactionSequence(Optional<Integer>transactionSequence);
 
     void setLastInfo(InvocationInfo invocationInfo);
 
