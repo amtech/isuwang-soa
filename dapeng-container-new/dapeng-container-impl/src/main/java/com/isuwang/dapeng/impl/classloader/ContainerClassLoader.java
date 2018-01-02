@@ -9,10 +9,10 @@ import java.net.URLClassLoader;
  * @author craneding
  * @date 16/1/28
  */
-public class PlatformClassLoader extends URLClassLoader {
+public class ContainerClassLoader extends URLClassLoader {
 
-    public PlatformClassLoader(URL[] urls) {
-        super(urls, ClassLoaderManager.shareClassLoader);
+    public ContainerClassLoader(URL[] urls, CoreClassLoader coreClassLoader) {
+        super(urls, coreClassLoader);
     }
 
 }

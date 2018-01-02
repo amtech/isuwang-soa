@@ -9,9 +9,9 @@ import java.net.URLClassLoader;
  * @author craneding
  * @date 16/1/28
  */
-public class ShareClassLoader extends URLClassLoader {
+public class CoreClassLoader extends URLClassLoader {
 
-    public ShareClassLoader(URL[] urls) {
+    public CoreClassLoader(URL[] urls) {
         super(urls, Thread.currentThread().getContextClassLoader());
     }
 

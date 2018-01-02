@@ -8,7 +8,7 @@ import com.isuwang.dapeng.core.ProcessorKey;
 import com.isuwang.dapeng.core.Service;
 import com.isuwang.dapeng.core.ServiceInfo;
 import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
-import com.isuwang.dapeng.impl.classloader.AppClassLoader;
+import com.isuwang.dapeng.impl.classloader.ApplicationClassLoader;
 import com.isuwang.dapeng.impl.container.DapengApplication;
 
 import java.lang.reflect.Constructor;
@@ -20,9 +20,9 @@ import java.util.stream.Collectors;
 public class SpringAppLoader implements Plugin {
 
     private final Container container;
-    private final List<AppClassLoader> appClassLoaders;
+    private final List<ApplicationClassLoader> appClassLoaders;
 
-    public SpringAppLoader(Container container, List<AppClassLoader> appClassLoaders) {
+    public SpringAppLoader(Container container, List<ApplicationClassLoader> appClassLoaders) {
         this.container = container;
         this.appClassLoaders = appClassLoaders;
     }
