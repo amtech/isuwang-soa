@@ -282,9 +282,10 @@ public class JsonSerializer implements BeanSerializer<String> {
              */
             final int byteBufPosition;
 
+            //struct if dataType.kind==STRUCT
             final Struct struct;
             /**
-             * if dataType is a Collection(such as LIST, MAP, SET etc), elSize represents the size of the Collection.
+             * if dataType is a Collection(such as LIST, MAP, SET etc), elCount represents the size of the Collection.
              */
             private int elCount = 0;
 
@@ -297,15 +298,13 @@ public class JsonSerializer implements BeanSerializer<String> {
             void increaseElement() {
                 elCount++;
             }
-
-            int getElCount() {
-                return elCount;
-            }
         }
 
-        // current struct
+        //当前处理数据节点
         StackNode current;
+        //标志是否是第一个object
         boolean inited = false;
+        //onStartField的时候, 记录是否找到该Field. 如果没找到,那么需要skip这个field
         boolean foundField = true;
 
         /**
@@ -313,6 +312,8 @@ public class JsonSerializer implements BeanSerializer<String> {
          */
         public Json2ThriftCallback(TProtocol oproto) {
             this.oproto = oproto;
+
+            //初始化当前数据节点
             DataType initDataType = new DataType();
             initDataType.setKind(DataType.KIND.STRUCT);
             initDataType.qualifiedName = struct.name;
@@ -412,18 +413,15 @@ public class JsonSerializer implements BeanSerializer<String> {
                     oproto.writeSetBegin(new TSet(dataType2Byte(current.dataType.valueType), 0));
                     break;
             }
-            //List<List<>>/List<Struct>
-//            if (isComplexKind(current.dataType.valueType.kind)) {
-//                current.increaseElement();
+
             stackNew(new StackNode(current.dataType.valueType, byteBuf.writerIndex(), findStruct(current.dataType.valueType.qualifiedName, service)));
-//            }
         }
 
         @Override
         public void onEndArray() throws TException {
-            assert isCollectionKind(current.dataType.kind);
-//todo assert fail
             pop();
+
+            assert isCollectionKind(current.dataType.kind);
 
             switch (current.dataType.kind) {
                 case LIST:
@@ -473,11 +471,6 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onBoolean(boolean value) throws TException {
-//            if (isCollectionKind(current.dataType.kind)) {
-//                current.increaseElement();
-//            } else if (peek().dataType.kind == DataType.KIND.MAP) {
-//                peek().increaseElement();
-//            }
             if (peek() != null && isMultiElementKind(peek().dataType.kind)) peek().increaseElement();
             oproto.writeBool(value);
         }
@@ -485,12 +478,7 @@ public class JsonSerializer implements BeanSerializer<String> {
         @Override
         public void onNumber(double value) throws TException {
             DataType.KIND currentType = current.dataType.kind;
-//            if (isCollectionKind(current.dataType.kind)) {
-//                current.increaseElement();
-//                currentType = current.dataType.valueType.kind;
-//            } else if (peek().dataType.kind == DataType.KIND.MAP) {
-//                peek().increaseElement();
-//            }
+
             if (peek() != null && isMultiElementKind(peek().dataType.kind)) peek().increaseElement();
 
             switch (currentType) {
@@ -526,12 +514,6 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onString(String value) throws TException {
-//            if (isCollectionKind(current.dataType.kind)) {
-//                current.increaseElement();
-//            } else if (peek().dataType.kind == DataType.KIND.MAP) {
-//                peek().increaseElement();
-//            }
-
             if (peek() != null && isMultiElementKind(peek().dataType.kind)) peek().increaseElement();
 
             if (current.dataType.kind == DataType.KIND.ENUM) {
