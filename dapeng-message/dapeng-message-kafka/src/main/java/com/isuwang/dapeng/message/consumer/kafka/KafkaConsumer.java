@@ -1,8 +1,8 @@
 package com.isuwang.dapeng.message.consumer.kafka;
 
-import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.core.definition.SoaFunctionDefinition;
 import com.isuwang.dapeng.message.consumer.api.context.ConsumerContext;
+import com.isuwang.dapeng.util.SoaSystemEnvProperties;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.serialization.ByteBufferDeserializer;

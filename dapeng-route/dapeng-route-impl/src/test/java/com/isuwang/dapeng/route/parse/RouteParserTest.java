@@ -47,8 +47,6 @@ public class RouteParserTest {
         soaHeader.setVersionName("1.0.0");
         soaHeader.setMethodName("getArticleDetail");
 
-        ctx.setHeader(soaHeader);
-
         Set<InetAddress> serverResult = RouteExecutor.execute(ctx, routes, servers);
 
         System.out.println(serverResult);

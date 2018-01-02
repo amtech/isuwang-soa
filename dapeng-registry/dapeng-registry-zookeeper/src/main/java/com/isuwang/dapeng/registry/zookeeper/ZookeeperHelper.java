@@ -1,8 +1,8 @@
 package com.isuwang.dapeng.registry.zookeeper;
 
-import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.core.helper.MasterHelper;
 import com.isuwang.dapeng.registry.RegistryAgent;
+import com.isuwang.dapeng.util.SoaSystemEnvProperties;
 import org.apache.zookeeper.*;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;

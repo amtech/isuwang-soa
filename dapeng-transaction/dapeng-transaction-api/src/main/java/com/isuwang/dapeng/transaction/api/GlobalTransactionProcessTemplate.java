@@ -42,18 +42,18 @@ public class GlobalTransactionProcessTemplate<REQ> {
 
             transactionContext.setCurrentTransactionSequence(transactionContext.getCurrentTransactionSequence() + 1);
 
-            invocationContext.getHeader().setTransactionId(Optional.of(transactionContext.getCurrentTransactionId()));
-            invocationContext.getHeader().setTransactionSequence(Optional.of(transactionContext.getCurrentTransactionSequence()));
+            invocationContext.setTransactionId(Optional.of(transactionContext.getCurrentTransactionId()));
+            invocationContext.setTransactionSequence(Optional.of(transactionContext.getCurrentTransactionSequence()));
 
             transactionProcess = new TGlobalTransactionProcess();
             transactionProcess.setCreatedAt(new Date());
             transactionProcess.setCreatedBy(0);
             transactionProcess.setExpectedStatus(TGlobalTransactionProcessExpectedStatus.Success);
 
-            transactionProcess.setServiceName(invocationContext.getHeader().getServiceName());
-            transactionProcess.setMethodName(invocationContext.getHeader().getMethodName());
-            transactionProcess.setVersionName(invocationContext.getHeader().getVersionName());
-            transactionProcess.setRollbackMethodName(invocationContext.getHeader().getMethodName() + "_rollback");
+            transactionProcess.setServiceName(invocationContext.getServiceName());
+            transactionProcess.setMethodName(invocationContext.getMethodName());
+            transactionProcess.setVersionName(invocationContext.getVersionName());
+            transactionProcess.setRollbackMethodName(invocationContext.getMethodName() + "_rollback");
 
             transactionProcess.setRequestJson(req == null ? "" : new Gson().toJson(req));
             transactionProcess.setResponseJson("");

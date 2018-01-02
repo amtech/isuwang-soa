@@ -1,4 +1,4 @@
-package com.isuwang.dapeng.core;
+package com.isuwang.dapeng.util;
 
 /**
  * Soa System Env Properties

@@ -5,9 +5,9 @@ import com.isuwang.dapeng.api.events.AppEvent;
 import com.isuwang.dapeng.api.events.AppEventType;
 import com.isuwang.dapeng.core.Application;
 import com.isuwang.dapeng.core.ProcessorKey;
-import com.isuwang.dapeng.core.SoaSystemEnvProperties;
 import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
 import com.isuwang.dapeng.core.filter.Filter;
+import com.isuwang.dapeng.util.SoaSystemEnvProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

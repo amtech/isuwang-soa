@@ -1,4 +1,4 @@
-package com.isuwang.dapeng.common;
+package com.isuwang.dapeng.util;
 
 import io.netty.buffer.ByteBuf;
 

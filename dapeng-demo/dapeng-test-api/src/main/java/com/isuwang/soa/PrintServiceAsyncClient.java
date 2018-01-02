@@ -22,7 +22,7 @@ package com.isuwang.soa;
       private SoaConnectionPool pool;
 
       public PrintServiceAsyncClient() {
-        this.serviceName = "com.isuwang.soa.service.PrintServiceAsync";
+        this.serviceName = "com.isuwang.soa.service.PrintService";
         this.version = "1.0.0";
 
         ServiceLoader<SoaConnectionPoolFactory> factories = ServiceLoader.load(SoaConnectionPoolFactory.class);

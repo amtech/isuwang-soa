@@ -4,6 +4,7 @@ import com.isuwang.dapeng.core.*;
 import com.isuwang.dapeng.registry.*;
 import com.isuwang.dapeng.registry.zookeeper.LoadBalanceService;
 import com.isuwang.dapeng.registry.zookeeper.ZkClientAgentImpl;
+import com.isuwang.dapeng.util.SoaSystemEnvProperties;
 
 import java.lang.ref.WeakReference;
 import java.util.List;

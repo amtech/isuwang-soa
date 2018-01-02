@@ -22,7 +22,7 @@ package com.isuwang.soa;
       private SoaConnectionPool pool;
 
       public CalculateServiceAsyncClient() {
-        this.serviceName = "com.isuwang.soa.service.CalculateServiceAsync";
+        this.serviceName = "com.isuwang.soa.service.CalculateService";
         this.version = "1.0.0";
 
         ServiceLoader<SoaConnectionPoolFactory> factories = ServiceLoader.load(SoaConnectionPoolFactory.class);

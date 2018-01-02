@@ -15,7 +15,7 @@
 
         * 
         **/
-        @Service(name="com.isuwang.soa.service.CalculateServiceAsync",version = "1.0.0")
+        @Service(name="com.isuwang.soa.service.CalculateService",version = "1.0.0")
         @Processor(className = "com.isuwang.soa.CalculateServiceAsyncCodec$Processor")
         public interface CalculateServiceAsync {
         

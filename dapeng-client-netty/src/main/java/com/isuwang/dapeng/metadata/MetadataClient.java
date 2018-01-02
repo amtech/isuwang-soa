@@ -1,9 +1,7 @@
 package com.isuwang.dapeng.metadata;
 
 import com.isuwang.dapeng.client.netty.SoaConnectionImpl;
-import com.isuwang.dapeng.core.SoaException;
-import com.isuwang.dapeng.core.SoaSystemEnvProperties;
-import com.isuwang.org.apache.thrift.TException;
+import com.isuwang.dapeng.util.SoaSystemEnvProperties;
 
 /**
  * Created by tangliu on 2016/3/3.
