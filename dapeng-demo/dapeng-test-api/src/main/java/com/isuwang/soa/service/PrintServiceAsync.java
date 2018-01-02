@@ -15,7 +15,7 @@
 
         * 
         **/
-        @Service(name="com.isuwang.soa.service.PrintServiceAsync",version = "1.0.0")
+        @Service(name="com.isuwang.soa.service.PrintService",version = "1.0.0")
         @Processor(className = "com.isuwang.soa.PrintServiceAsyncCodec$Processor")
         public interface PrintServiceAsync {
         

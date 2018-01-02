@@ -22,7 +22,7 @@ package com.isuwang.soa;
       private SoaConnectionPool pool;
 
       public SchedualServiceAsyncClient() {
-        this.serviceName = "com.isuwang.soa.service.SchedualServiceAsync";
+        this.serviceName = "com.isuwang.soa.service.SchedualService";
         this.version = "1.0.0";
 
         ServiceLoader<SoaConnectionPoolFactory> factories = ServiceLoader.load(SoaConnectionPoolFactory.class);

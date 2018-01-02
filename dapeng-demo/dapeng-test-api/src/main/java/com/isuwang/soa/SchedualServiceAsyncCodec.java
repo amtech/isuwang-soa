@@ -75,18 +75,18 @@ package com.isuwang.soa;
       public test_args read(TProtocol iprot) throws TException{
 
       test_args bean = new test_args();
-      com.isuwang.org.apache.thrift.protocol.TField schemeField;
+      TField schemeField;
       iprot.readStructBegin();
 
       while(true){
         schemeField = iprot.readFieldBegin();
-        if(schemeField.type == com.isuwang.org.apache.thrift.protocol.TType.STOP){ break;}
+        if(schemeField.type == TType.STOP){ break;}
 
         switch(schemeField.id){
           
           
             default:
-            com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            TProtocolUtil.skip(iprot, schemeField.type);
           
         }
         iprot.readFieldEnd();
@@ -101,7 +101,7 @@ package com.isuwang.soa;
       public void write(test_args bean, TProtocol oprot) throws TException{
 
       validate(bean);
-      oprot.writeStructBegin(new com.isuwang.org.apache.thrift.protocol.TStruct("test_args"));
+      oprot.writeStructBegin(new TStruct("test_args"));
 
       
       oprot.writeFieldStop();
@@ -123,20 +123,20 @@ package com.isuwang.soa;
             public test_result read(TProtocol iprot) throws TException{
 
               test_result bean = new test_result();
-              com.isuwang.org.apache.thrift.protocol.TField schemeField;
+              TField schemeField;
               iprot.readStructBegin();
 
               while(true){
                 schemeField = iprot.readFieldBegin();
-                if(schemeField.type == com.isuwang.org.apache.thrift.protocol.TType.STOP){ break;}
+                if(schemeField.type == TType.STOP){ break;}
 
                 switch(schemeField.id){
                   case 0:  //SUCCESS
-                  if(schemeField.type == com.isuwang.org.apache.thrift.protocol.TType.STRING){
+                  if(schemeField.type == TType.STRING){
                     String elem0 = iprot.readString();
        bean.setSuccess(elem0);
                   }else{
-                    com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+                    TProtocolUtil.skip(iprot, schemeField.type);
                   }
                   break;
                   /*
@@ -146,7 +146,7 @@ package com.isuwang.soa;
                   break A;
                   */
                   default:
-                  com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+                  TProtocolUtil.skip(iprot, schemeField.type);
                 }
                 iprot.readFieldEnd();
               }
@@ -160,10 +160,10 @@ package com.isuwang.soa;
       public void write(test_result bean, TProtocol oprot) throws TException{
 
       validate(bean);
-      oprot.writeStructBegin(new com.isuwang.org.apache.thrift.protocol.TStruct("test_result"));
+      oprot.writeStructBegin(new TStruct("test_result"));
 
       
-            oprot.writeFieldBegin(new com.isuwang.org.apache.thrift.protocol.TField("success", com.isuwang.org.apache.thrift.protocol.TType.STRING, (short) 0));
+            oprot.writeFieldBegin(new TField("success", TType.STRING, (short) 0));
             String elem0 = bean.getSuccess();
             oprot.writeString(elem0);
             
@@ -247,17 +247,17 @@ package com.isuwang.soa;
           public getServiceMetadata_args read(TProtocol iprot) throws TException {
 
             getServiceMetadata_args bean =new getServiceMetadata_args();
-            com.isuwang.org.apache.thrift.protocol.TField schemeField;
+            TField schemeField;
             iprot.readStructBegin();
 
             while (true) {
               schemeField = iprot.readFieldBegin();
-              if (schemeField.type == com.isuwang.org.apache.thrift.protocol.TType.STOP) {
+              if (schemeField.type == TType.STOP) {
                 break;
               }
               switch (schemeField.id) {
                 default:
-                com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+                TProtocolUtil.skip(iprot, schemeField.type);
 
               }
               iprot.readFieldEnd();
@@ -273,7 +273,7 @@ package com.isuwang.soa;
           public void write(getServiceMetadata_args bean, TProtocol oprot) throws TException {
 
             validate(bean);
-            oprot.writeStructBegin(new com.isuwang.org.apache.thrift.protocol.TStruct("getServiceMetadata_args"));
+            oprot.writeStructBegin(new TStruct("getServiceMetadata_args"));
             oprot.writeFieldStop();
             oprot.writeStructEnd();
           }
@@ -292,25 +292,25 @@ package com.isuwang.soa;
           public getServiceMetadata_result read(TProtocol iprot) throws TException {
 
             getServiceMetadata_result bean = new getServiceMetadata_result();
-            com.isuwang.org.apache.thrift.protocol.TField schemeField;
+            TField schemeField;
             iprot.readStructBegin();
 
             while (true) {
               schemeField = iprot.readFieldBegin();
-              if (schemeField.type == com.isuwang.org.apache.thrift.protocol.TType.STOP) {
+              if (schemeField.type == TType.STOP) {
                 break;
               }
 
               switch (schemeField.id) {
                 case 0:  //SUCCESS
-                if (schemeField.type == com.isuwang.org.apache.thrift.protocol.TType.STRING) {
+                if (schemeField.type == TType.STRING) {
                   bean.setSuccess(iprot.readString());
                 } else {
-                  com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+                  TProtocolUtil.skip(iprot, schemeField.type);
                 }
                 break;
                 default:
-                com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+                TProtocolUtil.skip(iprot, schemeField.type);
               }
               iprot.readFieldEnd();
             }
@@ -324,9 +324,9 @@ package com.isuwang.soa;
           public void write(getServiceMetadata_result bean, TProtocol oprot) throws TException {
 
             validate(bean);
-            oprot.writeStructBegin(new com.isuwang.org.apache.thrift.protocol.TStruct("getServiceMetadata_result"));
+            oprot.writeStructBegin(new TStruct("getServiceMetadata_result"));
 
-            oprot.writeFieldBegin(new com.isuwang.org.apache.thrift.protocol.TField("success", com.isuwang.org.apache.thrift.protocol.TType.STRING, (short) 0));
+            oprot.writeFieldBegin(new TField("success", TType.STRING, (short) 0));
             oprot.writeString(bean.getSuccess());
             oprot.writeFieldEnd();
 

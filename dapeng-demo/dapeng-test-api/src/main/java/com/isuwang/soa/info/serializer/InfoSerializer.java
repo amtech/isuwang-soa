@@ -21,36 +21,36 @@
       public com.isuwang.soa.info.Info read(TProtocol iprot) throws TException{
 
       com.isuwang.soa.info.Info bean = new com.isuwang.soa.info.Info();
-      com.isuwang.org.apache.thrift.protocol.TField schemeField;
+      TField schemeField;
       iprot.readStructBegin();
 
       while(true){
         schemeField = iprot.readFieldBegin();
-        if(schemeField.type == com.isuwang.org.apache.thrift.protocol.TType.STOP){ break;}
+        if(schemeField.type == TType.STOP){ break;}
 
         switch(schemeField.id){
           
               case 1:
-              if(schemeField.type == com.isuwang.org.apache.thrift.protocol.TType.STRING){
+              if(schemeField.type == TType.STRING){
               String elem0 = iprot.readString();
        bean.setName(elem0);
             }else{
-              com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              TProtocolUtil.skip(iprot, schemeField.type);
             }
               break;
             
               case 2:
-              if(schemeField.type == com.isuwang.org.apache.thrift.protocol.TType.STRING){
+              if(schemeField.type == TType.STRING){
               String elem0 = iprot.readString();
        bean.setCode(elem0);
             }else{
-              com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              TProtocolUtil.skip(iprot, schemeField.type);
             }
               break;
             
           
             default:
-            com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+            TProtocolUtil.skip(iprot, schemeField.type);
           
         }
         iprot.readFieldEnd();
@@ -65,16 +65,16 @@
       public void write(com.isuwang.soa.info.Info bean, TProtocol oprot) throws TException{
 
       validate(bean);
-      oprot.writeStructBegin(new com.isuwang.org.apache.thrift.protocol.TStruct("Info"));
+      oprot.writeStructBegin(new TStruct("Info"));
 
       
-            oprot.writeFieldBegin(new com.isuwang.org.apache.thrift.protocol.TField("name", com.isuwang.org.apache.thrift.protocol.TType.STRING, (short) 1));
+            oprot.writeFieldBegin(new TField("name", TType.STRING, (short) 1));
             String elem0 = bean.getName();
             oprot.writeString(elem0);
             
             oprot.writeFieldEnd();
           
-            oprot.writeFieldBegin(new com.isuwang.org.apache.thrift.protocol.TField("code", com.isuwang.org.apache.thrift.protocol.TType.STRING, (short) 2));
+            oprot.writeFieldBegin(new TField("code", TType.STRING, (short) 2));
             String elem1 = bean.getCode();
             oprot.writeString(elem1);
             

@@ -15,7 +15,7 @@
 
         * 
         **/
-        @Service(name="com.isuwang.soa.service.SchedualServiceAsync",version = "1.0.0")
+        @Service(name="com.isuwang.soa.service.SchedualService",version = "1.0.0")
         @Processor(className = "com.isuwang.soa.SchedualServiceAsyncCodec$Processor")
         public interface SchedualServiceAsync {
         
