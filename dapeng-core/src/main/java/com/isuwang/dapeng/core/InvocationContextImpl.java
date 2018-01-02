@@ -21,8 +21,10 @@ public class InvocationContextImpl implements  InvocationContext {
 
     private InvocationInfo invocationInfo;
 
-    private SoaHeader soaHeader;
-
+    /**
+     * 全局事务id
+     */
+    private Optional<Integer> transactionId = Optional.empty();
 
     // readonly
     private int seqid;
@@ -58,20 +60,20 @@ public class InvocationContextImpl implements  InvocationContext {
     }
 
     @Override
-    public SoaHeader getHeader() {
-        return this.soaHeader;
-    }
-
-    @Override
-    public void setHeader(SoaHeader soaHeader) {
-        this.soaHeader = soaHeader;
-    }
-
-    @Override
     public void setLastInfo(InvocationInfo invocationInfo) {
         this.invocationInfo = invocationInfo;
     }
 
+    public Optional<Integer> getTransactionId() {
+        return transactionId;
+    }
+
+    @Override
+    public void setTransactionId(Optional<Integer> transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    @Override
     public void setCodecProtocol(CodecProtocol codecProtocol) {
         this.codecProtocol = codecProtocol;
     }

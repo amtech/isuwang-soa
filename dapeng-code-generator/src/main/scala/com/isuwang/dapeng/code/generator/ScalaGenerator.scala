@@ -262,7 +262,7 @@ class ScalaGenerator extends CodeGenerator {
       }
       for(structIndex <- (0 until service.getStructDefinitions.size())) {
         val structDefinition = service.getStructDefinitions.get(structIndex)
-        structDefinition.setNamespace(toScalaNamespace(structDefinition.getNamespace,1))
+        structDefinition.setNamespace(toScalaNamespace(structDefinition.getNamespace))
         namespaces.add(structDefinition.getNamespace)
         structNamespaces.add(structDefinition.getNamespace)
 
@@ -371,7 +371,7 @@ class ScalaGenerator extends CodeGenerator {
         /**
         {notice}
         **/
-        class {service.name}Client extends {service.name}Async <block>
+        class {service.name}AsyncClient extends {service.name}Async <block>
 
         import java.util.function.<block> Function ⇒ JFunction, Predicate ⇒ JPredicate, BiPredicate </block>
         implicit def toJavaFunction[A, B](f: Function1[A, B]) = new JFunction[A, B] <block>
@@ -563,7 +563,7 @@ class ScalaGenerator extends CodeGenerator {
         {notice}
         * {service.doc}
         **/
-        @Service(name ="{oriNamespace+"."+service.name}Async" , version = "{service.meta.version}")
+        @Service(name ="{oriNamespace+"."+service.name}" , version = "{service.meta.version}")
         @Processor(className = "{service.namespace.substring(0, service.namespace.lastIndexOf("service"))}{service.name}AsyncCodec$Processor")
         trait {service.name}Async <block>
         {

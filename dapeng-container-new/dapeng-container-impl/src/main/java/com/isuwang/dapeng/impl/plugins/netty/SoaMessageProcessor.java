@@ -3,6 +3,7 @@ package com.isuwang.dapeng.impl.plugins.netty;
 
 import com.isuwang.dapeng.client.netty.TSoaTransport;
 import com.isuwang.dapeng.core.*;
+import com.isuwang.dapeng.core.enums.CodecProtocol;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.TBinaryProtocol;
 import com.isuwang.org.apache.thrift.protocol.TCompactProtocol;
@@ -107,7 +108,7 @@ public class SoaMessageProcessor {
         }
 
         byte protocol = headerProtocol.readByte();
-        context.setCodecProtocol(Context.CodecProtocol.toCodecProtocol(protocol));
+        context.setCodecProtocol(CodecProtocol.toCodecProtocol(protocol));
         switch (context.getCodecProtocol()) {
             case Binary:
                 contentProtocol = new TBinaryProtocol(getTransport());

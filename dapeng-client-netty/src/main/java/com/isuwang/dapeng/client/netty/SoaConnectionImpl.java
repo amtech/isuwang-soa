@@ -83,7 +83,7 @@ public class SoaConnectionImpl implements SoaConnection {
 
         SharedChain sharedChain = new SharedChain(new LoadBalanceFilter(), new ArrayList<>(), dispatchFilter, 0);
 
-        HandlerFilterContext filterContext = new HandlerFilterContext();
+        FilterContextImpl filterContext = new FilterContextImpl();
         filterContext.setAttach(dispatchFilter, "chain", sharedChain);
 
         try {
@@ -143,7 +143,7 @@ public class SoaConnectionImpl implements SoaConnection {
 
         SharedChain sharedChain = new SharedChain(new LoadBalanceFilter(), new ArrayList<>(), dispatchFilter, 0);
 
-        HandlerFilterContext filterContext = new HandlerFilterContext();
+        FilterContextImpl filterContext = new FilterContextImpl();
         filterContext.setAttach(dispatchFilter, "chain", sharedChain);
 
         try {
