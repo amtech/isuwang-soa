@@ -28,44 +28,17 @@ public class NettyClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyClient.class);
 
-
-    private final String host;
-    private final int port;
-
     private final int readerIdleTimeSeconds = 15;
     private final int writerIdleTimeSeconds = 10;
     private final int allIdleTimeSeconds = 0;
 
     private Bootstrap bootstrap = null;
-    private Channel channel = null;
     private final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
     private final Map<Integer, CompletableFuture> futureCaches = new ConcurrentHashMap<>();
 
-    public NettyClient(String host, int port) throws SoaException {
-        this.host = host;
-        this.port = port;
-        try {
-            connect(host, port);
-        } catch (Exception e) {
-            throw new SoaException(SoaBaseCode.NotConnected);
-        }
-   }
-
-    /**
-     * 创建连接
-     *
-     */
-    private synchronized Channel connect(String host, int port) throws Exception {
-        if (channel != null && channel.isActive())
-            return channel;
-
-        try {
-            Bootstrap b = initBootstrap();
-            return channel = b.connect(host, port).sync().channel();
-        } catch (Exception e) {
-            throw new SoaException(SoaBaseCode.NotConnected);
-        }
+    public NettyClient(){
+        initBootstrap();
     }
 
     protected Bootstrap initBootstrap() {
@@ -83,8 +56,7 @@ public class NettyClient {
         return bootstrap;
     }
 
-    public ByteBuf send(int seqid, ByteBuf request) throws Exception {
-        checkChannel();
+    public ByteBuf send(Channel channel ,int seqid, ByteBuf request) throws Exception {
 
         //means that this channel is not idle and would not managered by IdleConnectionManager
         IdleConnectionManager.remove(channel);
@@ -103,9 +75,7 @@ public class NettyClient {
 
     }
 
-    public void sendAsync(int seqid, ByteBuf request, CompletableFuture<ByteBuf> future, long timeout) throws Exception {
-
-        checkChannel();
+    public void sendAsync(Channel channel,int seqid, ByteBuf request, CompletableFuture<ByteBuf> future, long timeout) throws Exception {
 
         IdleConnectionManager.remove(channel);
         futureCaches.put(seqid, future);
@@ -130,9 +100,9 @@ public class NettyClient {
         }
     };
 
-    private void checkChannel() throws Exception {
-        if (channel == null || !channel.isActive())
-            connect(host, port);
+
+    public Bootstrap getBootstrap (){
+        return bootstrap;
     }
 
 }

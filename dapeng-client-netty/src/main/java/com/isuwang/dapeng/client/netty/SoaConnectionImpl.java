@@ -1,16 +1,14 @@
 package com.isuwang.dapeng.client.netty;
 
 import com.isuwang.dapeng.client.filter.LoadBalanceFilter;
-import com.isuwang.dapeng.core.BeanSerializer;
-import com.isuwang.dapeng.core.SoaConnection;
-import com.isuwang.dapeng.core.SoaException;
-import com.isuwang.dapeng.core.SoaHeader;
+import com.isuwang.dapeng.core.*;
 import com.isuwang.dapeng.core.filter.*;
 import com.isuwang.dapeng.util.SoaMessageBuilder;
 import com.isuwang.dapeng.util.SoaMessageParser;
 import com.isuwang.org.apache.thrift.TException;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,14 +21,20 @@ public class SoaConnectionImpl implements SoaConnection {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SoaConnectionImpl.class);
 
-
+    private final String host;
+    private final int port;
+    private Channel channel = null;
     private NettyClient client; // Netty Channel
     private AtomicInteger seqidAtomic = new AtomicInteger(0);
 
+
     public SoaConnectionImpl(String host, int port) {
+        this.client = NettyClientFactory.getNettyClient();
+        this.host = host;
+        this.port = port;
         try {
-            client = new NettyClient(host, port);
-        } catch (SoaException e) {
+            channel = connect(host,port);
+        } catch (Exception e) {
             LOGGER.error("connect to {}:{} failed", host, port);
         }
     }
@@ -57,7 +61,8 @@ public class SoaConnectionImpl implements SoaConnection {
                     ByteBuf requestBuf = buildRequestBuf(service, version, method, seqid, request, requestSerializer);
 
                     // TODO filter
-                    ByteBuf responseBuf = client.send(seqid, requestBuf); //发送请求，返回结果
+                    checkChannel();
+                    ByteBuf responseBuf = client.send(channel,seqid, requestBuf); //发送请求，返回结果
                     SoaMessageParser parser = new SoaMessageParser(responseBuf, responseSerializer).parse();
 
                     // TODO fill InvocationContext.lastInfo from response.Header
@@ -114,7 +119,8 @@ public class SoaConnectionImpl implements SoaConnection {
 
                 CompletableFuture<ByteBuf> responseBufFuture = new CompletableFuture<>();
                 try {
-                    client.sendAsync(seqid, requestBuf,responseBufFuture,timeout); //发送请求，返回结果
+                    checkChannel();
+                    client.sendAsync(channel,seqid, requestBuf,responseBufFuture,timeout); //发送请求，返回结果
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -181,4 +187,26 @@ public class SoaConnectionImpl implements SoaConnection {
                 .build();
         return buf;
     }
+
+
+    /**
+     * 创建连接
+     *
+     */
+    private synchronized Channel connect(String host, int port) throws Exception {
+        if (channel != null && channel.isActive())
+            return channel;
+
+        try {
+            return channel = this.client.getBootstrap().connect(host, port).sync().channel();
+        } catch (Exception e) {
+            throw new SoaException(SoaBaseCode.NotConnected);
+        }
+    }
+
+    private void checkChannel() throws Exception {
+        if (channel == null || !channel.isActive())
+            connect(host, port);
+    }
+
 }
