@@ -274,10 +274,10 @@ public class SoaHeader {
         return value;
     }
 
-    public Map<String, String> getAttachments(){
-        if(attachments == null)
-            return new HashMap<>();
-        else
-            return attachments;
+    public Map<String, String> getAttachments() {
+        if (attachments == null) {
+            attachments = new HashMap<>();
+        }
+        return attachments;
     }
 }
