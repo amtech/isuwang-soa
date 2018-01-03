@@ -49,65 +49,6 @@ public class JsonSerializer implements BeanSerializer<String> {
             }
 
             iproto.readFieldEnd();
-
-//            switch (field.type) {
-//                case TType.VOID:
-//                    break;
-//                case TType.BOOL:
-//                    boolean boolValue = iproto.readBool();
-//                    if (!skip) {
-//                        writer.onStartField(fld.name);
-//                        writer.onBoolean(boolValue);
-//                        writer.onEndField();
-//                    }
-//                    break;
-//                case TType.BYTE:
-//                    // TODO
-//                case TType.DOUBLE:
-//                    // TODO
-//                case TType.I16:
-//                    // TODO
-//                case TType.I32:
-//                    // TODO:
-//                case TType.I64:
-//                    // TODO:
-//                case TType.STRING:
-//                    String strValue = iproto.readString();
-//                    if (!skip) {
-//                        writer.onStartField(fld.name);
-//                        writer.onString(strValue);
-//                        writer.onEndField();
-//                    }
-//                    break;
-//                case TType.STRUCT:
-//                    if (!skip) {
-//                        String subStructName = fld.dataType.qualifiedName;
-//                        Struct subStruct = findStruct(subStructName, service);
-//                        writer.onStartField(subStructName);
-//                        new JsonSerializer(subStruct, byteBuf, service, method).read(iproto, writer);
-//                        writer.onEndField();
-//                    } else {
-//                        // skip contents
-//                    }
-//                    break;
-//                case TType.MAP:
-//                    if (!skip) {
-//                        String subStructName = fld.dataType.qualifiedName;
-//                        Struct subStruct = findStruct(subStructName, service);
-//                        writer.onStartField(field.name);
-//                        TMap map = iproto.readMapBegin();
-//                        map.keyType
-//                        new JsonSerializer(subStruct, byteBuf, service, method).read(iproto, writer);
-//                        writer.onEndField();
-//                    } else {
-//                        // skip contents
-//                    }
-//                    break;
-//                case TType.SET:
-//                case TType.LIST:
-//                default:
-//
-//            }
         }
 
 
@@ -178,10 +119,6 @@ public class JsonSerializer implements BeanSerializer<String> {
                     TMap map = iproto.readMapBegin();
                     writer.onStartObject();
                     for (int index = 0; index < map.size; index++) {
-//                        if (map.keyType == TType.STRUCT) {
-//                            String subStructName = fld.dataType.qualifiedName;
-//                            Struct subStruct = findStruct(subStructName, service);
-//                        }
                         if (map.keyType != TType.STRUCT && map.keyType != TType.LIST && map.keyType != TType.SET) {
                             writer.onStartField(iproto.readString());
                         }
@@ -196,7 +133,6 @@ public class JsonSerializer implements BeanSerializer<String> {
             case TType.SET:
                 if (!skip) {
                     TSet set = iproto.readSetBegin();
-//                    _writeCollection(set.size, set.elemType, fld.dataType.valueType, iproto, writer);
                     writer.onStartArray();
                     writeCollection(set.size, set.elemType, fld.dataType.valueType,  fld.dataType.valueType.valueType,iproto, writer);
                     writer.onEndArray();
@@ -207,7 +143,6 @@ public class JsonSerializer implements BeanSerializer<String> {
             case TType.LIST:
                 if (!skip) {
                     TList list = iproto.readListBegin();
-//                    _writeCollection(list.size, list.elemType, fld.dataType.valueType, iproto, writer);
                     writer.onStartArray();
                     writeCollection(list.size, list.elemType, fld.dataType.valueType, fld.dataType.valueType.valueType, iproto, writer);
                     writer.onEndArray();

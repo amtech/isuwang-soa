@@ -63,7 +63,7 @@ struct CreateAppointmentForAvailableRequest{
     2: list<string> appointmentDate,
     3: common_domain.PageRequest pageRequest,
     4: set<CreateOrderRequest> requests,
-    5: list<list<CreateOrderRequest>> requestLists,
+    5: list<list<list<CreateOrderRequest>>> requestLists,
 }
 
 /*查询排班列表请求条件*/
