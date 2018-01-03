@@ -1,19 +1,21 @@
 package com.isuwang.dapeng.api;
 
 
+import java.util.List;
+import java.util.ServiceLoader;
+
 public class ContainerFactory {
 
-    private static Container applicationContainer;
+    private static volatile Container applicationContainer;
 
-//    public static DapengContainer initDapengContainer() {
-//        if (applicationContainer == null) {
-//            applicationContainer = new DapengContainer();
-//        }
-//        return (DapengContainer) applicationContainer;
-//    }
-
-    public static void initDapengContainer(Container container) {
-        applicationContainer = container;
+    public static void createContainer(List<ClassLoader> applicationCls, ClassLoader containerCl) {
+        if (applicationContainer == null) {
+            synchronized (ContainerFactory.class) {
+                ServiceLoader<ContainerFactorySpi> containerFactorySpis = ServiceLoader.load(ContainerFactorySpi.class, containerCl);
+                assert containerFactorySpis.iterator().hasNext();
+                applicationContainer = containerFactorySpis.iterator().next().createInstance(applicationCls);
+            }
+        }
     }
 
     public static Container getContainer() {
