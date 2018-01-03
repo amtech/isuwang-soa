@@ -11,5 +11,5 @@ service PrintService{
 
     string printInfo2(1:string name)
 
-    string printInfo3(1:account_enums.AccountType accountType)
+    string printInfo3()
 }

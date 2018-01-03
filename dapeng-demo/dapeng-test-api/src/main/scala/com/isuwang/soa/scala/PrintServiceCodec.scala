@@ -427,7 +427,7 @@ import com.isuwang.soa.scala.info.serializer._;
             }
           }
           
-            case class printInfo3_args(accountType:com.isuwang.soa.scala.account.scala.enums.AccountType)
+            case class printInfo3_args()
 
             case class printInfo3_result(success:String)
 
@@ -439,8 +439,7 @@ import com.isuwang.soa.scala.info.serializer._;
         var schemeField: com.isuwang.org.apache.thrift.protocol.TField = null
         iprot.readStructBegin()
 
-      var accountType: com.isuwang.soa.scala.account.scala.enums.AccountType = null
-        
+      
 
       while (schemeField == null || schemeField.`type` != com.isuwang.org.apache.thrift.protocol.TType.STOP) {
 
@@ -448,12 +447,6 @@ import com.isuwang.soa.scala.info.serializer._;
 
         schemeField.id match {
           
-              case 1 =>
-                  schemeField.`type` match {
-                    case com.isuwang.org.apache.thrift.protocol.TType.I32 => accountType = com.isuwang.soa.scala.account.scala.enums.AccountType.findByValue(iprot.readI32)
-                    case _ => com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.`type`)
-            }
-            
           case _ => com.isuwang.org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.`type`)
         }
       }
@@ -461,7 +454,7 @@ import com.isuwang.soa.scala.info.serializer._;
       iprot.readFieldEnd
       iprot.readStructEnd
 
-      val bean = printInfo3_args(accountType = accountType)
+      val bean = printInfo3_args()
       validate(bean)
 
       bean
@@ -474,13 +467,6 @@ import com.isuwang.soa.scala.info.serializer._;
       oprot.writeStructBegin(new com.isuwang.org.apache.thrift.protocol.TStruct("printInfo3_args"))
 
       
-            {
-            val elem0 = bean.accountType 
-            oprot.writeFieldBegin(new com.isuwang.org.apache.thrift.protocol.TField("accountType", com.isuwang.org.apache.thrift.protocol.TType.I32, 1.asInstanceOf[Short]))
-            oprot.writeI32(elem0.id)
-            oprot.writeFieldEnd
-            
-            }
       oprot.writeFieldStop
       oprot.writeStructEnd
     }
@@ -488,9 +474,6 @@ import com.isuwang.soa.scala.info.serializer._;
       @throws[TException]
       override def validate(bean: printInfo3_args): Unit = {
       
-              if(bean.accountType == null)
-              throw new SoaException(SoaBaseCode.NotNull, "accountType字段不允许为空")
-            
     }
     
 
@@ -567,7 +550,7 @@ import com.isuwang.soa.scala.info.serializer._;
             @throws[TException]
             def apply(iface: com.isuwang.soa.scala.service.PrintService, args: printInfo3_args):printInfo3_result = {
 
-              val _result = iface.printInfo3(args.accountType)
+              val _result = iface.printInfo3()
               printInfo3_result(_result )
             }
           }
@@ -679,10 +662,11 @@ import com.isuwang.soa.scala.info.serializer._;
       @throws[TException]
       override def apply(iface: com.isuwang.soa.scala.service.PrintService, args: getServiceMetadata_args): getServiceMetadata_result = {
 
-        val source = scala.io.Source.fromInputStream(PrintServiceCodec.getClass.getClassLoader.getResourceAsStream("com.isuwang.soa.service.PrintService.xml"))
-        val success = source.mkString
-        source.close
-        getServiceMetadata_result(success)
+              val source = scala.io.Source.fromInputStream(PrintServiceCodec.getClass.getClassLoader.getResourceAsStream("com.isuwang.soa.service.PrintService.xml"))
+              val success = source.mkString
+              source.close
+              getServiceMetadata_result(success)
+
       }
       }
 

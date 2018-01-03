@@ -20,7 +20,7 @@ import com.isuwang.dapeng.core._;
           override def apply(a: A): B = f(a)
         }
 
-          val serviceName = "com.isuwang.soa.scala.service.CalculateService"
+          val serviceName = "com.isuwang.soa.service.CalculateService"
           val version = "1.0.0"
           val pool = {
             val serviceLoader = ServiceLoader.load(classOf[SoaConnectionPoolFactory])
