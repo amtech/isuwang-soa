@@ -64,6 +64,12 @@ struct CreateAppointmentForAvailableRequest{
     3: common_domain.PageRequest pageRequest,
     4: set<CreateOrderRequest> requests,
     5: list<list<list<CreateOrderRequest>>> requestLists,
+    6: map<string, string> strMap,
+    7: map<i32, string> i32Map,
+    8: map<string, i64> stringI64Map,
+    9: map<i32, CreateOrderRequest> i32StructMap,
+    10:map<i32,map<string, string>> recMap,
+    11:map<string, map<i32, CreateOrderRequest>> recStructMap,
 }
 
 /*查询排班列表请求条件*/

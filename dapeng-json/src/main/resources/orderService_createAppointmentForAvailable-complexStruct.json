@@ -89,6 +89,77 @@
           }
         ]
       ]
-    ]
+    ],
+    "strMap": {
+      "m1":"m12",
+      "m2":"m22"
+    },
+    "i32Map": {
+      "10":"m10",
+      "20":"m20"
+    },
+    "stringI64Map":{
+      "str1": 6400,
+      "str2": 6401
+    },
+    "i32StructMap":{
+      "32":{
+        "doctorId": 3,
+        "patientId": 4,
+        "appointmentId": 21,
+        "payType": "ALIPAY",
+        "remark": "test"
+      },
+      "33":{
+        "doctorId": 4,
+        "patientId": 5,
+        "appointmentId": 22,
+        "payType": "ALIPAY",
+        "remark": "test2"
+      }
+    },
+    "recMap":{
+      "332":{
+        "str..":"str...",
+        "str..2":"str...2"
+        },
+      "333":{
+        "str..b":"str...b"
+      }
+    },
+    "recStructMap":{
+      "strRec1":{
+        "1":{
+          "doctorId": 4,
+          "patientId": 5,
+          "appointmentId": 22,
+          "payType": "ALIPAY",
+          "remark": "lastStruct"
+        },
+        "2":{
+          "doctorId": 6,
+          "patientId": 7,
+          "appointmentId": 23,
+          "payType": "ALIPAY",
+          "remark": "lastStruct2"
+        }
+      },
+      "strRec1":{
+        "3":{
+          "doctorId": 14,
+          "patientId": 15,
+          "appointmentId": 122,
+          "payType": "ALIPAY",
+          "remark": "lastStruct200"
+        },
+        "4":{
+          "doctorId": 16,
+          "patientId": 17,
+          "appointmentId": 123,
+          "payType": "ALIPAY",
+          "remark": "lastStruct211"
+        }
+      }
+    }
   }
 }

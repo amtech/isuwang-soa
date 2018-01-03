@@ -44,7 +44,7 @@ public class JsonSerializer implements BeanSerializer<String> {
 
             if (!skip) {
                 writer.onStartField(fld.name);
-                readField(iproto, fld, field.type, writer, skip);
+                readField(iproto, fld.dataType, field.type, writer, skip);
                 writer.onEndField();
             }
 
@@ -56,7 +56,7 @@ public class JsonSerializer implements BeanSerializer<String> {
         writer.onEndObject();
     }
 
-    private void readField(TProtocol iproto, Field fld, byte fieldType,
+    private void readField(TProtocol iproto, DataType fieldDataType, byte fieldType,
                            JsonCallback writer, boolean skip) throws TException {
         switch (fieldType) {
             case TType.VOID:
@@ -85,8 +85,8 @@ public class JsonSerializer implements BeanSerializer<String> {
             case TType.I32:
                 int iValue = iproto.readI32();
                 if (!skip) {
-                    if (fld != null && fld.dataType.kind == DataType.KIND.ENUM) {
-                        String enumLabel = findEnumItemLabel(findEnum(fld.dataType.qualifiedName, service), iValue);
+                    if (fieldDataType != null && fieldDataType.kind == DataType.KIND.ENUM) {
+                        String enumLabel = findEnumItemLabel(findEnum(fieldDataType.qualifiedName, service), iValue);
                         writer.onString(enumLabel);
                     } else {
                         writer.onNumber(iValue);
@@ -107,7 +107,7 @@ public class JsonSerializer implements BeanSerializer<String> {
                 break;
             case TType.STRUCT:
                 if (!skip) {
-                    String subStructName = fld.dataType.qualifiedName;
+                    String subStructName = fieldDataType.qualifiedName;
                     Struct subStruct = findStruct(subStructName, service);
                     new JsonSerializer(subStruct, byteBuf, service, method).read(iproto, writer);
                 } else {
@@ -119,10 +119,22 @@ public class JsonSerializer implements BeanSerializer<String> {
                     TMap map = iproto.readMapBegin();
                     writer.onStartObject();
                     for (int index = 0; index < map.size; index++) {
-                        if (map.keyType != TType.STRUCT && map.keyType != TType.LIST && map.keyType != TType.SET) {
-                            writer.onStartField(iproto.readString());
+                        switch (map.keyType) {
+                            case TType.STRING:
+                                writer.onStartField(iproto.readString());
+                                break;
+                            case TType.I16:
+                                writer.onStartField(String.valueOf(iproto.readI16()));
+                                break;
+                            case TType.I32:
+                                writer.onStartField(String.valueOf(iproto.readI32()));
+                                break;
+                            case TType.I64:
+                                writer.onStartField(String.valueOf(iproto.readI64()));
+                                break;
                         }
-                        readField(iproto, null, map.valueType, writer, false);
+
+                        readField(iproto, fieldDataType.valueType, map.valueType, writer, false);
                         writer.onEndField();
                     }
                     writer.onEndObject();
@@ -134,7 +146,7 @@ public class JsonSerializer implements BeanSerializer<String> {
                 if (!skip) {
                     TSet set = iproto.readSetBegin();
                     writer.onStartArray();
-                    writeCollection(set.size, set.elemType, fld.dataType.valueType,  fld.dataType.valueType.valueType,iproto, writer);
+                    writeCollection(set.size, set.elemType, fieldDataType.valueType, fieldDataType.valueType.valueType, iproto, writer);
                     writer.onEndArray();
                 } else {
                     TProtocolUtil.skip(iproto, TType.SET);
@@ -144,7 +156,7 @@ public class JsonSerializer implements BeanSerializer<String> {
                 if (!skip) {
                     TList list = iproto.readListBegin();
                     writer.onStartArray();
-                    writeCollection(list.size, list.elemType, fld.dataType.valueType, fld.dataType.valueType.valueType, iproto, writer);
+                    writeCollection(list.size, list.elemType, fieldDataType.valueType, fieldDataType.valueType.valueType, iproto, writer);
                     writer.onEndArray();
                 } else {
                     TProtocolUtil.skip(iproto, TType.LIST);
@@ -178,7 +190,7 @@ public class JsonSerializer implements BeanSerializer<String> {
                     //处理List<list<>>
                     TList list = iproto.readListBegin();
                     writer.onStartArray();
-                    writeCollection(list.size, list.elemType, subMetadataType,  subMetadataType.valueType, iproto, writer);
+                    writeCollection(list.size, list.elemType, subMetadataType, subMetadataType.valueType, iproto, writer);
                     writer.onEndArray();
                 }
             }
@@ -300,6 +312,7 @@ public class JsonSerializer implements BeanSerializer<String> {
                         oproto.writeStructBegin(new TStruct(struct.name));
                         break;
                     case MAP:
+                        assert isValidMapKeyType(current.dataType.keyType.kind);
                         // 压缩模式下, default size不能设置为0...
                         oproto.writeMapBegin(new TMap(dataType2Byte(current.dataType.keyType), dataType2Byte(current.dataType.valueType), 1));
                         break;
@@ -374,9 +387,14 @@ public class JsonSerializer implements BeanSerializer<String> {
         public void onStartField(String name) throws TException {
             if (current.dataType.kind == DataType.KIND.MAP) {
                 stackNew(new StackNode(current.dataType.keyType, byteBuf.writerIndex(), null));
-                if (!isMultiElementKind(current.dataType.kind)) { //TODO
+                assert isValidMapKeyType(current.dataType.keyType.kind);
+                if (current.dataType.kind == DataType.KIND.STRING) {
                     oproto.writeString(name);
+                } else {
+                    writeIntField(name, current.dataType.kind);
                 }
+                pop();
+                stackNew(new StackNode(current.dataType.valueType, byteBuf.writerIndex(), findStruct(current.dataType.valueType.qualifiedName, service)));
             } else {
                 Field field = findField(name, current.struct);
                 if (field == null) {
@@ -389,6 +407,22 @@ public class JsonSerializer implements BeanSerializer<String> {
 
                 oproto.writeFieldBegin(new TField(field.name, dataType2Byte(field.dataType), (short) field.getTag()));
                 stackNew(new StackNode(field.dataType, byteBuf.writerIndex(), findStruct(field.dataType.qualifiedName, service)));
+            }
+        }
+
+        private void writeIntField(String value, DataType.KIND kind) throws TException {
+            switch (kind) {
+                case SHORT:
+                    oproto.writeI16(Short.valueOf(value));
+                    break;
+                case INTEGER:
+                    oproto.writeI32(Integer.valueOf(value));
+                    break;
+                case LONG:
+                    oproto.writeI64(Long.valueOf(value));
+                    break;
+                default:
+                    //should not come here..
             }
         }
 
@@ -642,6 +676,17 @@ public class JsonSerializer implements BeanSerializer<String> {
         }
 
         return TType.STOP;
+    }
+
+    /**
+     * 暂时只支持key为整形或者字符串的map
+     *
+     * @param kind
+     * @return
+     */
+    private boolean isValidMapKeyType(DataType.KIND kind) {
+        return kind == DataType.KIND.INTEGER || kind == DataType.KIND.LONG
+                || kind == DataType.KIND.SHORT || kind == DataType.KIND.STRING;
     }
 
     /**
