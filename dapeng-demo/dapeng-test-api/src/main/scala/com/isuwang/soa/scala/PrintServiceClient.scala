@@ -20,7 +20,7 @@ import com.isuwang.dapeng.core._;
           override def apply(a: A): B = f(a)
         }
 
-          val serviceName = "com.isuwang.soa.scala.service.PrintService"
+          val serviceName = "com.isuwang.soa.service.PrintService"
           val version = "1.0.0"
           val pool = {
             val serviceLoader = ServiceLoader.load(classOf[SoaConnectionPoolFactory])
@@ -98,13 +98,13 @@ import com.isuwang.dapeng.core._;
              /**
              * 
              **/
-            def printInfo3(accountType:com.isuwang.soa.scala.account.scala.enums.AccountType ) : String = {
+            def printInfo3() : String = {
 
               val response = pool.send(
               serviceName,
               version,
               "printInfo3",
-              printInfo3_args(accountType),
+              printInfo3_args(),
               new PrintInfo3_argsSerializer(),
               new PrintInfo3_resultSerializer())
 

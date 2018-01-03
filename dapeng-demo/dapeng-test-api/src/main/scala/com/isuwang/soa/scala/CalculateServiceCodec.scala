@@ -441,10 +441,11 @@ import com.isuwang.soa.scala.info.serializer._;
       @throws[TException]
       override def apply(iface: com.isuwang.soa.scala.service.CalculateService, args: getServiceMetadata_args): getServiceMetadata_result = {
 
-        val source = scala.io.Source.fromInputStream(CalculateServiceCodec.getClass.getClassLoader.getResourceAsStream("com.isuwang.soa.service.CalculateService.xml"))
-        val success = source.mkString
-        source.close
-        getServiceMetadata_result(success)
+              val source = scala.io.Source.fromInputStream(CalculateServiceCodec.getClass.getClassLoader.getResourceAsStream("com.isuwang.soa.service.CalculateService.xml"))
+              val success = source.mkString
+              source.close
+              getServiceMetadata_result(success)
+
       }
       }
 

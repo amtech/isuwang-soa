@@ -49,7 +49,7 @@ import com.isuwang.dapeng.core.{Processor, Service}
             
             @throws[com.isuwang.dapeng.core.SoaException]
             def printInfo3(
-            accountType: com.isuwang.soa.scala.account.scala.enums.AccountType ): String
+            ): String
 
           
         }
