@@ -72,4 +72,5 @@ public interface Container {
 
     public List<Filter> getFilters();
 
+    void startup();
 }

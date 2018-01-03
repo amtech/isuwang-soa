@@ -1,14 +1,11 @@
 package com.isuwang.dapeng.maven.plugin;
 
+import com.isuwang.dapeng.api.Container;
 import com.isuwang.dapeng.api.ContainerFactory;
-import com.isuwang.dapeng.api.Plugin;
-import com.isuwang.dapeng.impl.classloader.*;
-import com.isuwang.dapeng.impl.container.DapengContainer;
-import com.isuwang.dapeng.impl.plugins.ApiDocPlugin;
-import com.isuwang.dapeng.impl.plugins.SpringAppLoader;
-import com.isuwang.dapeng.impl.plugins.TaskSchedulePlugin;
-import com.isuwang.dapeng.impl.plugins.ZookeeperRegistryPlugin;
-import com.isuwang.dapeng.impl.plugins.netty.NettyPlugin;
+import com.isuwang.dapeng.bootstrap.classloader.ApplicationClassLoader;
+import com.isuwang.dapeng.bootstrap.classloader.ContainerClassLoader;
+import com.isuwang.dapeng.bootstrap.classloader.CoreClassLoader;
+import com.isuwang.dapeng.impl.container.DapengContainerFactorySpiml;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -88,36 +85,21 @@ public class RunContainerPlugin extends SoaAbstractMojo {
                 List<List<URL>> appURLsList = new ArrayList<>();
                 appURLsList.add(appUrls);
 
-                DapengContainer dapengContainer = new DapengContainer();
-                ContainerFactory.initDapengContainer(dapengContainer);
-
                 CoreClassLoader coreClassLoader = new CoreClassLoader(shareUrls.toArray(new URL[shareUrls.size()]));
 
-                List<ApplicationClassLoader> appClassLoaders = appURLsList.stream().map(i ->
+                List<ClassLoader> appClassLoaders = appURLsList.stream().map(i ->
                         new ApplicationClassLoader(i.toArray(new URL[i.size()]),coreClassLoader)).collect(Collectors.toList());
 
                 ContainerClassLoader platformClassLoader = new ContainerClassLoader(platformUrls.toArray(new URL[platformUrls.size()]),coreClassLoader);
 
-
                 System.out.println("------set classloader-------------");
                 Thread.currentThread().setContextClassLoader(coreClassLoader);
-                //3. 初始化appLoader,dapengPlugin
-                Plugin springAppLoader = new SpringAppLoader(dapengContainer,appClassLoaders);
-                Plugin apiDocPlugin = new ApiDocPlugin(dapengContainer);
-                Plugin zookeeperPlugin = new ZookeeperRegistryPlugin(dapengContainer);
-                Plugin taskSchedulePlugin = new TaskSchedulePlugin(dapengContainer);
-                Plugin nettyPlugin = new NettyPlugin(dapengContainer);
 
-                //ApiDocPlugin优先启动(为了Spring触发注册事件时，ServiceCache已经实例化，能收到消息)
-                dapengContainer.registerPlugin(springAppLoader);
-                dapengContainer.registerPlugin(nettyPlugin);
-                dapengContainer.registerPlugin(zookeeperPlugin);
-                dapengContainer.registerPlugin(taskSchedulePlugin);
-                dapengContainer.registerPlugin(apiDocPlugin);
+                new DapengContainerFactorySpiml().createInstance(appClassLoaders);
+                Container dapengContainer = ContainerFactory.getContainer();
 
+                dapengContainer.startup();
 
-                //4.启动Apploader， plugins
-                ContainerFactory.getContainer().getPlugins().forEach(Plugin::start);
 
             } catch (Exception e) {
                 Thread.currentThread().getThreadGroup().uncaughtException(Thread.currentThread(), e);

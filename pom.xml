@@ -46,9 +46,9 @@
         <module>dapeng-api-doc</module>
         <!--<module>dapeng-monitor</module>-->
         <module>dapeng-route</module>
-        <module>dapeng-tools</module>
+        <!--<module>dapeng-tools</module>-->
         <module>dapeng-message</module>
-        <module>dapeng-service-invoke</module>
+        <!--<module>dapeng-service-invoke</module>-->
         <module>dapeng-container-new</module>
         <module>dapeng-utils</module>
         <module>dapeng-client-netty</module>

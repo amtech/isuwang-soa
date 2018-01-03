@@ -29,5 +29,6 @@
     <modules>
         <module>dapeng-container-api</module>
         <module>dapeng-container-impl</module>
+        <module>dapeng-bootstrap</module>
     </modules>
 </project>

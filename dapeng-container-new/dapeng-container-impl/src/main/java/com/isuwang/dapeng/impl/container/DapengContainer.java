@@ -7,6 +7,11 @@ import com.isuwang.dapeng.core.Application;
 import com.isuwang.dapeng.core.ProcessorKey;
 import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
 import com.isuwang.dapeng.core.filter.Filter;
+import com.isuwang.dapeng.impl.plugins.ApiDocPlugin;
+import com.isuwang.dapeng.impl.plugins.SpringAppLoader;
+import com.isuwang.dapeng.impl.plugins.TaskSchedulePlugin;
+import com.isuwang.dapeng.impl.plugins.ZookeeperRegistryPlugin;
+import com.isuwang.dapeng.impl.plugins.netty.NettyPlugin;
 import com.isuwang.dapeng.util.SoaSystemEnvProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +32,11 @@ public class DapengContainer implements Container {
     private List<Plugin> plugins = new ArrayList<>();
     private Map<ProcessorKey, SoaServiceDefinition<?>> processors = new ConcurrentHashMap<>();
     private Map<ProcessorKey,Application>  applicationMap = new ConcurrentHashMap<>();
+    private final List<ClassLoader> applicationCls;
+
+    public DapengContainer(List<ClassLoader> applicationCls) {
+        this.applicationCls = applicationCls;
+    }
 
     @Override
     public void registerAppListener(AppListener listener) {
@@ -122,6 +132,33 @@ public class DapengContainer implements Container {
     @Override
     public List<Filter> getFilters() {
         return new ArrayList<>(); //TODO
+    }
+
+    @Override
+    public void startup() {
+        //3. 初始化appLoader,dapengPlugin 应该用serviceLoader的方式去加载
+        Plugin springAppLoader = new SpringAppLoader(this,applicationCls);
+        Plugin apiDocPlugin = new ApiDocPlugin(this);
+        Plugin zookeeperPlugin = new ZookeeperRegistryPlugin(this);
+        Plugin taskSchedulePlugin = new TaskSchedulePlugin(this);
+        Plugin nettyPlugin = new NettyPlugin(this);
+
+        //ApiDocPlugin优先启动(为了Spring触发注册事件时，ServiceCache已经实例化，能收到消息)
+        registerPlugin(springAppLoader);
+        registerPlugin(zookeeperPlugin);
+        registerPlugin(taskSchedulePlugin);
+        registerPlugin(nettyPlugin);
+        registerPlugin(apiDocPlugin);
+
+
+        //4.启动Apploader， plugins
+        ContainerFactory.getContainer().getPlugins().forEach(Plugin::start);
+//        springAppLoader.start();
+//        nettyPlugin.start();
+//        apiDocPlugin.start();
+
+//        PluginLoader pluginLoader = new PluginLoader();
+//        pluginLoader.startup();
     }
 
 

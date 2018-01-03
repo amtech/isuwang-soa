@@ -136,12 +136,6 @@
 
         <dependency>
             <groupId>com.isuwang</groupId>
-            <artifactId>dapeng-registry-api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.isuwang</groupId>
             <artifactId>dapeng-utils</artifactId>
             <version>${project.version}</version>
         </dependency>

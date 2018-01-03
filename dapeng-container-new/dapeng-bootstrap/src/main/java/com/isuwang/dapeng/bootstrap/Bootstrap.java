@@ -1,14 +1,13 @@
-package com.isuwang.dapeng.impl;
+package com.isuwang.dapeng.bootstrap;
 
-
-import com.isuwang.dapeng.api.ContainerFactory;
-import com.isuwang.dapeng.api.Plugin;
-import com.isuwang.dapeng.impl.classloader.*;
-import com.isuwang.dapeng.impl.container.DapengContainer;
-import com.isuwang.dapeng.impl.plugins.*;
-import com.isuwang.dapeng.impl.plugins.netty.NettyPlugin;
+import com.isuwang.dapeng.bootstrap.classloader.ApplicationClassLoader;
+import com.isuwang.dapeng.bootstrap.classloader.ContainerClassLoader;
+import com.isuwang.dapeng.bootstrap.classloader.CoreClassLoader;
+import com.isuwang.dapeng.bootstrap.classloader.PluginClassLoader;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -24,46 +23,32 @@ public class Bootstrap {
     private static final String enginePath = System.getProperty("soa.base", new File(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile().getParentFile().getParent() +"/dapeng-container/");
 
 
-    public static void main(String[] args) throws MalformedURLException {
-        //1. 初始化dapeng容器
-        DapengContainer dapengContainer = new DapengContainer();
-        ContainerFactory.initDapengContainer(dapengContainer);
-
+    public static void main(String[] args) throws MalformedURLException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 
         loadAllUrls();
         CoreClassLoader coreClassLoader = new CoreClassLoader(shareURLs.toArray(new URL[shareURLs.size()]));
 
-        ContainerClassLoader platformClassLoader = new ContainerClassLoader(platformURLs.toArray(new URL[platformURLs.size()]),coreClassLoader);
+        ClassLoader platformClassLoader = new ContainerClassLoader(platformURLs.toArray(new URL[platformURLs.size()]),coreClassLoader);
 
-        List<ApplicationClassLoader> appClassLoaders = appURLs.stream().map(i -> new ApplicationClassLoader(i.toArray(new URL[i.size()]),coreClassLoader)).collect(Collectors.toList());
+        List<ClassLoader> applicationCls = appURLs.stream().map(i -> new ApplicationClassLoader(i.toArray(new URL[i.size()]),coreClassLoader)).collect(Collectors.toList());
 
-        List<PluginClassLoader> pluginClassLoaders = pluginURLs.stream().map(i -> new PluginClassLoader(i.toArray(new URL[i.size()]),coreClassLoader)).collect(Collectors.toList());
+        List<ClassLoader> pluginClassLoaders = pluginURLs.stream().map(i -> new PluginClassLoader(i.toArray(new URL[i.size()]),coreClassLoader)).collect(Collectors.toList());
 
-        //3. 初始化appLoader,dapengPlugin
-        Plugin springAppLoader = new SpringAppLoader(dapengContainer,appClassLoaders);
-        Plugin apiDocPlugin = new ApiDocPlugin(dapengContainer);
-        Plugin zookeeperPlugin = new ZookeeperRegistryPlugin(dapengContainer);
-        Plugin taskSchedulePlugin = new TaskSchedulePlugin(dapengContainer);
-        Plugin nettyPlugin = new NettyPlugin(dapengContainer);
-
-        //ApiDocPlugin优先启动(为了Spring触发注册事件时，ServiceCache已经实例化，能收到消息)
-        dapengContainer.registerPlugin(springAppLoader);
-        dapengContainer.registerPlugin(zookeeperPlugin);
-        dapengContainer.registerPlugin(taskSchedulePlugin);
-        dapengContainer.registerPlugin(nettyPlugin);
-        dapengContainer.registerPlugin(apiDocPlugin);
+        startup(platformClassLoader, applicationCls);
+    }
 
 
-        //4.启动Apploader， plugins
-        //ContainerFactory.getContainer().getPlugins().forEach(Plugin::start);
-        springAppLoader.start();
-        nettyPlugin.start();
-        apiDocPlugin.start();
+    private static void startup(ClassLoader platformClassLoader, List<ClassLoader> applicationCls) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        Thread.currentThread().setContextClassLoader(platformClassLoader);
+        Class<?> containerFactoryClz = platformClassLoader.loadClass("com.isuwang.dapeng.api.ContainerFactory");
+        Method createContainerMethod = containerFactoryClz.getMethod("createContainer", List.class, ClassLoader.class);
+        createContainerMethod.invoke(containerFactoryClz, applicationCls, platformClassLoader);
 
-//        PluginLoader pluginLoader = new PluginLoader();
-//        pluginLoader.startup();
+        Method getContainerMethod = containerFactoryClz.getMethod("getContainer");
+        Object container = getContainerMethod.invoke(containerFactoryClz);
 
-
+        Method mainMethod = container.getClass().getMethod("startup");
+        mainMethod.invoke(container);
     }
 
 

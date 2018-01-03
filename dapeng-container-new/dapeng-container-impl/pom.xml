@@ -30,7 +30,6 @@
             </activation>
 
             <build>
-                <finalName>${project.artifactId}</finalName>
                 <resources>
                     <resource>
                         <filtering>true</filtering>
@@ -72,7 +71,7 @@
                                     <overWriteSnapshots>false</overWriteSnapshots>
                                     <overWriteIfNewer>true</overWriteIfNewer>
                                     <includeArtifactIds>
-                                        dapeng-core,slf4j-api,logback-classic,logback-core,janino,commons-compiler,dapeng-transaction-api,gson
+                                        dapeng-core
                                     </includeArtifactIds>
                                 </configuration>
                             </execution>
@@ -89,7 +88,6 @@
                                     <overWriteSnapshots>false</overWriteSnapshots>
                                     <overWriteIfNewer>true</overWriteIfNewer>
                                     <excludeArtifactIds>
-                                        dapeng-core,slf4j-api,logback-classic,logback-core,janino,commons-compiler,dapeng-transaction-api,gson,
                                         dapeng-message-api,dapeng-message-kafka,kafka_2.12,kafka-clients,jopt-simple,metrics-core
                                     </excludeArtifactIds>
                                 </configuration>
