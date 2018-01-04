@@ -25,7 +25,21 @@ public class Bootstrap {
 
     public static void main(String[] args) throws MalformedURLException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 
-        loadAllUrls();
+        if (args != null && args.length > 0) {
+            List<URL> urls = new ArrayList<>();
+            for (String arg: args) {
+                URL url = new URL("file:" + arg);
+                urls.add(url);
+            }
+            appURLs.add(urls);
+            platformURLs.addAll(urls);
+            shareURLs.addAll(urls);
+        } else {
+            loadAllUrls();
+        }
+
+        System.out.println(" appURL: " + appURLs.size() + " platformUrls: " + platformURLs.size() + " shareUrl: " + shareURLs.size());
+
         CoreClassLoader coreClassLoader = new CoreClassLoader(shareURLs.toArray(new URL[shareURLs.size()]));
 
         ClassLoader platformClassLoader = new ContainerClassLoader(platformURLs.toArray(new URL[platformURLs.size()]),coreClassLoader);
