@@ -36,7 +36,7 @@ public class NettyPlugin implements AppListener, Plugin {
 
     private final int port = SoaSystemEnvProperties.SOA_CONTAINER_PORT;
 
-    private final EventLoopGroup bossGroup = new NioEventLoopGroup();
+    private final EventLoopGroup bossGroup = new NioEventLoopGroup(1);
     private final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
     private ServerBootstrap bootstrap;
@@ -56,7 +56,6 @@ public class NettyPlugin implements AppListener, Plugin {
                             .childHandler(new ChannelInitializer<SocketChannel>() {
                                 @Override
                                 protected void initChannel(SocketChannel ch) throws Exception {
-                                    System.out.println("a new Channel" + ch.toString()); // TODO remove
                                     ch.pipeline().addLast(new IdleStateHandler(15, 0, 0), //超时设置
                                             new SoaDecoder(), //粘包和断包处理
                                             new SoaIdleHandler(),  //心跳处理

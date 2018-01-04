@@ -19,30 +19,10 @@ public class Bootstrap {
 
 
     public static void main(String[] args) throws MalformedURLException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-
-        List<URL> coreURLs;
-        List<URL> containerURLs;
-        List<List<URL>> applicationURLs = new ArrayList<>();
-        List<List<URL>> pluginURLs = new ArrayList<>();
-
-        // 支持maven或者sbt的方式传入application路径
-        if (args != null && args.length > 0) {
-            List<URL> urls = new ArrayList<>();
-            for (String arg: args) {
-                URL url = new URL("file:" + arg);
-                urls.add(url);
-            }
-            applicationURLs.add(urls);
-            containerURLs = new ArrayList<>();
-            containerURLs.addAll(urls);
-            coreURLs = new ArrayList<>();
-            coreURLs.addAll(urls);
-        } else {
-            coreURLs = findJarURLs(new File(enginePath, "lib"));
-            containerURLs = findJarURLs(new File(enginePath, "bin/lib"));
-            applicationURLs.addAll(getUrlList(new File(enginePath, "apps")));
-            pluginURLs.addAll(getUrlList(new File(enginePath, "plugin")));
-        }
+        List<URL> coreURLs = findJarURLs(new File(enginePath, "lib"));
+        List<URL> containerURLs = findJarURLs(new File(enginePath, "bin/lib"));
+        List<List<URL>> applicationURLs = getUrlList(new File(enginePath, "apps"));
+        List<List<URL>> pluginURLs = getUrlList(new File(enginePath, "plugin"));
 
         CoreClassLoader coreClassLoader = new CoreClassLoader(coreURLs.toArray(new URL[coreURLs.size()]));
 
@@ -72,11 +52,11 @@ public class Bootstrap {
     }
 
 
-    private static void startup(ClassLoader platformClassLoader, List<ClassLoader> applicationCls) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        Thread.currentThread().setContextClassLoader(platformClassLoader);
-        Class<?> containerFactoryClz = platformClassLoader.loadClass("com.isuwang.dapeng.api.ContainerFactory");
+    private static void startup(ClassLoader containerCl, List<ClassLoader> applicationCls) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        Thread.currentThread().setContextClassLoader(containerCl);
+        Class<?> containerFactoryClz = containerCl.loadClass("com.isuwang.dapeng.api.ContainerFactory");
         Method createContainerMethod = containerFactoryClz.getMethod("createContainer", List.class, ClassLoader.class);
-        createContainerMethod.invoke(containerFactoryClz, applicationCls, platformClassLoader);
+        createContainerMethod.invoke(containerFactoryClz, applicationCls, containerCl);
 
         Method getContainerMethod = containerFactoryClz.getMethod("getContainer");
         Object container = getContainerMethod.invoke(containerFactoryClz);

@@ -20,13 +20,15 @@ public class ApplicationClassLoader extends URLClassLoader {
 
     public ApplicationClassLoader(URL[] urls, ClassLoader parent, ClassLoader coreClassLoader) {
         super(urls, parent);
-        this.coreClassLoader =  coreClassLoader;
+        this.coreClassLoader = coreClassLoader;
     }
 
     @Override
     protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
 
-        if (name.startsWith("com.isuwang.dapeng.core") || name.startsWith("com.isuwang.org.apache.thrift") || name.startsWith("com.isuwang.dapeng.transaction.api")
+        if (name.startsWith("com.isuwang.dapeng.core")
+                || name.startsWith("com.isuwang.org.apache.thrift")
+                || name.startsWith("com.isuwang.dapeng.transaction.api")
                 || name.startsWith("com.google.gson")) {
             return coreClassLoader.loadClass(name);
         }

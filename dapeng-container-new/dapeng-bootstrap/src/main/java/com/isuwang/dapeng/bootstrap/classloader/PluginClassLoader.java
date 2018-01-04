@@ -11,9 +11,9 @@ import java.net.URLClassLoader;
  */
 public class PluginClassLoader extends URLClassLoader {
 
-    private final CoreClassLoader coreClassLoader;
+    private final ClassLoader coreClassLoader;
 
-    public PluginClassLoader(URL[] urls, CoreClassLoader coreClassLoader) {
+    public PluginClassLoader(URL[] urls, ClassLoader coreClassLoader) {
         super(urls, ClassLoader.getSystemClassLoader());
         this.coreClassLoader = coreClassLoader;
     }

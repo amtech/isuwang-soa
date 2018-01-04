@@ -1,7 +1,5 @@
 package com.isuwang.dapeng.client.netty;
 
-import com.isuwang.dapeng.core.SoaBaseCode;
-import com.isuwang.dapeng.core.SoaException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -33,7 +31,7 @@ public class NettyClient {
     private final int allIdleTimeSeconds = 0;
 
     private Bootstrap bootstrap = null;
-    private final EventLoopGroup workerGroup = new NioEventLoopGroup();
+    private final EventLoopGroup workerGroup = new NioEventLoopGroup(1);
 
     private final Map<Integer, CompletableFuture> futureCaches = new ConcurrentHashMap<>();
 

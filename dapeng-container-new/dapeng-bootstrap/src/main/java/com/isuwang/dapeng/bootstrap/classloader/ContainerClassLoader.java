@@ -11,7 +11,7 @@ import java.net.URLClassLoader;
  */
 public class ContainerClassLoader extends URLClassLoader {
 
-    public ContainerClassLoader(URL[] urls, CoreClassLoader coreClassLoader) {
+    public ContainerClassLoader(URL[] urls, ClassLoader coreClassLoader) {
         super(urls, coreClassLoader);
     }
 
