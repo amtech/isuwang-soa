@@ -231,7 +231,7 @@ class ScalaCodecGenerator extends CodeGenerator {
       </block>
       </block>
 
-      class Processor(iface: {service.getNamespace}.{service.name}) extends
+      class Processor(iface: {service.getNamespace}.{service.name}, ifaceClass: Class[{service.getNamespace}.{service.name}] ) extends
         SoaServiceDefinition(iface,classOf[{service.getNamespace}.{service.name}], Processor.getProcessMap)
 
         object Processor<block>
@@ -470,7 +470,7 @@ class ScalaCodecGenerator extends CodeGenerator {
           </block>
         </block>
 
-        class Processor(iface: {service.getNamespace}.{service.name}Async) extends
+        class Processor(iface: {service.getNamespace}.{service.name}Async, ifaceClass: Class[{service.getNamespace}.{service.name}Async]) extends
         SoaServiceDefinition(iface,classOf[{service.getNamespace}.{service.name}Async], Processor.buildMap)
 
         object Processor<block>

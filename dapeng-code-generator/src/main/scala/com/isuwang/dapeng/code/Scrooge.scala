@@ -109,22 +109,26 @@ object Scrooge {
       }
 
       //根据时间戳判断是否需要重新生成文件
-      //1. 如果thrift文件修改时间 > xml的时间 => needUpdate
+      //1. 如果 (thrift文件 + outDirFiles) 任一修改时间 > xml的时间 => needUpdate
       //2. 如果没有xml文件 => needUpdate
-      //3. 如果 language equals scala && scalaXmlCount ==0 => needUpdate
+      //3. 如果language == scala && scala文件没有生成过 => needUpdate
+      //4. 如果language == java && java文件没有生成过 => needUpdate
       val resourcePath = new File(resources(0)).getParentFile.getParentFile
-      val thriftModifyTimes = resources.map(file => new File(file).lastModified())
+      val thriftFiles = resources.map(new File(_))
       val needUpdate = {
         val xmlFiles = resourcePath.listFiles().filter(_.getName.endsWith(".xml"))
-        if (xmlFiles.exists(xmlFile => thriftModifyTimes.exists(_ > xmlFile.lastModified()))) {
+        val targetDirFiles = getFiles(outDir)
+
+        if (xmlFiles.size <= 0) {
           true
-        } else if (xmlFiles.size <= 0) {
+        } else if ((xmlFiles.toList ++: targetDirFiles)
+          .filter(!_.getName.endsWith(".thrift"))
+          .exists(generatedFile => thriftFiles.exists(f => f.lastModified() > generatedFile.lastModified()))) {
           true
         } else {
-          val files = getFile(outDir)
           language match {
-            case "java" => if (files.filter(_.getName.endsWith(".java")).size <= 0) true else false
-            case "scala" => if (files.filter(_.getName.endsWith(".scala")).size <= 0) true else false
+            case "java" => if (targetDirFiles.filter(_.getName.endsWith(".java")).size <= 0) true else false
+            case "scala" => if (targetDirFiles.filter(_.getName.endsWith(".scala")).size <= 0) true else false
           }
         }
       }
@@ -161,9 +165,9 @@ object Scrooge {
   }
 
 
-  def getFile(path: String): List[File] = {
+  def getFiles(path: String): List[File] = {
     if (new File(path).isDirectory) {
-      new File(path).listFiles().flatMap(i => getFile(i.getPath)).toList
+      new File(path).listFiles().flatMap(i => getFiles(i.getPath)).toList
     } else {
       List(new File(path))
     }

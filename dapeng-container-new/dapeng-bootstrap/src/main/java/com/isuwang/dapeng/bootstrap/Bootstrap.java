@@ -15,38 +15,42 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Bootstrap {
-
-    private static final List<URL> shareURLs = new ArrayList<>();
-    private static final List<URL> platformURLs = new ArrayList<>();
-    private static final List<List<URL>> appURLs = new ArrayList<>();
-    private static final List<List<URL>> pluginURLs = new ArrayList<>();
-    private static final String enginePath = System.getProperty("soa.base", new File(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile().getParentFile().getParent() +"/dapeng-container/");
+    private static final String enginePath = System.getProperty("soa.base", new File(Bootstrap.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile().getParentFile().getParent() + "/dapeng-container-impl/target/dapeng-container/");
 
 
     public static void main(String[] args) throws MalformedURLException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
 
+        List<URL> coreURLs;
+        List<URL> containerURLs;
+        List<List<URL>> applicationURLs = new ArrayList<>();
+        List<List<URL>> pluginURLs = new ArrayList<>();
+
+        // 支持maven或者sbt的方式传入application路径
         if (args != null && args.length > 0) {
             List<URL> urls = new ArrayList<>();
             for (String arg: args) {
                 URL url = new URL("file:" + arg);
                 urls.add(url);
             }
-            appURLs.add(urls);
-            platformURLs.addAll(urls);
-            shareURLs.addAll(urls);
+            applicationURLs.add(urls);
+            containerURLs = new ArrayList<>();
+            containerURLs.addAll(urls);
+            coreURLs = new ArrayList<>();
+            coreURLs.addAll(urls);
         } else {
-            loadAllUrls();
+            coreURLs = findJarURLs(new File(enginePath, "lib"));
+            containerURLs = findJarURLs(new File(enginePath, "bin/lib"));
+            applicationURLs.addAll(getUrlList(new File(enginePath, "apps")));
+            pluginURLs.addAll(getUrlList(new File(enginePath, "plugin")));
         }
 
-        System.out.println(" appURL: " + appURLs.size() + " platformUrls: " + platformURLs.size() + " shareUrl: " + shareURLs.size());
+        CoreClassLoader coreClassLoader = new CoreClassLoader(coreURLs.toArray(new URL[coreURLs.size()]));
 
-        CoreClassLoader coreClassLoader = new CoreClassLoader(shareURLs.toArray(new URL[shareURLs.size()]));
+        ClassLoader platformClassLoader = new ContainerClassLoader(containerURLs.toArray(new URL[containerURLs.size()]), coreClassLoader);
 
-        ClassLoader platformClassLoader = new ContainerClassLoader(platformURLs.toArray(new URL[platformURLs.size()]),coreClassLoader);
+        List<ClassLoader> applicationCls = applicationURLs.stream().map(i -> new ApplicationClassLoader(i.toArray(new URL[i.size()]), coreClassLoader)).collect(Collectors.toList());
 
-        List<ClassLoader> applicationCls = appURLs.stream().map(i -> new ApplicationClassLoader(i.toArray(new URL[i.size()]),coreClassLoader)).collect(Collectors.toList());
-
-        List<ClassLoader> pluginClassLoaders = pluginURLs.stream().map(i -> new PluginClassLoader(i.toArray(new URL[i.size()]),coreClassLoader)).collect(Collectors.toList());
+        List<ClassLoader> pluginClassLoaders = pluginURLs.stream().map(i -> new PluginClassLoader(i.toArray(new URL[i.size()]), coreClassLoader)).collect(Collectors.toList());
 
         startup(platformClassLoader, applicationCls);
     }
@@ -64,20 +68,6 @@ public class Bootstrap {
         Method mainMethod = container.getClass().getMethod("startup");
         mainMethod.invoke(container);
     }
-
-
-    private static void loadAllUrls() throws MalformedURLException {
-        shareURLs.addAll(findJarURLs(new File(enginePath, "lib")));
-
-        platformURLs.addAll(findJarURLs(new File(enginePath, "bin/lib")));
-
-        final File appsPath = new File(enginePath, "apps");
-        getUrlList(appsPath).stream().forEach(i -> appURLs.add(i));
-
-        final File pluginPath = new File(enginePath, "plugin");
-        getUrlList(pluginPath).stream().forEach(i -> pluginURLs.add(i));
-    }
-
 
     private static List<List<URL>> getUrlList(File filepath) throws MalformedURLException {
         List<List<URL>> urlsList = new ArrayList<>();
