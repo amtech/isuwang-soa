@@ -12,24 +12,42 @@ import java.util.Map;
  */
 public class FilterContextImpl implements FilterContext {
 
-    private Map<Filter, Map<String, Object>> attachments = new HashMap<>();
+    private Map<Filter, Map<String, Object>> attachmentsWithFilter = new HashMap<>();
+
+    private Map<String, Object> attachments = new HashMap<>();
 
     @Override
     public void setAttach(Filter filter, String key, Object value) {
-        Map<String, Object> attches = attachments.get(filter);
+        Map<String, Object> attches = attachmentsWithFilter.get(filter);
         if(attches == null){
             attches = new HashMap<>();
-            attachments.put(filter, attches);
+            attachmentsWithFilter.put(filter, attches);
         }
         attches.put(key, value);
     }
 
     @Override
     public Object getAttach(Filter filter, String key) {
-        Map<String, Object> attaches = attachments.get(filter);
+        Map<String, Object> attaches = attachmentsWithFilter.get(filter);
         if(attaches != null)
             return attaches.get(key);
         else return null;
+    }
+
+    @Override
+    public void setAttach(String key, Object value) {
+        if (attachments == null) {
+            attachments = new HashMap<String, Object>();
+        }
+        attachments.put(key, value);
+    }
+
+    @Override
+    public Object getAttach(String key) {
+        if (attachments == null){
+            return null;
+        }
+        return attachments.get(key);
     }
 
 

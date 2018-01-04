@@ -11,7 +11,7 @@ import com.isuwang.dapeng.core.filter.FilterChain;
 import com.isuwang.dapeng.core.filter.FilterContext;
 import com.isuwang.dapeng.core.filter.SharedChain;
 import com.isuwang.dapeng.core.filter.FilterContextImpl;
-import com.isuwang.dapeng.impl.filters.TimeoutFilter;
+import com.isuwang.dapeng.impl.filters.HeadFilter;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.TProtocol;
 import io.netty.buffer.ByteBuf;
@@ -94,6 +94,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
         //log request
         application.info(this.getClass(), "{} {} {} operatorId:{} operatorName:{} request body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), soaHeader.getOperatorId(), soaHeader.getOperatorName(), formatToString(soaFunction.reqSerializer.toString(args)));
 
+        HeadFilter headFilter = new HeadFilter();
         Filter dispatchFilter = new Filter() {
 
             private FilterChain getPrevChain(FilterContext ctx) {
@@ -108,13 +109,13 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
                         SoaFunctionDefinition.Async asyncFunc = (SoaFunctionDefinition.Async) soaFunction;
                         CompletableFuture<RESP> future = (CompletableFuture<RESP>) asyncFunc.apply(iface, args);
                         future.whenComplete((realResult, ex) -> {
-                            processResult(channelHandlerContext, soaFunction, context, realResult, application);
+                            processResult(channelHandlerContext, soaFunction, context, realResult, application,ctx);
                             onExit(ctx, getPrevChain(ctx));
                         });
                     } else {
                         SoaFunctionDefinition.Sync syncFunction = (SoaFunctionDefinition.Sync) soaFunction;
                         RESP result = (RESP) syncFunction.apply(iface, args);
-                        processResult(channelHandlerContext, soaFunction, context, result, application);
+                        processResult(channelHandlerContext, soaFunction, context, result, application,ctx);
                         onExit(ctx, getPrevChain(ctx));
                     }
                 }catch (Exception e){
@@ -132,7 +133,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
                 }
             }
         };
-        SharedChain sharedChain = new SharedChain(new TimeoutFilter(), container.getFilters(), dispatchFilter, 0);
+        SharedChain sharedChain = new SharedChain(headFilter, container.getFilters(), dispatchFilter, 0);
 
         FilterContextImpl filterContext = new FilterContextImpl();
         filterContext.setAttach(dispatchFilter, "chain", sharedChain);
@@ -140,24 +141,19 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
         sharedChain.onEntry(filterContext);
     }
 
-    private void processResult(ChannelHandlerContext channelHandlerContext, SoaFunctionDefinition soaFunction, TransactionContext context, Object result, Application application) {
+    private void processResult(ChannelHandlerContext channelHandlerContext, SoaFunctionDefinition soaFunction, TransactionContext context, Object result, Application application,FilterContext filterContext) {
         SoaHeader soaHeader = context.getHeader();
         soaHeader.setRespCode(Optional.of("0000"));
         soaHeader.setRespMessage(Optional.of("ok"));
+        context.setHeader(soaHeader);
         try {
             application.info(this.getClass(), "{} {} {} operatorId:{} operatorName:{} response body:{}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), soaHeader.getOperatorId(), soaHeader.getOperatorName(), formatToString(soaFunction.respSerializer.toString(result)));
 
-            ByteBuf outputBuf = channelHandlerContext.alloc().buffer(8192);  // TODO 8192?
-            TSoaTransport transport = new TSoaTransport(outputBuf);
+            filterContext.setAttach("channelHandlerContext",channelHandlerContext);
+            filterContext.setAttach("context",context);
+            filterContext.setAttach("respSerializer",soaFunction.respSerializer);
+            filterContext.setAttach("result",result);
 
-            SoaMessageProcessor builder = new SoaMessageProcessor(transport);
-            context.setHeader(soaHeader);
-            builder.writeHeader(context);
-            builder.writeBody(soaFunction.respSerializer, result);
-            builder.writeMessageEnd();
-
-            transport.flush();
-            channelHandlerContext.writeAndFlush(outputBuf);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             writeErrorMessage(channelHandlerContext, context, new SoaException(SoaBaseCode.UnKnown, e.getMessage()));

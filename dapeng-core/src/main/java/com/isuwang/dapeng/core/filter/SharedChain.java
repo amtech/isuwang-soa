@@ -18,11 +18,12 @@ public class SharedChain implements FilterChain {
     public int size() {
         return shared.size() + 2;
     }
-    public SharedChain(Filter head, List<Filter> shared, Filter tail, int index){
-        if(index >= 2 + shared.size())
+
+    public SharedChain(Filter head, List<Filter> shared, Filter tail, int index) {
+        if (index >= 2 + shared.size())
             throw new IllegalArgumentException();
-        assert(head != null);
-        assert(tail != null);
+        assert (head != null);
+        assert (tail != null);
 
         this.head = head;
         this.shared = shared;
@@ -34,35 +35,31 @@ public class SharedChain implements FilterChain {
     @Override
     public void onEntry(FilterContext ctx) throws TException {
         SharedChain next = null;
-        if(index  < 1 + shared.size())
-                next = new SharedChain(head, shared, tail, index+1);
+        if (index < 1 + shared.size())
+            next = new SharedChain(head, shared, tail, index + 1);
         else next = null;
 
-        if(index == 0) {
+        if (index == 0) {
             head.onEntry(ctx, next);
-        }
-        else if(index > 0 && index < shared.size() + 1) {
-            shared.get(index-1).onEntry(ctx, next);
-        }
-        else if(index == shared.size()+1) {
+        } else if (index > 0 && index < shared.size() + 1) {
+            shared.get(index - 1).onEntry(ctx, next);
+        } else if (index == shared.size() + 1) {
             tail.onEntry(ctx, next);
         }
     }
 
     @Override
-    public void onExit(FilterContext ctx) throws TException{
+    public void onExit(FilterContext ctx) throws TException {
         SharedChain prev = null;
-        if(index >= 1)
+        if (index >= 1)
             prev = new SharedChain(head, shared, tail, index - 1);
         else prev = null;
 
-        if(index == 0) {
+        if (index == 0) {
             head.onExit(ctx, null);
-        }
-        else if(index > 0 && index < shared.size() + 1) {
-            shared.get(index-1).onExit(ctx, prev);
-        }
-        else if(index == shared.size()+1) {
+        } else if (index > 0 && index < shared.size() + 1) {
+            shared.get(index - 1).onExit(ctx, prev);
+        } else if (index == shared.size() + 1) {
             tail.onEntry(ctx, prev);
         }
     }
