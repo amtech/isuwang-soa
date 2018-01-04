@@ -61,7 +61,7 @@ public class NettyClient {
         //means that this channel is not idle and would not managered by IdleConnectionManager
         IdleConnectionManager.remove(channel);
 
-        CompletableFuture<ByteBuf> future = new CompletableFuture<ByteBuf>();
+        CompletableFuture<ByteBuf> future = new CompletableFuture<>();
 
         futureCaches.put(seqid, future);
 
