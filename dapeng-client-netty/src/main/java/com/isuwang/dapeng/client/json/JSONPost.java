@@ -9,6 +9,7 @@ import com.isuwang.dapeng.core.SoaHeader;
 import com.isuwang.dapeng.core.metadata.Method;
 import com.isuwang.dapeng.core.metadata.Service;
 import com.isuwang.dapeng.util.SoaMessageBuilder;
+import com.isuwang.dapeng.util.SoaSystemEnvProperties;
 import com.isuwang.org.apache.thrift.TException;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -30,7 +31,7 @@ public class JSONPost {
 
     private String host = "127.0.0.1";
 
-    private Integer port = 9090;
+    private Integer port = SoaSystemEnvProperties.SOA_CONTAINER_PORT;
 
     private boolean doNotThrowError = false;
 

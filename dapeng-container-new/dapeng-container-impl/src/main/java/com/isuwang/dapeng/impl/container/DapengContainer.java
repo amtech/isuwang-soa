@@ -152,13 +152,24 @@ public class DapengContainer implements Container {
 
 
         //4.启动Apploader， plugins
-        ContainerFactory.getContainer().getPlugins().forEach(Plugin::start);
-//        springAppLoader.start();
-//        nettyPlugin.start();
-//        apiDocPlugin.start();
+        getPlugins().forEach(Plugin::start);
 
-//        PluginLoader pluginLoader = new PluginLoader();
-//        pluginLoader.startup();
+        DapengContainer container = this;
+
+        Runtime.getRuntime().addShutdownHook( new Thread( ()->{
+            getPlugins().forEach(Plugin::stop);
+            synchronized (container){
+                container.notify();
+            }
+        } ) );
+
+        synchronized (container){
+            try {
+                container.wait();
+            }
+            catch(InterruptedException ex){
+            }
+        }
     }
 
 

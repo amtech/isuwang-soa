@@ -57,7 +57,7 @@ public class TestController {
         header.setMethodName(methodName);
         header.setCallerFrom(Optional.of("TestController"));
         try {
-            jsonPost = new JSONPost(SoaSystemEnvProperties.SOA_SERVICE_IP, SoaSystemEnvProperties.SOA_SERVICE_PORT, true);
+            jsonPost = new JSONPost(SoaSystemEnvProperties.SOA_CONTAINER_IP, SoaSystemEnvProperties.SOA_CONTAINER_PORT, true);
             return jsonPost.callServiceMethod(header, jsonParameter, service);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);

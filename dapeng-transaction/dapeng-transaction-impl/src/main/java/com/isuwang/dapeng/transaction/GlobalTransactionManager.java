@@ -274,7 +274,7 @@ public class GlobalTransactionManager {
             jsonPost = new JSONPost(infos[0], Integer.valueOf(infos[1]), false);
 
         } else if (SoaSystemEnvProperties.SOA_REMOTING_MODE.equals("local")) {
-            jsonPost = new JSONPost(SoaSystemEnvProperties.SOA_SERVICE_IP, SoaSystemEnvProperties.SOA_SERVICE_PORT, false);
+            jsonPost = new JSONPost(SoaSystemEnvProperties.SOA_CONTAINER_IP, SoaSystemEnvProperties.SOA_CONTAINER_PORT, false);
         }
 
         SoaHeader header = new SoaHeader();

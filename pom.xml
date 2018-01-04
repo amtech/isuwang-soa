@@ -303,7 +303,7 @@
                 <configuration>
                     <source>${java-version}</source>
                     <target>${java-version}</target>
-                    <verbose>true</verbose>
+                    <verbose>false</verbose>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>

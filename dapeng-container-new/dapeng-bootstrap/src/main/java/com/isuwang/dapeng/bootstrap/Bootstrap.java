@@ -55,6 +55,22 @@ public class Bootstrap {
         startup(platformClassLoader, applicationCls);
     }
 
+    public static void sbtStartup(ClassLoader containerClassLoader, List<URL> applicationLibs) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+
+        ClassLoader coreCL = containerClassLoader;
+        ClassLoader containerCL = containerClassLoader;
+
+        ClassLoader applicationCL = new ApplicationClassLoader(
+                applicationLibs.toArray(new URL[applicationLibs.size()]),
+                null,
+                coreCL);
+        List<ClassLoader> applicationCLs = new ArrayList<>();
+        applicationCLs.add(applicationCL);
+
+        startup(containerCL, applicationCLs);
+
+    }
+
 
     private static void startup(ClassLoader platformClassLoader, List<ClassLoader> applicationCls) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         Thread.currentThread().setContextClassLoader(platformClassLoader);

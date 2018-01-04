@@ -56,6 +56,7 @@ public class NettyPlugin implements AppListener, Plugin {
                             .childHandler(new ChannelInitializer<SocketChannel>() {
                                 @Override
                                 protected void initChannel(SocketChannel ch) throws Exception {
+                                    System.out.println("a new Channel" + ch.toString()); // TODO remove
                                     ch.pipeline().addLast(new IdleStateHandler(15, 0, 0), //超时设置
                                             new SoaDecoder(), //粘包和断包处理
                                             new SoaIdleHandler(),  //心跳处理

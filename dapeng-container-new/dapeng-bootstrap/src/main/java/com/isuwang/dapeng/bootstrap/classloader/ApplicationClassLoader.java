@@ -11,14 +11,14 @@ import java.net.URLClassLoader;
  */
 public class ApplicationClassLoader extends URLClassLoader {
 
-    private final CoreClassLoader coreClassLoader;
+    private final ClassLoader coreClassLoader;
 
-    public ApplicationClassLoader(URL[] urls, CoreClassLoader coreClassLoader) {
+    public ApplicationClassLoader(URL[] urls, ClassLoader coreClassLoader) {
         super(urls, ClassLoader.getSystemClassLoader());
         this.coreClassLoader = coreClassLoader;
     }
 
-    public ApplicationClassLoader(URL[] urls, ClassLoader parent, CoreClassLoader coreClassLoader) {
+    public ApplicationClassLoader(URL[] urls, ClassLoader parent, ClassLoader coreClassLoader) {
         super(urls, parent);
         this.coreClassLoader =  coreClassLoader;
     }

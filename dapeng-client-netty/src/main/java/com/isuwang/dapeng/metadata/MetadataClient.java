@@ -21,7 +21,7 @@ public class MetadataClient {
      * getServiceMetadata
      **/
     public String getServiceMetadata() throws Exception {
-        getServiceMetadata_result result = new SoaConnectionImpl(SoaSystemEnvProperties.SOA_SERVICE_IP, SoaSystemEnvProperties.SOA_CONTAINER_PORT)
+        getServiceMetadata_result result = new SoaConnectionImpl(SoaSystemEnvProperties.SOA_CONTAINER_IP, SoaSystemEnvProperties.SOA_CONTAINER_PORT)
                 .send(serviceName,version,methodName, new getServiceMetadata_args(),
                         new GetServiceMetadata_argsSerializer(),new GetServiceMetadata_resultSerializer());
 
