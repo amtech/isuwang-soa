@@ -615,17 +615,9 @@ class ScalaGenerator extends CodeGenerator {
       case KIND.SET =>
         return {<div>Set[{toDataTypeTemplate(dataType.getValueType())}]</div>}
       case KIND.ENUM =>
-        var ref = dataType.getQualifiedName
-        if(!dataType.getQualifiedName.contains("com.isuwang.soa.scala")){
-          ref=dataType.getQualifiedName.replace("com.isuwang.soa","com.isuwang.soa.scala")
-        }
-        return {<div>{ref}</div>}
+        return {<div>{dataType.getQualifiedName}</div>}
       case KIND.STRUCT =>
-        var ref = dataType.getQualifiedName
-        if(!dataType.getQualifiedName.contains("com.isuwang.soa.scala")){
-          ref=dataType.getQualifiedName.replace("com.isuwang.soa","com.isuwang.soa.scala")
-        }
-        return {<div>{ref}</div>}
+        return {<div>{dataType.getQualifiedName}</div>}
     }
   }
 
