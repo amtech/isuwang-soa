@@ -1,7 +1,6 @@
 package com.dapeng.soa
 
-import com.isuwang.soa.scala.PrintServiceAsyncClient
-import com.isuwang.soa.scala.PrintServiceClient
+import com.isuwang.soa.scala.{CalculateServiceClient, PrintServiceAsyncClient, PrintServiceClient}
 //需要添加这个引用
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -29,6 +28,10 @@ object TestScalaClient {
       case Success(value) => println(value)
       case Failure(t) => println("An error has occured: " + t.getMessage)
     }
+
+    val scalaClient = new CalculateServiceClient
+    val calResult = scalaClient.calcualteWordCount("sd","sdd");
+    println("result:"+ calResult);
   }
 
 }

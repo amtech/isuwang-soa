@@ -1,7 +1,6 @@
 package com.dapeng.soa;
 
 import com.isuwang.dapeng.core.SoaException;
-import com.isuwang.soa.CalculateServiceClient;
 import com.isuwang.soa.PrintServiceAsyncClient;
 import com.isuwang.soa.PrintServiceClient;
 
@@ -17,17 +16,18 @@ public class TestClient {
 
         System.setProperty("soa.zookeeper.host", "192.168.99.100:2181");
 
-        //测试客户端同步
+        //测试java客户端同步
         PrintServiceClient client = new PrintServiceClient();
         String result = client.printInfo2("test");
         System.out.println("result:"+result);
 
-        //测试客户端异步
+        //测试java客户端异步
         PrintServiceAsyncClient asyncClient = new PrintServiceAsyncClient();
         CompletableFuture<String> asyncResult = asyncClient.printInfo2("test",20000);
         asyncResult.whenComplete((res,ex) ->{
             System.out.println(res);
         });
+
 
     }
 }
