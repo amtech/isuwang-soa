@@ -163,7 +163,7 @@ public class SoaHeaderSerializer implements BeanSerializer<SoaHeader> {
     @Override
     public void write(SoaHeader bean, TProtocol oprot) throws TException {
 
-        validate(bean);
+        //validate(bean);
         oprot.writeStructBegin(new TStruct("soaheader"));
 
         if (null != bean.getServiceName()) {

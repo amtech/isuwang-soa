@@ -79,19 +79,20 @@ public class ZkClientAgentImpl implements ZkClientAgent {
         List<Route> routes = usingFallbackZookeeper ? zkfbw.getRoutes() : siw.getRoutes();
         List<RuntimeInstance> runtimeList = new ArrayList<>();
 
-        for (RuntimeInstance instance : zkInfo.getRuntimeInstances()) {
-            try {
-                InetAddress inetAddress = InetAddress.getByName(instance.ip);
-                if (RouteExecutor.isServerMatched(context, routes, inetAddress)) {
-                    runtimeList.add(instance);
+        if (zkInfo != null&&zkInfo.getRuntimeInstances()!=null) {
+            for (RuntimeInstance instance : zkInfo.getRuntimeInstances()) {
+                try {
+                    InetAddress inetAddress = InetAddress.getByName(instance.ip);
+                    if (RouteExecutor.isServerMatched(context, routes, inetAddress)) {
+                        runtimeList.add(instance);
+                    }
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
                 }
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
             }
+            zkInfo.setRuntimeInstances(runtimeList);
+            zkInfos.put(serviceName,zkInfo);
         }
-        zkInfo.setRuntimeInstances(runtimeList);
-
-        zkInfos.put(serviceName,zkInfo);
 
     }
 

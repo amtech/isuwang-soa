@@ -10,15 +10,22 @@ import com.isuwang.org.apache.thrift.TException;
  */
 public class LoadBalanceFilter implements Filter {
     @Override
-    public void onEntry(FilterContext ctx, FilterChain next) throws TException {
-        next.onEntry(ctx);
-
+    public void onEntry(FilterContext ctx, FilterChain next){
+        try {
+            next.onEntry(ctx);
+        } catch (TException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public void onExit(FilterContext ctx, FilterChain prev) throws TException {
+    public void onExit(FilterContext ctx, FilterChain prev)  {
 
-        prev.onExit(ctx);
+        try {
+            prev.onExit(ctx);
+        } catch (TException e) {
+            e.printStackTrace();
+        }
 
     }
 }
