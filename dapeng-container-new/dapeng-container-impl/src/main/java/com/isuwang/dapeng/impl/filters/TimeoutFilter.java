@@ -9,15 +9,19 @@ import com.isuwang.org.apache.thrift.TException;
 public class TimeoutFilter implements Filter {
 
     @Override
-    public void onEntry(FilterContext ctx, FilterChain next) throws TException {
+    public void onEntry(FilterContext ctx, FilterChain next)  {
 
-        next.onEntry(ctx);
+        try {
+            next.onEntry(ctx);
+        } catch (TException e) {
+            e.printStackTrace();
+        }
 
 
     }
 
     @Override
-    public void onExit(FilterContext ctx, FilterChain prev) throws TException {
+    public void onExit(FilterContext ctx, FilterChain prev)  {
         // 第一个filter不需要调onExit
 
     }
