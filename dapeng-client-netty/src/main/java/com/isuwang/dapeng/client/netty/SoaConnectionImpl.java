@@ -55,9 +55,8 @@ public class SoaConnectionImpl implements SoaConnection {
                 return new SharedChain(chain.head, chain.shared, chain.tail, chain.size() - 2);
             }
             @Override
-            public void onEntry(FilterContext ctx, FilterChain next){
+            public void onEntry(FilterContext ctx, FilterChain next) throws SoaException{
 
-                try {
                     ByteBuf requestBuf = buildRequestBuf(service, version, method, seqid, request, requestSerializer);
 
                     // TODO filter
@@ -65,9 +64,6 @@ public class SoaConnectionImpl implements SoaConnection {
                     ByteBuf responseBuf = client.send(channel,seqid, requestBuf); //发送请求，返回结果
                     processResponse(responseBuf,responseSerializer,ctx,this);
                     onExit(ctx, getPrevChain(ctx));
-                }catch (Exception e){
-                    LOGGER.error(e.getMessage(),e);
-                }
             }
 
             @Override
@@ -164,39 +160,46 @@ public class SoaConnectionImpl implements SoaConnection {
         return header;
     }
 
-    private <REQ> ByteBuf buildRequestBuf(String service, String version, String method,int seqid, REQ request, BeanSerializer<REQ> requestSerializer) throws TException {
+    private <REQ> ByteBuf buildRequestBuf(String service, String version, String method,int seqid, REQ request, BeanSerializer<REQ> requestSerializer) throws SoaException {
         final ByteBuf requestBuf = PooledByteBufAllocator.DEFAULT.buffer(8192);//Unpooled.directBuffer(8192);  // TODO Pooled
 
         SoaMessageBuilder<REQ> builder = new SoaMessageBuilder<>();
 
         // TODO set protocol
         SoaHeader header = buildHeader(service, version, method);
-        ByteBuf buf = builder.buffer(requestBuf)
-                .header(header)
-                .body(request, requestSerializer)
-                .seqid(seqid)
-                .build();
-        return buf;
+        try {
+            ByteBuf buf = builder.buffer(requestBuf)
+                    .header(header)
+                    .body(request, requestSerializer)
+                    .seqid(seqid)
+                    .build();
+            return buf;
+        } catch (TException e) {
+            throw new SoaException(e);
+        }
     }
 
-    private <RESP> RESP processResponse(ByteBuf responseBuf,BeanSerializer<RESP> responseSerializer,FilterContext ctx,Filter filter) throws Exception{
+    private <RESP> RESP processResponse(ByteBuf responseBuf,BeanSerializer<RESP> responseSerializer,FilterContext ctx,Filter filter) throws SoaException{
        try {
            if (responseBuf == null) {
                throw new SoaException(SoaBaseCode.TimeOut);
            } else {
-               SoaMessageParser parser = new SoaMessageParser(responseBuf, responseSerializer).parse();
+               SoaMessageParser parser = new SoaMessageParser(responseBuf, responseSerializer).parseHeader();
                // TODO fill InvocationContext.lastInfo from response.Header
                SoaHeader respHeader = parser.getHeader();
 
                if ("0000".equals(respHeader.getRespCode().get())) {
+                   parser.parseBody();
                    RESP resp = (RESP) parser.getBody();
                    ctx.setAttach(filter, "response", resp);
                    return resp;
                } else {
-                   throw new SoaException(respHeader.getRespCode().get(), respHeader.getRespMessage().get());
+                   throw new SoaException((respHeader.getRespCode().isPresent())?respHeader.getRespCode().get():SoaBaseCode.UnKnown.getCode()  , (respHeader.getRespMessage().isPresent())?respHeader.getRespMessage().get():SoaBaseCode.UnKnown.getMsg());
                }
 
            }
+       }catch (TException e){
+           throw new SoaException(e);
        }finally {
            responseBuf.release();
        }
@@ -207,7 +210,7 @@ public class SoaConnectionImpl implements SoaConnection {
      * 创建连接
      *
      */
-    private synchronized Channel connect(String host, int port) throws Exception {
+    private synchronized Channel connect(String host, int port) throws SoaException {
         if (channel != null && channel.isActive())
             return channel;
 
@@ -218,7 +221,7 @@ public class SoaConnectionImpl implements SoaConnection {
         }
     }
 
-    private void checkChannel() throws Exception {
+    private void checkChannel() throws SoaException {
         if (channel == null || !channel.isActive())
             connect(host, port);
     }

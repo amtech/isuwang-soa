@@ -1,5 +1,6 @@
 package com.isuwang.dapeng.client.filter;
 
+import com.isuwang.dapeng.core.SoaException;
 import com.isuwang.dapeng.core.filter.Filter;
 import com.isuwang.dapeng.core.filter.FilterChain;
 import com.isuwang.dapeng.core.filter.FilterContext;
@@ -10,22 +11,15 @@ import com.isuwang.org.apache.thrift.TException;
  */
 public class LoadBalanceFilter implements Filter {
     @Override
-    public void onEntry(FilterContext ctx, FilterChain next){
-        try {
-            next.onEntry(ctx);
-        } catch (TException e) {
-            e.printStackTrace();
-        }
+    public void onEntry(FilterContext ctx, FilterChain next) throws SoaException {
+        next.onEntry(ctx);
+
     }
 
     @Override
-    public void onExit(FilterContext ctx, FilterChain prev)  {
+    public void onExit(FilterContext ctx, FilterChain prev) throws SoaException {
 
-        try {
-            prev.onExit(ctx);
-        } catch (TException e) {
-            e.printStackTrace();
-        }
+        prev.onExit(ctx);
 
     }
 }

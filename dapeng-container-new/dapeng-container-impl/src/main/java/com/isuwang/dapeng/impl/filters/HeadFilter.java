@@ -41,7 +41,9 @@ public class HeadFilter implements Filter {
 
                 SoaMessageProcessor builder = new SoaMessageProcessor(transport);
                 builder.writeHeader(context);
-                builder.writeBody(serializer, result);
+                if(serializer != null && result != null) {
+                    builder.writeBody(serializer, result);
+                }
                 builder.writeMessageEnd();
                 transport.flush();
                 channelHandlerContext.writeAndFlush(outputBuf);

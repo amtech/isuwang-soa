@@ -26,6 +26,8 @@ public class SoaMessageParser<RESP> {
     private BeanSerializer<RESP> bodySerializer;
     private CodecProtocol protocol=CodecProtocol.CompressedBinary;
     private int seqid;
+    private TProtocol bodyProtocol;
+    private TProtocol headerProtocol;
 
     private ByteBuf buffer;
 
@@ -42,10 +44,10 @@ public class SoaMessageParser<RESP> {
         return body;
     }
 
-    public SoaMessageParser<RESP> parse() throws TException{
+    public SoaMessageParser<RESP> parseHeader() throws TException{
         TSoaTransport transport = new TSoaTransport(buffer);
         TBinaryProtocol headerProtocol = new TBinaryProtocol(transport);
-
+        this.headerProtocol = headerProtocol;
         // length(int32) stx(int8) version(int8) protocol(int8) seqid(i32) header(struct) body(struct) etx(int8)
 
         byte stx = headerProtocol.readByte();
@@ -57,7 +59,6 @@ public class SoaMessageParser<RESP> {
             throw new TException("通讯协议不正确(协议版本号)");
         }
 
-        TProtocol bodyProtocol = null;
         CodecProtocol protocol = CodecProtocol.toCodecProtocol(headerProtocol.readByte());
         switch (protocol) {
             case Binary:
@@ -77,15 +78,19 @@ public class SoaMessageParser<RESP> {
         this.seqid = headerProtocol.readI32();
         SoaHeader soaHeader =new SoaHeaderSerializer().read( headerProtocol);
         this.header = soaHeader;
-        this.body=bodySerializer.read(bodyProtocol);
 
-        byte etx = headerProtocol.readByte();
+        return this;
+    }
+
+    public SoaMessageParser<RESP> parseBody() throws TException{
+        if(bodySerializer!=null) {
+            this.body = bodySerializer.read(bodyProtocol);
+        }
+        byte etx = this.headerProtocol.readByte();
         if(etx != ETX){
             throw new TException("通讯协议不正确(结束符)");
         }
         return this;
     }
-
-
 
 }

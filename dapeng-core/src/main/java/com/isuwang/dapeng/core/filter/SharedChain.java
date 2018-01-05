@@ -1,6 +1,6 @@
 package com.isuwang.dapeng.core.filter;
 
-import com.isuwang.org.apache.thrift.TException;
+import com.isuwang.dapeng.core.SoaException;
 
 import java.util.List;
 
@@ -33,7 +33,7 @@ public class SharedChain implements FilterChain {
     }
 
     @Override
-    public void onEntry(FilterContext ctx) throws TException {
+    public void onEntry(FilterContext ctx) throws SoaException {
         SharedChain next = null;
         if (index < 1 + shared.size())
             next = new SharedChain(head, shared, tail, index + 1);
@@ -49,7 +49,7 @@ public class SharedChain implements FilterChain {
     }
 
     @Override
-    public void onExit(FilterContext ctx) throws TException {
+    public void onExit(FilterContext ctx) throws SoaException {
         SharedChain prev = null;
         if (index >= 1)
             prev = new SharedChain(head, shared, tail, index - 1);

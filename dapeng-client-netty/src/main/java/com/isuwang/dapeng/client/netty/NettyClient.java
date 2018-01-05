@@ -1,5 +1,7 @@
 package com.isuwang.dapeng.client.netty;
 
+import com.isuwang.dapeng.core.SoaBaseCode;
+import com.isuwang.dapeng.core.SoaException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -54,7 +56,7 @@ public class NettyClient {
         return bootstrap;
     }
 
-    public ByteBuf send(Channel channel ,int seqid, ByteBuf request) throws Exception {
+    public ByteBuf send(Channel channel ,int seqid, ByteBuf request) throws SoaException {
 
         //means that this channel is not idle and would not managered by IdleConnectionManager
         IdleConnectionManager.remove(channel);
@@ -67,7 +69,9 @@ public class NettyClient {
             channel.writeAndFlush(request);
             ByteBuf respByteBuf = future.get(30000, TimeUnit.MILLISECONDS);
             return respByteBuf;
-        } finally {
+        }catch (Exception e){
+            throw new SoaException(SoaBaseCode.UnKnown,e.getMessage());
+        }finally {
             futureCaches.remove(seqid);
         }
 

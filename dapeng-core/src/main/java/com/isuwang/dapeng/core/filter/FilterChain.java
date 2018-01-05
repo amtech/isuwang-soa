@@ -1,7 +1,6 @@
 package com.isuwang.dapeng.core.filter;
 
-import com.isuwang.dapeng.core.filter.FilterContext;
-import com.isuwang.org.apache.thrift.TException;
+import com.isuwang.dapeng.core.SoaException;
 
 /**
  * Created by lihuimin on 2017/12/11.
@@ -9,10 +8,10 @@ import com.isuwang.org.apache.thrift.TException;
 public interface FilterChain {
 
     // execute current filter's onEntry
-    void onEntry(FilterContext ctx) throws TException;
+    void onEntry(FilterContext ctx) throws SoaException;
 
     // execute current filter's onExit
-    void onExit(FilterContext ctx)throws TException;
+    void onExit(FilterContext ctx)throws SoaException;
 
 
 }
