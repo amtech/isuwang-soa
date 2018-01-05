@@ -187,20 +187,17 @@ class JavaCodecGenerator extends CodeGenerator {
               </block>
 
               @Override
-              public {method.name}_result apply(I iface, {method.name}_args {method.name}_args)
+              public {method.name}_result apply(I iface, {method.name}_args {method.name}_args) throws SoaException
               <block>
 
                 {method.name}_result result = new {method.name}_result();
 
 
-                {<div>try <block>
+                {<div>
                 {if (method.response.getFields.get(0).getDataType.kind != DataType.KIND.VOID)
                   <div>result.success = iface.{method.name}{toFieldArrayBuffer(method.getRequest.getFields).map((field: Field) => {method.name} + "_args." + field.name).mkString("(", ",", ")")};</div>
                 else {<div> iface.{method.name}{toFieldArrayBuffer(method.getRequest.getFields).map((field: Field) => {method.name} + "_args." + field.name).mkString("(", ",", ")")};</div>}
                 }
-                </block> catch (SoaException e) <block>
-                e.printStackTrace();
-              </block>
                 </div>}
 
                 return result;
