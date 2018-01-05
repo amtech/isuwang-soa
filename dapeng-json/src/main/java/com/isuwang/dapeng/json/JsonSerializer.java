@@ -5,6 +5,7 @@ import com.isuwang.dapeng.core.metadata.*;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.*;
 import io.netty.buffer.ByteBuf;
+import static com.isuwang.dapeng.util.MetaDataUtil.*;
 
 import java.util.List;
 import java.util.Stack;
@@ -44,6 +45,9 @@ public class JsonSerializer implements BeanSerializer<String> {
 
             if (!skip) {
                 writer.onStartField(fld.name);
+                if (fld.name.equals("listMap")) {
+                    System.out.println("hell");
+                }
                 readField(iproto, fld.dataType, field.type, writer, skip);
                 writer.onEndField();
             }
@@ -192,6 +196,8 @@ public class JsonSerializer implements BeanSerializer<String> {
                     writer.onStartArray();
                     writeCollection(list.size, list.elemType, subMetadataType, subMetadataType.valueType, iproto, writer);
                     writer.onEndArray();
+                } else if (metadataType.kind == DataType.KIND.MAP) {
+                    readField(iproto, metadataType, elemType,writer, false);
                 }
             }
             writer.onEndField();
@@ -301,7 +307,10 @@ public class JsonSerializer implements BeanSerializer<String> {
                 oproto.writeStructBegin(new TStruct(current.struct.name));
                 inited = true;
             } else {
-                if (peek() != null && isMultiElementKind(peek().dataType.kind)) peek().increaseElement();
+                if (peek() != null && isMultiElementKind(peek().dataType.kind)) {
+                    peek().increaseElement();
+                    current = new StackNode(peek().dataType.valueType, byteBuf.writerIndex(), current.struct);
+                }
                 switch (current.dataType.kind) {
                     case STRUCT:
                         Struct struct = current.struct;//findStruct(current.dataType.qualifiedName, service);
@@ -385,6 +394,9 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onStartField(String name) throws TException {
+            if (name.equals("listMap")) {
+                System.out.println("listMap");
+            }
             if (current.dataType.kind == DataType.KIND.MAP) {
                 stackNew(new StackNode(current.dataType.keyType, byteBuf.writerIndex(), null));
                 assert isValidMapKeyType(current.dataType.keyType.kind);
@@ -564,118 +576,6 @@ public class JsonSerializer implements BeanSerializer<String> {
         }
 
         return null;
-    }
-
-    private Struct findStruct(String qualifiedName, Service service) {
-        if (qualifiedName == null) {
-            return null;
-        }
-        List<Struct> structDefinitions = service.getStructDefinitions();
-
-        for (Struct structDefinition : structDefinitions) {
-            if ((structDefinition.getNamespace() + "." + structDefinition.getName()).equals(qualifiedName)) {
-                return structDefinition;
-            }
-        }
-
-        return null;
-    }
-
-    private TEnum findEnum(String qualifiedName, Service service) {
-        List<TEnum> enumDefinitions = service.getEnumDefinitions();
-
-        for (TEnum enumDefinition : enumDefinitions) {
-            if ((enumDefinition.getNamespace() + "." + enumDefinition.getName()).equals(qualifiedName)) {
-                return enumDefinition;
-            }
-        }
-
-        return null;
-    }
-
-    private String findEnumItemLabel(TEnum tEnum, Integer value) {
-        List<TEnum.EnumItem> enumItems = tEnum.getEnumItems();
-        for (TEnum.EnumItem enumItem : enumItems) {
-            if (enumItem.getValue() == value) {
-                return enumItem.getLabel();
-            }
-        }
-
-        return null;
-    }
-
-    private Integer findEnumItemValue(TEnum tEnum, String label) {
-        List<TEnum.EnumItem> enumItems = tEnum.getEnumItems();
-        for (TEnum.EnumItem enumItem : enumItems) {
-            if (enumItem.getLabel().equals(label)) {
-                return enumItem.getValue();
-            }
-        }
-
-        for (TEnum.EnumItem enumItem : enumItems) {
-            if (String.valueOf(enumItem.getValue()).equals(label)) {
-                return enumItem.getValue();
-            }
-        }
-
-        return null;
-    }
-
-    private byte dataType2Byte(DataType type) {
-        switch (type.kind) {
-            case BOOLEAN:
-                return TType.BOOL;
-
-            case BYTE:
-                return TType.BYTE;
-
-            case DOUBLE:
-                return TType.DOUBLE;
-
-            case SHORT:
-                return TType.I16;
-
-            case INTEGER:
-                return TType.I32;
-
-            case LONG:
-                return TType.I64;
-
-            case STRING:
-                return TType.STRING;
-
-            case STRUCT:
-                return TType.STRUCT;
-
-            case MAP:
-                return TType.MAP;
-
-            case SET:
-                return TType.SET;
-
-            case LIST:
-                return TType.LIST;
-
-            case ENUM:
-                return TType.I32;
-
-            case VOID:
-                return TType.VOID;
-
-            case DATE:
-                return TType.I64;
-
-            case BIGDECIMAL:
-                return TType.STRING;
-
-            case BINARY:
-                return TType.STRING;
-
-            default:
-                break;
-        }
-
-        return TType.STOP;
     }
 
     /**

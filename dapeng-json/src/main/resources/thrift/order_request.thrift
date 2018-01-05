@@ -70,6 +70,12 @@ struct CreateAppointmentForAvailableRequest{
     9: map<i32, CreateOrderRequest> i32StructMap,
     10:map<i32,map<string, string>> recMap,
     11:map<string, map<i32, CreateOrderRequest>> recStructMap,
+    12:map<string, list<CreateOrderRequest>> mapList,
+    13:list<map<i32, CreateOrderRequest>> listMap,
+}
+
+struct CreateAppointmentForAvailableRequest1{
+    1:list<map<i32, CreateOrderRequest>> listMap,
 }
 
 /*查询排班列表请求条件*/

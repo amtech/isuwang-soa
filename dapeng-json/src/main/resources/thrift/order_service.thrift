@@ -131,6 +131,7 @@ service OrderService{
    1. 无
     */
     void createAppointmentForAvailable(/**条件*/1:order_request.CreateAppointmentForAvailableRequest request),
+void createAppointmentForAvailable1(/**条件*/1:order_request.CreateAppointmentForAvailableRequest1 request),
 
 /**
 ### 最后的诊断医生

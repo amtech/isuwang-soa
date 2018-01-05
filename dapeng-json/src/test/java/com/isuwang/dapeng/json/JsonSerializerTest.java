@@ -24,6 +24,8 @@ public class JsonSerializerTest {
 
     public static void main(String[] args) throws IOException, TException {
 
+        complexStructTest1();
+
         simpleStructTest();
         simpleMapTest();
         intArrayTest();
@@ -43,6 +45,18 @@ public class JsonSerializerTest {
         String payNotifyJson = loadJson("/orderService_createAppointmentForAvailable-complexStruct.json");
 
         String desc = "complexStructTest";
+        doTest(orderService, orderServicePayNotify, orderServicePayNotify.request, payNotifyJson, desc);
+
+    }
+
+    private static void complexStructTest1() throws IOException, TException {
+        final String orderDescriptorXmlPath = "/com.isuwang.dapeng.json.demo.service.OrderService.xml";
+        Service orderService = getService(orderDescriptorXmlPath);
+
+        Method orderServicePayNotify = orderService.methods.stream().filter(method -> method.name.equals("createAppointmentForAvailable1")).collect(Collectors.toList()).get(0);
+        String payNotifyJson = loadJson("/complexStruct.json");
+
+        String desc = "complexStructTest1";
         doTest(orderService, orderServicePayNotify, orderServicePayNotify.request, payNotifyJson, desc);
 
     }
