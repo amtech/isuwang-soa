@@ -117,14 +117,15 @@ object Scrooge {
       val thriftFiles = resources.map(new File(_))
       val needUpdate = {
         val xmlFiles = resourcePath.listFiles().filter(_.getName.endsWith(".xml"))
-        val targetDirFiles = getFiles(outDir)
+        val targetDirFiles = getFiles(outDir).filter(file=> {
+          val fileName = file.getName
+          fileName.endsWith(".java") || fileName.endsWith(".scala")
+        })
 
         if (xmlFiles.size <= 0) {
           true
         } else if ((xmlFiles.toList ++: targetDirFiles)
-          .filter(!_.getName.endsWith(".thrift"))
-            .filter(i => i.getName.endsWith(".java") || i.getName.endsWith(".scala"))
-          .exists(generatedFile => thriftFiles.exists(f => f.lastModified() > generatedFile.lastModified()))) {
+          .exists(generatedFile => thriftFiles.exists(_.lastModified() > generatedFile.lastModified()))) {
           true
         } else {
           language match {

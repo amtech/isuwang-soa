@@ -4,8 +4,8 @@ package com.isuwang.dapeng.doc;
 import com.isuwang.dapeng.core.metadata.Method;
 import com.isuwang.dapeng.core.metadata.Service;
 import com.isuwang.dapeng.core.metadata.Struct;
-import com.isuwang.dapeng.core.metadata.TEnum;
 import com.isuwang.dapeng.doc.cache.ServiceCache;
+import com.isuwang.dapeng.util.MetaDataUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -57,17 +58,10 @@ public class ApiServiceController {
     public String method(HttpServletRequest request, @PathVariable String serviceName, @PathVariable String version, @PathVariable String methodName) {
         Service service = serviceCache.getService(serviceName, version);
 
-        Method seleted = null;
+        Method seleted = MetaDataUtil.findMethod(methodName, service);
         List<Method> methods = service.getMethods();
-        for (Method method : methods) {
-            if (method.getName().equals(methodName)) {
-                seleted = method;
 
-                break;
-            }
-        }
-
-        Collections.sort(methods, (arg0, arg1) -> arg0.getName().compareTo(arg1.getName()));
+        Collections.sort(methods, Comparator.comparing(Method::getName));
 
         request.setAttribute("service", service);
         request.setAttribute("methods", methods);
@@ -80,14 +74,7 @@ public class ApiServiceController {
     public Method findMethod(@PathVariable String serviceName, @PathVariable String version, @PathVariable String methodName) {
         Service service = serviceCache.getService(serviceName, version);
 
-        List<Method> methods = service.getMethods();
-        for (Method method : methods) {
-            if (method.getName().equals(methodName)) {
-                return method;
-            }
-        }
-
-        return null;
+        return MetaDataUtil.findMethod(methodName, service);
     }
 
     @RequestMapping(value = "struct/{serviceName}/{version}/{ref}", method = RequestMethod.GET)
@@ -95,17 +82,7 @@ public class ApiServiceController {
     public String struct(HttpServletRequest request, @PathVariable String serviceName, @PathVariable String version, @PathVariable String ref) {
         Service service = serviceCache.getService(serviceName, version);
 
-        List<Struct> structDefinitions = service.getStructDefinitions();
-
-        for (Struct struct : structDefinitions) {
-            String fullStructName = struct.getNamespace() + "." + struct.getName();
-
-            if (fullStructName.equals(ref)) {
-                request.setAttribute("struct", struct);
-                break;
-            }
-        }
-
+        request.setAttribute("struct", MetaDataUtil.findStruct(ref, service));
         request.setAttribute("service", service);
         request.setAttribute("structs", service.getStructDefinitions());
         return "api/struct";
@@ -116,17 +93,7 @@ public class ApiServiceController {
     public Struct findStruct(@PathVariable String serviceName, @PathVariable String version, @PathVariable String fullStructName) {
         Service service = serviceCache.getService(serviceName, version);
 
-        List<Struct> structDefinitions = service.getStructDefinitions();
-
-        for (Struct struct : structDefinitions) {
-            String fsname = struct.getNamespace() + "." + struct.getName();
-
-            if (fsname.equals(fullStructName)) {
-                return struct;
-            }
-        }
-
-        return null;
+        return MetaDataUtil.findStruct(fullStructName, service);
     }
 
     @RequestMapping(value = "enum/{serviceName}/{version}/{ref}", method = RequestMethod.GET)
@@ -134,17 +101,7 @@ public class ApiServiceController {
     public String anEnum(HttpServletRequest request, @PathVariable String serviceName, @PathVariable String version, @PathVariable String ref) {
         Service service = serviceCache.getService(serviceName, version);
 
-        List<TEnum> enums = service.getEnumDefinitions();
-
-        for (TEnum anEnum : enums) {
-            String ename = anEnum.getNamespace() + "." + anEnum.getName();
-
-            if (ename.equals(ref)) {
-                request.setAttribute("anEnum", anEnum);
-
-                break;
-            }
-        }
+        request.setAttribute("anEnum", MetaDataUtil.findEnum(ref, service));
 
         request.setAttribute("service", service);
         request.setAttribute("enums", service.getEnumDefinitions());
@@ -157,18 +114,8 @@ public class ApiServiceController {
 
         Service service = serviceCache.getService(serviceName, version);
 
-        Method seleted = null;
-        List<Method> methods = service.getMethods();
-        for (Method method : methods) {
-            if (method.getName().equals(methodName)) {
-                seleted = method;
-
-                break;
-            }
-        }
-
         request.setAttribute("service", service);
-        request.setAttribute("method", seleted);
+        request.setAttribute("method", MetaDataUtil.findMethod(methodName, service));
         request.setAttribute("services", serviceCache.getServices().values());
         return "api/test";
     }
@@ -176,8 +123,7 @@ public class ApiServiceController {
     @RequestMapping(value = "findService/{serviceName}/{version}", method = RequestMethod.GET)
     @ResponseBody
     public Service findService(@PathVariable String serviceName, @PathVariable String version) {
-        Service service = serviceCache.getService(serviceName, version);
-        return service;
+        return serviceCache.getService(serviceName, version);
     }
 
     @RequestMapping(value = "findServiceAfterRefresh/{serviceName}/{version}/{refresh}", method = RequestMethod.GET)
@@ -186,7 +132,6 @@ public class ApiServiceController {
 //        if (refresh) {
 //            serviceCache.reloadServices();
 //        }
-        Service service = serviceCache.getService(serviceName, version);
-        return service;
+        return serviceCache.getService(serviceName, version);
     }
 }
