@@ -123,6 +123,7 @@ object Scrooge {
           true
         } else if ((xmlFiles.toList ++: targetDirFiles)
           .filter(!_.getName.endsWith(".thrift"))
+            .filter(i => i.getName.endsWith(".java") || i.getName.endsWith(".scala"))
           .exists(generatedFile => thriftFiles.exists(f => f.lastModified() > generatedFile.lastModified()))) {
           true
         } else {
