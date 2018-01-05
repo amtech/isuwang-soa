@@ -482,42 +482,40 @@ class JavaGenerator extends CodeGenerator {
     }
   }
 
-  private def toServiceTemplate(service:Service): Elem = {
-    return {
-      <div>
-        package {service.namespace};
+  private def toServiceTemplate(service:Service): Elem = return {
+    <div>
+      package {service.namespace};
 
-        import com.isuwang.dapeng.core.Processor;
-        import com.isuwang.dapeng.core.Service;
-        import com.isuwang.dapeng.core.SoaGlobalTransactional;
+      import com.isuwang.dapeng.core.Processor;
+      import com.isuwang.dapeng.core.Service;
+      import com.isuwang.dapeng.core.SoaGlobalTransactional;
 
-        /**
-        {notice}
-        * {service.doc}
-        **/
-        @Service(name="{s"${service.namespace}.${service.name}"}",version = "{service.meta.version}")
-        @Processor(className = "{service.namespace.substring(0, service.namespace.lastIndexOf("service"))}{service.name}Codec$Processor")
-        public interface {service.name} <block>
-        {
-        toMethodArrayBuffer(service.methods).map { (method: Method) =>
-        {
-          <div>
-            /**
-            * {method.doc}
-            **/
-            {if(method.doc != null && method.doc.contains("@SoaGlobalTransactional")) <div>@SoaGlobalTransactional</div>}
-               <div>
-               {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
-               <div> {toDataTypeTemplate(field.getDataType())} {field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}
-               }}) throws com.isuwang.dapeng.core.SoaException;
-              </div>
-          </div>
-        }
-        }
-        }
-        </block>
+      /**
+      {notice}
+      * {service.doc}
+      **/
+      @Service(name="{s"${service.namespace}.${service.name}"}",version = "{service.meta.version}")
+      @Processor(className = "{service.namespace.substring(0, service.namespace.lastIndexOf("service"))}{service.name}Codec$Processor")
+      public interface {service.name} <block>
+      {
+      toMethodArrayBuffer(service.methods).map { (method: Method) =>
+      {
+        <div>
+          /**
+          * {method.doc}
+          **/
+          {if(method.doc != null && method.doc.contains("@SoaGlobalTransactional")) <div>@SoaGlobalTransactional</div>}
+             <div>
+             {toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)} {method.name}({toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+             <div> {toDataTypeTemplate(field.getDataType())} {field.name}{if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}
+             }}) throws com.isuwang.dapeng.core.SoaException;
+            </div>
         </div>
-    }
+      }
+      }
+      }
+      </block>
+      </div>
   }
 
   private def toAsyncServiceTemplate(service:Service): Elem = {
@@ -537,7 +535,7 @@ class JavaGenerator extends CodeGenerator {
         **/
         @Service(name="{s"${service.namespace}.${service.name}"}",version = "{service.meta.version}")
         @Processor(className = "{service.namespace.substring(0, service.namespace.lastIndexOf("service"))}{service.name}AsyncCodec$Processor")
-        public interface {service.name}Async <block>
+        public interface {service.name}Async  extends com.isuwang.dapeng.core.definition.AsyncService <block>
         {
         toMethodArrayBuffer(service.methods).map { (method: Method) =>
         {

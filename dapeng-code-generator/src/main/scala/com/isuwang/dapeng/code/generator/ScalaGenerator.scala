@@ -549,43 +549,41 @@ class ScalaGenerator extends CodeGenerator {
   }
 
 
-  private def toAsyncServiceTemplate(service:Service, oriNamespace: String): Elem = {
-    return {
-      <div>
-        package {service.namespace}
+  private def toAsyncServiceTemplate(service:Service, oriNamespace: String): Elem = return {
+    <div>
+      package {service.namespace}
 
-        import com.isuwang.dapeng.core.<block>Processor, Service</block>
-        import com.isuwang.dapeng.core.SoaGlobalTransactional
-        import scala.concurrent.Future
+      import com.isuwang.dapeng.core.<block>Processor, Service</block>
+      import com.isuwang.dapeng.core.SoaGlobalTransactional
+      import scala.concurrent.Future
 
-        /**
-        {notice}
-        * {service.doc}
-        **/
-        @Service(name ="{oriNamespace+"."+service.name}" , version = "{service.meta.version}")
-        @Processor(className = "{service.namespace.substring(0, service.namespace.lastIndexOf("service"))}{service.name}AsyncCodec$Processor")
-        trait {service.name}Async <block>
-        {
-        toMethodArrayBuffer(service.methods).map { (method: Method) =>
-        {
-          <div>
-            /**
-            * {method.doc}
-            **/
-            {if(method.doc != null && method.doc.contains("@SoaGlobalTransactional")) <div>@SoaGlobalTransactional</div>}
-            <div>@throws[com.isuwang.dapeng.core.SoaException]</div>
-            def {method.name}(
-            {toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
-            <div>{nameAsId(field.name)}: {toDataTypeTemplate(field.getDataType())} {if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}
-          }}{if(method.getRequest.getFields().size()>0) ","} timeout : Long): Future[{if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) <div>Unit</div> else toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}]
+      /**
+      {notice}
+      * {service.doc}
+      **/
+      @Service(name ="{oriNamespace+"."+service.name}" , version = "{service.meta.version}")
+      @Processor(className = "{service.namespace.substring(0, service.namespace.lastIndexOf("service"))}{service.name}AsyncCodec$Processor")
+      trait {service.name}Async extends com.isuwang.dapeng.core.definition.AsyncService <block>
+      {
+      toMethodArrayBuffer(service.methods).map { (method: Method) =>
+      {
+        <div>
+          /**
+          * {method.doc}
+          **/
+          {if(method.doc != null && method.doc.contains("@SoaGlobalTransactional")) <div>@SoaGlobalTransactional</div>}
+          <div>@throws[com.isuwang.dapeng.core.SoaException]</div>
+          def {method.name}(
+          {toFieldArrayBuffer(method.getRequest.getFields).map{ (field: Field) =>{
+          <div>{nameAsId(field.name)}: {toDataTypeTemplate(field.getDataType())} {if(field != method.getRequest.fields.get(method.getRequest.fields.size() - 1)) <span>,</span>}</div>}
+        }}{if(method.getRequest.getFields().size()>0) ","} timeout : Long): Future[{if(method.getResponse.getFields().get(0).getDataType.kind.equals(KIND.VOID)) <div>Unit</div> else toDataTypeTemplate(method.getResponse.getFields().get(0).getDataType)}]
 
-          </div>
-        }
-        }
-        }
-      </block>
-      </div>
-    }
+        </div>
+      }
+      }
+      }
+    </block>
+    </div>
   }
 
 
