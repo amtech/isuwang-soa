@@ -9,7 +9,7 @@ import java.io.ByteArrayOutputStream;
  */
 public class DumpUtil {
 
-    private static void dump(ByteBuf buffer) {
+    public static void dump(ByteBuf buffer) {
         int readerIndex = buffer.readerIndex();
         int availabe = buffer.readableBytes();
 
