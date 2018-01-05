@@ -88,7 +88,7 @@
                                     <overWriteSnapshots>false</overWriteSnapshots>
                                     <overWriteIfNewer>true</overWriteIfNewer>
                                     <excludeArtifactIds>
-                                        dapeng-message-api,dapeng-message-kafka,kafka_2.12,kafka-clients,jopt-simple,metrics-core
+                                        dapeng-core,dapeng-message-api,dapeng-message-kafka,kafka_2.12,kafka-clients,jopt-simple,metrics-core
                                     </excludeArtifactIds>
                                 </configuration>
                             </execution>
