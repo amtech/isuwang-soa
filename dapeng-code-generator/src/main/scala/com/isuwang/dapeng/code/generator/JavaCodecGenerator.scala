@@ -733,15 +733,16 @@ class JavaCodecGenerator extends CodeGenerator {
           </block>
         </block>
 
-        public static class getServiceMetadata{lt}I extends {service.namespace}.{service.name}{gt} extends SoaFunctionDefinition.Sync{lt}I, getServiceMetadata_args, getServiceMetadata_result{gt} <block>
+        public static class getServiceMetadata{lt}I extends {service.namespace}.{service.name}Async{gt} extends SoaFunctionDefinition.Async{lt}I, getServiceMetadata_args, getServiceMetadata_result{gt} <block>
           public getServiceMetadata() <block>
             super("getServiceMetadata", new GetServiceMetadata_argsSerializer(), new GetServiceMetadata_resultSerializer());
           </block>
 
           @Override
-          public getServiceMetadata_result apply(I iface, getServiceMetadata_args args) <block>
+          public CompletableFuture{lt}getServiceMetadata_result{gt} apply(I iface, getServiceMetadata_args args) <block>
             getServiceMetadata_result result = new getServiceMetadata_result();
 
+           return CompletableFuture.supplyAsync(() -> <block>
             try (InputStreamReader isr = new InputStreamReader({service.name}Codec.class.getClassLoader().getResourceAsStream("{service.namespace}.{service.name}.xml"));
             BufferedReader in = new BufferedReader(isr)) <block>
               int len = 0;
@@ -764,6 +765,7 @@ class JavaCodecGenerator extends CodeGenerator {
             </block>
 
             return result;
+          </block>);
           </block>
 
         </block>
