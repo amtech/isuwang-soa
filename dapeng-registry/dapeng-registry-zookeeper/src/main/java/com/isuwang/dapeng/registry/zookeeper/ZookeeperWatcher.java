@@ -370,7 +370,7 @@ public class ZookeeperWatcher {
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         ZookeeperWatcher zw = new ZookeeperWatcher(true);
         zw.init();
     }

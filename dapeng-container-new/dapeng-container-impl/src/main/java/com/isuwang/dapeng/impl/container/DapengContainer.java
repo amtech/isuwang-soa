@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -33,6 +34,8 @@ public class DapengContainer implements Container {
     private Map<ProcessorKey, SoaServiceDefinition<?>> processors = new ConcurrentHashMap<>();
     private Map<ProcessorKey,Application>  applicationMap = new ConcurrentHashMap<>();
     private final List<ClassLoader> applicationCls;
+
+    private final static CountDownLatch shutdownCDL = new CountDownLatch(1);
 
     public DapengContainer(List<ClassLoader> applicationCls) {
         this.applicationCls = applicationCls;
@@ -154,22 +157,28 @@ public class DapengContainer implements Container {
         //4.启动Apploader， plugins
         getPlugins().forEach(Plugin::start);
 
-        DapengContainer container = this;
+//        DapengContainer container = this;
 
         Runtime.getRuntime().addShutdownHook( new Thread( ()->{
             getPlugins().forEach(Plugin::stop);
-            synchronized (container){
-                container.notify();
-            }
+//            synchronized (container){
+//                container.notify();
+//            }
+            shutdownCDL.countDown();
         } ) );
 
-        synchronized (container){
-            try {
-                container.wait();
-            }
-            catch(InterruptedException ex){
-            }
+        try {
+            shutdownCDL.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+//        synchronized (container){
+//            try {
+//                container.wait();
+//            }
+//            catch(InterruptedException ex){
+//            }
+//        }
     }
 
 

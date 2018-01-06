@@ -45,9 +45,6 @@ public class JsonSerializer implements BeanSerializer<String> {
 
             if (!skip) {
                 writer.onStartField(fld.name);
-                if (fld.name.equals("listMap")) {
-                    System.out.println("hell");
-                }
                 readField(iproto, fld.dataType, field.type, writer, skip);
                 writer.onEndField();
             }
@@ -150,7 +147,7 @@ public class JsonSerializer implements BeanSerializer<String> {
                 if (!skip) {
                     TSet set = iproto.readSetBegin();
                     writer.onStartArray();
-                    writeCollection(set.size, set.elemType, fieldDataType.valueType, fieldDataType.valueType.valueType, iproto, writer);
+                    readCollection(set.size, set.elemType, fieldDataType.valueType, fieldDataType.valueType.valueType, iproto, writer);
                     writer.onEndArray();
                 } else {
                     TProtocolUtil.skip(iproto, TType.SET);
@@ -160,7 +157,7 @@ public class JsonSerializer implements BeanSerializer<String> {
                 if (!skip) {
                     TList list = iproto.readListBegin();
                     writer.onStartArray();
-                    writeCollection(list.size, list.elemType, fieldDataType.valueType, fieldDataType.valueType.valueType, iproto, writer);
+                    readCollection(list.size, list.elemType, fieldDataType.valueType, fieldDataType.valueType.valueType, iproto, writer);
                     writer.onEndArray();
                 } else {
                     TProtocolUtil.skip(iproto, TType.LIST);
@@ -179,14 +176,14 @@ public class JsonSerializer implements BeanSerializer<String> {
      * @param writer
      * @throws TException
      */
-    private void writeCollection(int size, byte elemType, DataType metadataType, DataType subMetadataType, TProtocol iproto, JsonCallback writer) throws TException {
+    private void readCollection(int size, byte elemType, DataType metadataType, DataType subMetadataType, TProtocol iproto, JsonCallback writer) throws TException {
         Struct struct = null;
         if (metadataType.kind == DataType.KIND.STRUCT) {
             struct = findStruct(metadataType.qualifiedName, service);
         }
         for (int index = 0; index < size; index++) {
             if (!isComplexKind(metadataType.kind)) {//没有嵌套结构,也就是原始数据类型, 例如int, boolean,string等
-                readField(iproto, null, elemType, writer, false);
+                readField(iproto, metadataType, elemType, writer, false);
             } else {
                 if (struct != null) {
                     new JsonSerializer(struct, byteBuf, service, method).read(iproto, writer);
@@ -194,7 +191,7 @@ public class JsonSerializer implements BeanSerializer<String> {
                     //处理List<list<>>
                     TList list = iproto.readListBegin();
                     writer.onStartArray();
-                    writeCollection(list.size, list.elemType, subMetadataType, subMetadataType.valueType, iproto, writer);
+                    readCollection(list.size, list.elemType, subMetadataType, subMetadataType.valueType, iproto, writer);
                     writer.onEndArray();
                 } else if (metadataType.kind == DataType.KIND.MAP) {
                     readField(iproto, metadataType, elemType,writer, false);
@@ -212,19 +209,24 @@ public class JsonSerializer implements BeanSerializer<String> {
         read(iproto, writer);
         return writer.toString();
     }
-
     /**
      * format:
      * url:http://xxx/api/callService?serviceName=xxx&version=xx&method=xx
      * post body:
      * {
-     * "orderType":2,
-     * "supplyers":[209,304,211]
+     *   "header":{},
+     *   "body":{
+     *       ${structName}:{}
+     *   }
      * }
      * <p>
      * InvocationContext and SoaHeader should be ready before
      */
     class Json2ThriftCallback implements JsonCallback {
+        //是否已完成对body部分的解析
+        private boolean bodyParsed = false;
+        private boolean skipField = false;
+
 
         private final TProtocol oproto;
 
@@ -265,12 +267,6 @@ public class JsonSerializer implements BeanSerializer<String> {
          */
         public Json2ThriftCallback(TProtocol oproto) {
             this.oproto = oproto;
-
-            //初始化当前数据节点
-            DataType initDataType = new DataType();
-            initDataType.setKind(DataType.KIND.STRUCT);
-            initDataType.qualifiedName = struct.name;
-            this.current = new StackNode(initDataType, byteBuf.writerIndex(), struct);
         }
 
 
@@ -301,21 +297,19 @@ public class JsonSerializer implements BeanSerializer<String> {
         @Override
         public void onStartObject() throws TException {
             assert current.dataType.kind == DataType.KIND.STRUCT || current.dataType.kind == DataType.KIND.MAP;
-            //TODO 多重struct的处理
-            //TODO MAP的处理, key, value的类型
             if (!inited) {
                 oproto.writeStructBegin(new TStruct(current.struct.name));
                 inited = true;
             } else {
                 if (peek() != null && isMultiElementKind(peek().dataType.kind)) {
                     peek().increaseElement();
+                    //集合套集合的变态处理方式
                     current = new StackNode(peek().dataType.valueType, byteBuf.writerIndex(), current.struct);
                 }
                 switch (current.dataType.kind) {
                     case STRUCT:
                         Struct struct = current.struct;//findStruct(current.dataType.qualifiedName, service);
                         if (struct == null) {
-                            //TODO
                             logger.info("struct not found");
                         }
                         oproto.writeStructBegin(new TStruct(struct.name));
@@ -357,7 +351,7 @@ public class JsonSerializer implements BeanSerializer<String> {
 
             if (peek() != null && isMultiElementKind(peek().dataType.kind)) {
                 peek().increaseElement();
-                //TODO 集合套集合的变态处理方式
+                //集合套集合的变态处理方式
                 current = new StackNode(peek().dataType.valueType, byteBuf.writerIndex(), current.struct);
             }
 
@@ -394,8 +388,19 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onStartField(String name) throws TException {
-            if (name.equals("listMap")) {
-                System.out.println("listMap");
+            if (current == null) {
+                if (name.equals("header")) {
+                    if (bodyParsed) skipField = true;
+                } else if (name.equals("body")) {
+                    bodyParsed = true;
+                    skipField = false;
+
+                    //初始化当前数据节点
+                    DataType initDataType = new DataType();
+                    initDataType.setKind(DataType.KIND.STRUCT);
+                    initDataType.qualifiedName = struct.name;
+                    this.current = new StackNode(initDataType, byteBuf.writerIndex(), struct);
+                }
             }
             if (current.dataType.kind == DataType.KIND.MAP) {
                 stackNew(new StackNode(current.dataType.keyType, byteBuf.writerIndex(), null));
@@ -551,8 +556,25 @@ public class JsonSerializer implements BeanSerializer<String> {
     }
 
     // json -> thrift
+
+    /**
+     * {
+     *     header:{
+     *
+     *     },
+     *     boday:{
+     *         ${struct.name}:{
+     *
+     *         }
+     *     }
+     * }
+     * @param input
+     * @param oproto
+     * @throws TException
+     */
     @Override
     public void write(String input, TProtocol oproto) throws TException {
+
         new JsonParser(input, new Json2ThriftCallback(oproto)).parseJsValue();
     }
 
@@ -564,18 +586,6 @@ public class JsonSerializer implements BeanSerializer<String> {
     @Override
     public String toString(String s) {
         return s;
-    }
-
-    private Field findField(String fieldName, Struct struct) {
-        List<Field> fields = struct.getFields();
-
-        for (Field field : fields) {
-            if (field.getName().equals(fieldName)) {
-                return field;
-            }
-        }
-
-        return null;
     }
 
     /**

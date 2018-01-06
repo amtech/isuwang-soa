@@ -36,6 +36,18 @@ public class MetaDataUtil {
         return null;
     }
 
+    public static Field findField(String fieldName, Struct struct) {
+        List<Field> fields = struct.getFields();
+
+        for (Field field : fields) {
+            if (field.getName().equals(fieldName)) {
+                return field;
+            }
+        }
+
+        return null;
+    }
+
     public static TEnum findEnum(String qualifiedName, Service service) {
         List<TEnum> enumDefinitions = service.getEnumDefinitions();
 
