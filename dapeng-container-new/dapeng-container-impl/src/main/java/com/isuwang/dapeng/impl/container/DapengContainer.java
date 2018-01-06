@@ -35,7 +35,7 @@ public class DapengContainer implements Container {
     private Map<ProcessorKey,Application>  applicationMap = new ConcurrentHashMap<>();
     private final List<ClassLoader> applicationCls;
 
-    private final static CountDownLatch shutdownCDL = new CountDownLatch(1);
+    private final static CountDownLatch shutdownSignal = new CountDownLatch(1);
 
     public DapengContainer(List<ClassLoader> applicationCls) {
         this.applicationCls = applicationCls;
@@ -164,11 +164,11 @@ public class DapengContainer implements Container {
 //            synchronized (container){
 //                container.notify();
 //            }
-            shutdownCDL.countDown();
+            shutdownSignal.countDown();
         } ) );
 
         try {
-            shutdownCDL.await();
+            shutdownSignal.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
