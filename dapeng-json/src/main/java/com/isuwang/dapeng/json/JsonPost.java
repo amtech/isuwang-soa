@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.isuwang.dapeng.client.netty.SoaConnectionImpl;
 import com.isuwang.dapeng.client.netty.TSoaTransport;
 import com.isuwang.dapeng.core.BeanSerializer;
+import com.isuwang.dapeng.core.InvocationContext;
 import com.isuwang.dapeng.core.SoaException;
 import com.isuwang.dapeng.core.SoaHeader;
 import com.isuwang.dapeng.core.metadata.Method;
 import com.isuwang.dapeng.core.metadata.Service;
+import com.isuwang.dapeng.json.JsonSerializer;
 import com.isuwang.dapeng.util.SoaMessageBuilder;
 import com.isuwang.dapeng.util.SoaSystemEnvProperties;
 import com.isuwang.org.apache.thrift.TException;
@@ -27,8 +29,6 @@ public class JSONPost {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JSONPost.class);
 
-    private JSONSerializer jsonSerializer = new JSONSerializer();
-
     private String host = "127.0.0.1";
 
     private Integer port = SoaSystemEnvProperties.SOA_CONTAINER_PORT;
@@ -44,55 +44,56 @@ public class JSONPost {
     /**
      * 调用远程服务
      *
-     * @param soaHeader
+     * @param invocationContext
      * @param jsonParameter
      * @param service
      * @return
      * @throws Exception
      */
-    public String callServiceMethod(SoaHeader soaHeader, String jsonParameter, Service service) throws Exception {
+    public String callServiceMethod(InvocationContext invocationContext, String jsonParameter, Service service) throws Exception {
 
         if (null == jsonParameter || "".equals(jsonParameter.trim())) {
             jsonParameter = "{}";
         }
 
-        jsonSerializer.setService(service);
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        StringWriter out = new StringWriter();
+//
+//        @SuppressWarnings("unchecked")
+//        Map<String, Map<String, Object>> params = objectMapper.readValue(jsonParameter, Map.class);
+//
+//        Map<String, Object> map = new HashMap<>();
+//        map.put("serviceName", invocationContext.getServiceName());
+//        map.put("version", invocationContext.getVersionName());
+//        map.put("methodName", invocationContext.getMethodName());
+//        map.put("params", params);
+//
+//        objectMapper.writeValue(out, map);
+//
+//        //发起请求
+//        final DataInfo request = new DataInfo();
+//        request.setConsumesType("JSON");
+//        request.setConsumesValue(out.toString());
+//        request.setServiceName(invocationContext.getServiceName());
+//        request.setVersion(invocationContext.getVersionName());
+//        request.setMethodName(invocationContext.getMethodName());
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        StringWriter out = new StringWriter();
-
-        @SuppressWarnings("unchecked")
-        Map<String, Map<String, Object>> params = objectMapper.readValue(jsonParameter, Map.class);
-
-        Map<String, Object> map = new HashMap<>();
-        map.put("serviceName", soaHeader.getServiceName());
-        map.put("version", soaHeader.getVersionName());
-        map.put("methodName", soaHeader.getMethodName());
-        map.put("params", params);
-
-        objectMapper.writeValue(out, map);
-
-        //发起请求
-        final DataInfo request = new DataInfo();
-        request.setConsumesType("JSON");
-        request.setConsumesValue(out.toString());
-        request.setServiceName(soaHeader.getServiceName());
-        request.setVersion(soaHeader.getVersionName());
-        request.setMethodName(soaHeader.getMethodName());
-        for (Method method: service.getMethods()) {
-            if (method.getName().equals(soaHeader.getMethodName())) {
-                request.setMethod(method);
+        Method method = null;
+        for (Method _method: service.getMethods()) {
+            if (_method.getName().equals(invocationContext.getMethodName())) {
+                method = _method;
                 break;
             }
         }
 
-        jsonSerializer.setDataInfo(request);
+        JsonSerializer jsonEncoder = new JsonSerializer(service,method,method.request);
+        JsonSerializer jsonDecoder = new JsonSerializer(service,method,method.response);
 
         final long beginTime = System.currentTimeMillis();
 
-        LOGGER.info("soa-request: {}", out.toString());
+        LOGGER.info("soa-request: {}", jsonParameter);
 
-        String jsonResponse = post(soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), out.toString());
+        String jsonResponse = post(jsonParameter, jsonEncoder, jsonDecoder);
 
         LOGGER.info("soa-response: {} {}ms", jsonResponse, System.currentTimeMillis() - beginTime);
 
@@ -105,7 +106,7 @@ public class JSONPost {
      *
      * @return
      */
-    private String post(String serviceName, String version, String methodName, String requestJson) throws Exception {
+    private String post(String requestJson, JsonSerializer jsonEncoder, JsonSerializer jsonDecoder) throws Exception {
 
         String jsonResponse = "{}";
 
@@ -115,7 +116,7 @@ public class JSONPost {
         try {
             //TODO: need serialize jsonMap to RequestObj
 
-            Object result = new SoaConnectionImpl(host,port).send(serviceName,version,methodName,requestJson,jsonSerializer,jsonSerializer);
+            Object result = new SoaConnectionImpl(host,port).sendJson(requestJson,jsonEncoder,jsonEncoder);
 
             jsonResponse = (String)result;
 
@@ -158,33 +159,5 @@ public class JSONPost {
         }
 
         return jsonResponse;
-    }
-
-
-    private <REQ> ByteBuf buildRequestBuf(String service, String version, String method,int seqid, REQ request, BeanSerializer<REQ> requestSerializer) throws TException {
-        final ByteBuf requestBuf = PooledByteBufAllocator.DEFAULT.buffer(8192);//Unpooled.directBuffer(8192);  // TODO Pooled
-        final TSoaTransport reqSoaTransport = new TSoaTransport(requestBuf);
-
-        SoaMessageBuilder<REQ> builder = new SoaMessageBuilder<>();
-
-        // TODO set protocol
-        SoaHeader header = buildHeader(service, version, method);
-        ByteBuf buf = builder.buffer(requestBuf)
-                .header(header)
-                .body(request, requestSerializer)
-                .seqid(seqid)
-                .build();
-        return buf;
-    }
-
-    private SoaHeader buildHeader(String service, String version, String method) {
-        SoaHeader header = new SoaHeader();
-        header.setServiceName(service);
-        header.setVersionName(version);
-        header.setMethodName(method);
-
-        // TODO fill header from InvocationContext
-
-        return header;
     }
 }
