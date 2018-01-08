@@ -10,24 +10,16 @@ public class ProcessorKey {
         this.versionName = versionName;
     }
 
-    private String serviceName;
+    private final String serviceName;
 
-    private String versionName;
+    private final String versionName;
 
     public String getServiceName() {
         return serviceName;
     }
 
-    public void setServiceName(String serviceName) {
-        this.serviceName = serviceName;
-    }
-
     public String getVersionName() {
         return versionName;
-    }
-
-    public void setVersionName(String versionName) {
-        this.versionName = versionName;
     }
 
     @Override
@@ -41,8 +33,9 @@ public class ProcessorKey {
         if (o instanceof ProcessorKey) {
             ProcessorKey target = (ProcessorKey) o;
 
-            if (target.getServiceName().equals(this.serviceName) && target.getVersionName().equals(this.versionName))
+            if (target.getServiceName().equals(this.serviceName) && target.getVersionName().equals(this.versionName)) {
                 return true;
+            }
         }
 
         return false;
