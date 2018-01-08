@@ -81,6 +81,7 @@ public class RunContainerPlugin extends SoaAbstractMojo {
                 while (iterator.hasNext()) {
                     URL url = iterator.next();
                     if (removeServiceProjectArtifact(iterator, url)) continue;
+                    if (removeTwitterAndScalaDependency(iterator,url)) continue;
                 }
 
                 ClassLoaderManager.shareClassLoader = new ShareClassLoader(shareUrls.toArray(new URL[shareUrls.size()]));
@@ -109,6 +110,18 @@ public class RunContainerPlugin extends SoaAbstractMojo {
         if (url.getFile().matches("^.*/dapeng-bootstrap.*\\.jar$")) {
             iterator.remove();
 
+            return true;
+        }
+        return false;
+    }
+
+    private boolean removeTwitterAndScalaDependency(Iterator<URL> iterator, URL url){
+        if(url.getFile().matches("^.*/twitter.*\\.jar$")) {
+            iterator.remove();
+            return true;
+        }
+        if(url.getFile().matches("^.*/scala.*\\.jar$")) {
+            iterator.remove();
             return true;
         }
         return false;
