@@ -80,6 +80,7 @@ public class RunContainerPlugin extends SoaAbstractMojo {
                 while (iterator.hasNext()) {
                     URL url = iterator.next();
                     if (removeServiceProjectArtifact(iterator, url)) continue;
+                    if (removeTwitterAndScalaDependency(iterator,url)) continue;
                 }
 
                 List<List<URL>> appURLsList = new ArrayList<>();
@@ -126,6 +127,18 @@ public class RunContainerPlugin extends SoaAbstractMojo {
             System.out.println("app found dapeng-core.jar.. remove it");
             iterator.remove();
 
+            return true;
+        }
+        return false;
+    }
+
+    private boolean removeTwitterAndScalaDependency(Iterator<URL> iterator, URL url){
+        if(url.getFile().matches("^.*/twitter.*\\.jar$")) {
+            iterator.remove();
+            return true;
+        }
+        if(url.getFile().matches("^.*/scala.*\\.jar$")) {
+            iterator.remove();
             return true;
         }
         return false;

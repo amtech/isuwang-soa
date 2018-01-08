@@ -166,7 +166,6 @@ object Scrooge {
 
   }
 
-
   def getFiles(path: String): List[File] = {
     if (new File(path).isDirectory) {
       new File(path).listFiles().flatMap(i => getFiles(i.getPath)).toList
