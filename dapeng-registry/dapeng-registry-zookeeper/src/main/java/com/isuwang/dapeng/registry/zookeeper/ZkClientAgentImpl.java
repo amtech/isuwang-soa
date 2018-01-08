@@ -26,7 +26,7 @@ public class ZkClientAgentImpl implements ZkClientAgent {
 
     private ZookeeperWatcher siw, zkfbw;
 
-    public ZkClientAgentImpl(){
+    public ZkClientAgentImpl() {
         start();
     }
 
@@ -62,15 +62,15 @@ public class ZkClientAgentImpl implements ZkClientAgent {
     }
 
     @Override
-    public void syncService(String serviceName, Map<String,ServiceZKInfo> zkInfos) {
+    public void syncService(String serviceName, Map<String, ServiceZKInfo> zkInfos) {
 
         boolean usingFallbackZookeeper = SoaSystemEnvProperties.SOA_ZOOKEEPER_FALLBACK_ISCONFIG;
 
         ServiceZKInfo zkInfo = zkInfos.get(serviceName);
-        if(zkInfo == null){  //zkInfos没有，从zookeeper拿
-            zkInfo = siw.getServiceZkInfo(serviceName);
-            if(zkInfo == null && usingFallbackZookeeper){
-                zkInfo = zkfbw.getServiceZkInfo(serviceName);
+        if (zkInfo == null) {  //zkInfos没有，从zookeeper拿
+            zkInfo = siw.getServiceZkInfo(serviceName,zkInfos);
+            if (zkInfo == null && usingFallbackZookeeper) {
+                zkInfo = zkfbw.getServiceZkInfo(serviceName,zkInfos);
             }
         }
 
@@ -79,7 +79,7 @@ public class ZkClientAgentImpl implements ZkClientAgent {
         List<Route> routes = usingFallbackZookeeper ? zkfbw.getRoutes() : siw.getRoutes();
         List<RuntimeInstance> runtimeList = new ArrayList<>();
 
-        if (zkInfo != null&&zkInfo.getRuntimeInstances()!=null) {
+        if (zkInfo != null && zkInfo.getRuntimeInstances() != null) {
             for (RuntimeInstance instance : zkInfo.getRuntimeInstances()) {
                 try {
                     InetAddress inetAddress = InetAddress.getByName(instance.ip);
@@ -87,11 +87,11 @@ public class ZkClientAgentImpl implements ZkClientAgent {
                         runtimeList.add(instance);
                     }
                 } catch (UnknownHostException e) {
-                    e.printStackTrace();
+                    LOGGER.error(e.getMessage(),e);
                 }
             }
             zkInfo.setRuntimeInstances(runtimeList);
-            zkInfos.put(serviceName,zkInfo);
+            zkInfos.put(serviceName, zkInfo);
         }
 
     }

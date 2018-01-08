@@ -123,7 +123,7 @@ public class InvocationContextImpl implements  InvocationContext {
 
     @Override
     public void setCallerFrom(Optional<String> callerFrom) {
-        this.setCallerFrom(callerFrom);
+        this.callerFrom = callerFrom;
     }
 
     @Override
@@ -192,16 +192,9 @@ public class InvocationContextImpl implements  InvocationContext {
     public static class Factory {
         private static ThreadLocal<InvocationContext> threadLocal = new ThreadLocal<>();
 
-        public static InvocationContext createNewInstance() {
-
+        private static InvocationContext createNewInstance() {
             InvocationContext context = new InvocationContextImpl();
             threadLocal.set(context);
-            return context;
-        }
-
-        public static InvocationContext setCurrentInstance(InvocationContext context) {
-            threadLocal.set(context);
-
             return context;
         }
 
