@@ -1,33 +1,23 @@
-package com.isuwang.dapeng.client.json;
+package com.isuwang.dapeng.json;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.isuwang.dapeng.client.netty.SoaConnectionImpl;
 import com.isuwang.dapeng.client.netty.TSoaTransport;
-import com.isuwang.dapeng.core.BeanSerializer;
 import com.isuwang.dapeng.core.InvocationContext;
 import com.isuwang.dapeng.core.SoaException;
-import com.isuwang.dapeng.core.SoaHeader;
 import com.isuwang.dapeng.core.metadata.Method;
 import com.isuwang.dapeng.core.metadata.Service;
 import com.isuwang.dapeng.json.JsonSerializer;
-import com.isuwang.dapeng.util.SoaMessageBuilder;
 import com.isuwang.dapeng.util.SoaSystemEnvProperties;
 import com.isuwang.org.apache.thrift.TException;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.PooledByteBufAllocator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by tangliu on 2016/4/13.
  */
-public class JSONPost {
+public class JsonPost {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JSONPost.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(com.isuwang.dapeng.client.json.JsonPost.class);
 
     private String host = "127.0.0.1";
 
@@ -35,7 +25,7 @@ public class JSONPost {
 
     private boolean doNotThrowError = false;
 
-    public JSONPost(String host, Integer port, boolean doNotThrowError) {
+    public JsonPost(String host, Integer port, boolean doNotThrowError) {
         this.host = host;
         this.port = port;
         this.doNotThrowError = doNotThrowError;
