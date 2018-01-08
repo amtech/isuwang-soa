@@ -17,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +37,9 @@ public class NettyClient {
     private Bootstrap bootstrap = null;
     private final EventLoopGroup workerGroup = new NioEventLoopGroup(1);
 
-    private final Map<Integer, CompletableFuture> futureCaches = new ConcurrentHashMap<>();
+    private static final Map<Integer, CompletableFuture> futureCaches = new ConcurrentHashMap<>();
+
+    private static final Queue<AsyncRequestWithTimeout> futuresCachesWithTimeout = new PriorityQueue<>((o1, o2) -> (int) (o1.getTimeout() - o2.getTimeout()));
 
     public NettyClient(){
         initBootstrap();
@@ -81,6 +85,10 @@ public class NettyClient {
 
         IdleConnectionManager.remove(channel);
         futureCaches.put(seqid, future);
+
+        AsyncRequestWithTimeout fwt = new AsyncRequestWithTimeout(seqid, timeout, future);
+        futuresCachesWithTimeout.add(fwt);
+
         channel.writeAndFlush(request);
     }
 
@@ -101,6 +109,45 @@ public class NettyClient {
             msg.release();
         }
     };
+
+    /**
+     * 定时任务，使得超时的异步任务返回异常给调用者
+     */
+    private static long DEFAULT_SLEEP_TIME = 1000L;
+
+    static {
+
+        final Thread asyncCheckTimeThread = new Thread("Check Async Timeout Thread") {
+            @Override
+            public void run() {
+                while (true) {
+                    try {
+                        checkAsyncTimeout();
+                    } catch (Exception e) {
+                        LOGGER.error("Check Async Timeout Thread Error", e);
+                    }
+                }
+            }
+        };
+        asyncCheckTimeThread.start();
+    }
+
+    private static void checkAsyncTimeout() throws InterruptedException {
+
+        AsyncRequestWithTimeout fwt = futuresCachesWithTimeout.peek();
+
+        while (fwt != null && fwt.getTimeout() < System.currentTimeMillis()) {
+            LOGGER.info("异步任务({})超时...", fwt.getSeqid());
+            futuresCachesWithTimeout.remove();
+
+            CompletableFuture future = futureCaches.get(fwt.getSeqid());
+            future.completeExceptionally(new SoaException(SoaBaseCode.TimeOut));
+            futureCaches.remove(fwt.getSeqid());
+
+            fwt = futuresCachesWithTimeout.peek();
+        }
+        Thread.sleep(DEFAULT_SLEEP_TIME);
+    }
 
 
     public Bootstrap getBootstrap (){
