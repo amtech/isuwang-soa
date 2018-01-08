@@ -239,7 +239,7 @@ public class ZookeeperWatcher {
         return usableList;
     }
 
-    public ServiceZKInfo getServiceZkInfo(String serviceName){
+    public ServiceZKInfo getServiceZkInfo(String serviceName,Map<String,ServiceZKInfo> zkInfos){
         String servicePath = serviceRoute + "/" + serviceName;
         try {
             if (zk == null)
@@ -248,7 +248,7 @@ public class ZookeeperWatcher {
             List<String> childrens = zk.getChildren(servicePath, watchedEvent -> {
                 if (watchedEvent.getType() == Watcher.Event.EventType.NodeChildrenChanged) {
                     LOGGER.info("{}子节点发生变化，重新获取信息", watchedEvent.getPath());
-                    getServiceZkInfo(serviceName);
+                    getServiceZkInfo(serviceName,zkInfos);
                 }
             });
 
@@ -260,7 +260,9 @@ public class ZookeeperWatcher {
                 RuntimeInstance instance = new RuntimeInstance(serviceName,infos[0],Integer.valueOf(infos[1]),infos[2]);
                 runtimeInstanceList.add(instance);
             }
-            return new ServiceZKInfo(serviceName,runtimeInstanceList);
+            ServiceZKInfo zkInfo = new ServiceZKInfo(serviceName,runtimeInstanceList);
+            zkInfos.put(serviceName,zkInfo);
+            return zkInfo;
 
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
