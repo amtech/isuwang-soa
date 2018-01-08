@@ -73,7 +73,7 @@ public class RunContainerPlugin extends SoaAbstractMojo {
                 iterator = appUrls.iterator();
                 while (iterator.hasNext()) {
                     URL url = iterator.next();
-                    if (removeServiceProjectArtifact(iterator, url)) continue;
+                    if (removeTwitterAndScalaDependency(iterator,url)) continue;
                     if (removeContainerAndBootstrap(iterator, url)) continue;
                 }
 
