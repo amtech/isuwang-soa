@@ -6,7 +6,6 @@ import com.isuwang.dapeng.core.metadata.Service;
 import com.isuwang.dapeng.core.metadata.Struct;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.TBinaryProtocol;
-import com.isuwang.org.apache.thrift.protocol.TCompactProtocol;
 import com.isuwang.org.apache.thrift.protocol.TProtocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -38,37 +37,37 @@ public class JsonSerializerTest {
     }
 
     private static void complexStructTest() throws IOException, TException {
-        final String orderDescriptorXmlPath = "/com.isuwang.dapeng.json.demo.service.OrderService.xml";
+        final String orderDescriptorXmlPath = "/com.isuwang.dapeng.json.demo.service.OrderService.xml" ;
         Service orderService = getService(orderDescriptorXmlPath);
 
         Method orderServicePayNotify = orderService.methods.stream().filter(method -> method.name.equals("createAppointmentForAvailable")).collect(Collectors.toList()).get(0);
         String payNotifyJson = loadJson("/orderService_createAppointmentForAvailable-complexStruct.json");
 
-        String desc = "complexStructTest";
+        String desc = "complexStructTest" ;
         doTest(orderService, orderServicePayNotify, orderServicePayNotify.request, payNotifyJson, desc);
 
     }
 
     private static void complexStructTest1() throws IOException, TException {
-        final String orderDescriptorXmlPath = "/com.isuwang.dapeng.json.demo.service.OrderService.xml";
+        final String orderDescriptorXmlPath = "/com.isuwang.dapeng.json.demo.service.OrderService.xml" ;
         Service orderService = getService(orderDescriptorXmlPath);
 
         Method orderServicePayNotify = orderService.methods.stream().filter(method -> method.name.equals("createAppointmentForAvailable1")).collect(Collectors.toList()).get(0);
         String payNotifyJson = loadJson("/complexStruct.json");
 
-        String desc = "complexStructTest1";
+        String desc = "complexStructTest1" ;
         doTest(orderService, orderServicePayNotify, orderServicePayNotify.request, payNotifyJson, desc);
 
     }
 
     private static void simpleStructTest() throws TException, IOException {
-        final String orderDescriptorXmlPath = "/com.isuwang.dapeng.json.demo.service.OrderService.xml";
+        final String orderDescriptorXmlPath = "/com.isuwang.dapeng.json.demo.service.OrderService.xml" ;
         Service orderService = getService(orderDescriptorXmlPath);
 
         Method orderServicePayNotify = orderService.methods.stream().filter(method -> method.name.equals("payNotify")).collect(Collectors.toList()).get(0);
         String payNotifyJson = loadJson("/orderService_payNotify.json");
 
-        String desc = "simpleStructTest";
+        String desc = "simpleStructTest" ;
         doTest(orderService, orderServicePayNotify, orderServicePayNotify.request, payNotifyJson, desc);
     }
 
@@ -79,7 +78,7 @@ public class JsonSerializerTest {
      * @throws TException
      */
     private static void simpleMapTest() throws IOException, TException {
-        final String orderDescriptorXmlPath = "/com.isuwang.dapeng.json.demo.service.OrderService.xml";
+        final String orderDescriptorXmlPath = "/com.isuwang.dapeng.json.demo.service.OrderService.xml" ;
         Service orderService = getService(orderDescriptorXmlPath);
 
         Method method = orderService.methods.stream().filter(_method -> _method.name.equals("payNotifyForAlipay")).collect(Collectors.toList()).get(0);
@@ -95,7 +94,7 @@ public class JsonSerializerTest {
      * @throws TException
      */
     private static void intMapTest() throws IOException, TException {
-        final String crmDescriptorXmlPath = "/crm.xml";
+        final String crmDescriptorXmlPath = "/crm.xml" ;
 
         Service crmService = getService(crmDescriptorXmlPath);
 
@@ -107,7 +106,7 @@ public class JsonSerializerTest {
     }
 
     private static void intArrayTest() throws IOException, TException {
-        final String crmDescriptorXmlPath = "/crm.xml";
+        final String crmDescriptorXmlPath = "/crm.xml" ;
 
         Service crmService = getService(crmDescriptorXmlPath);
 
@@ -119,7 +118,7 @@ public class JsonSerializerTest {
     }
 
     private static void enumTest() throws IOException, TException {
-        final String crmDescriptorXmlPath = "/crm.xml";
+        final String crmDescriptorXmlPath = "/crm.xml" ;
 
         Service crmService = getService(crmDescriptorXmlPath);
 
@@ -131,7 +130,7 @@ public class JsonSerializerTest {
     }
 
     private static void simpleStructWithEnumTest() throws IOException, TException {
-        final String crmDescriptorXmlPath = "/crm.xml";
+        final String crmDescriptorXmlPath = "/crm.xml" ;
 
         Service crmService = getService(crmDescriptorXmlPath);
 
@@ -143,7 +142,7 @@ public class JsonSerializerTest {
     }
 
     private static void simpleStructWithOptionTest() throws IOException, TException {
-        final String crmDescriptorXmlPath = "/crm.xml";
+        final String crmDescriptorXmlPath = "/crm.xml" ;
 
         Service crmService = getService(crmDescriptorXmlPath);
 
@@ -159,7 +158,7 @@ public class JsonSerializerTest {
 
         final ByteBuf requestBuf = PooledByteBufAllocator.DEFAULT.buffer(8192);
 
-        JsonSerializer jsonSerializer = new JsonSerializer(struct, requestBuf, service, method);
+        JsonSerializer jsonSerializer = new JsonSerializer(service, method, struct, requestBuf);
 
         TProtocol outProtocol = new TBinaryProtocol(new TSoaTransport(requestBuf));
         jsonSerializer.write(json, outProtocol);

@@ -89,6 +89,24 @@ public class SoaMessageBuilder<T> {
         return this.buffer;
     }
 
+    public ByteBuf buildJson() throws TException {
+        //buildHeader
+        TSoaTransport transport = new TSoaTransport(buffer);
+        TBinaryProtocol binaryProtocol = new TBinaryProtocol(transport);
+        binaryProtocol.writeByte(STX);
+        binaryProtocol.writeByte(VERSION);
+        //TODO 协议
+        binaryProtocol.writeByte(CodecProtocol.Binary.getCode());
+        binaryProtocol.writeI32(seqid);
+
+        bodySerializer.write(body,binaryProtocol);
+
+        binaryProtocol.writeByte(ETX);
+        transport.flush();
+
+        return this.buffer;
+    }
+
 
 
 }

@@ -1,13 +1,16 @@
 package com.isuwang.dapeng.json;
 
-import com.isuwang.dapeng.core.BeanSerializer;
+import com.isuwang.dapeng.core.*;
 import com.isuwang.dapeng.core.metadata.*;
+import com.isuwang.dapeng.core.metadata.Service;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.*;
 import io.netty.buffer.ByteBuf;
+
 import static com.isuwang.dapeng.util.MetaDataUtil.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
@@ -15,15 +18,22 @@ public class JsonSerializer implements BeanSerializer<String> {
     private final Logger logger = new Logger();
 
     private final Struct struct;
-    private final ByteBuf byteBuf;
+    private ByteBuf byteBuf;
     private final Service service;
     private final Method method;
+    private final InvocationContext invocationContext = InvocationContextImpl.Factory.getCurrentInstance();
 
-    public JsonSerializer(Struct struct, ByteBuf byteBuf, Service service, Method method) {
+    public JsonSerializer(Service service, Method method, Struct struct) {
         this.struct = struct;
-        this.byteBuf = byteBuf;
         this.service = service;
         this.method = method;
+    }
+
+    public JsonSerializer(Service service, Method method, Struct struct, ByteBuf byteBuf) {
+        this.struct = struct;
+        this.service = service;
+        this.method = method;
+        this.byteBuf = byteBuf;
     }
 
     // thrift -> json
@@ -110,7 +120,7 @@ public class JsonSerializer implements BeanSerializer<String> {
                 if (!skip) {
                     String subStructName = fieldDataType.qualifiedName;
                     Struct subStruct = findStruct(subStructName, service);
-                    new JsonSerializer(subStruct, byteBuf, service, method).read(iproto, writer);
+                    new JsonSerializer(service, method, subStruct, byteBuf).read(iproto, writer);
                 } else {
                     TProtocolUtil.skip(iproto, TType.STRUCT);
                 }
@@ -186,7 +196,7 @@ public class JsonSerializer implements BeanSerializer<String> {
                 readField(iproto, metadataType, elemType, writer, false);
             } else {
                 if (struct != null) {
-                    new JsonSerializer(struct, byteBuf, service, method).read(iproto, writer);
+                    new JsonSerializer(service, method, struct, byteBuf).read(iproto, writer);
                 } else if (isCollectionKind(metadataType.kind)) {
                     //处理List<list<>>
                     TList list = iproto.readListBegin();
@@ -194,7 +204,7 @@ public class JsonSerializer implements BeanSerializer<String> {
                     readCollection(list.size, list.elemType, subMetadataType, subMetadataType.valueType, iproto, writer);
                     writer.onEndArray();
                 } else if (metadataType.kind == DataType.KIND.MAP) {
-                    readField(iproto, metadataType, elemType,writer, false);
+                    readField(iproto, metadataType, elemType, writer, false);
                 }
             }
             writer.onEndField();
@@ -209,26 +219,36 @@ public class JsonSerializer implements BeanSerializer<String> {
         read(iproto, writer);
         return writer.toString();
     }
+
+    public void setByteBuf(ByteBuf byteBuf) {
+        this.byteBuf = byteBuf;
+    }
+
     /**
      * format:
      * url:http://xxx/api/callService?serviceName=xxx&version=xx&method=xx
      * post body:
      * {
-     *   "header":{},
-     *   "body":{
-     *       ${structName}:{}
-     *   }
+     * "header":{},
+     * "body":{
+     * ${structName}:{}
+     * }
      * }
      * <p>
      * InvocationContext and SoaHeader should be ready before
      */
+    enum ParsePhase {
+        INIT, HEADER_BEGIN, HEADER, HEADER_END, BODY_BEGIN, BODY, BODY_END
+    }
+
     class Json2ThriftCallback implements JsonCallback {
         //是否已完成对body部分的解析
-        private boolean bodyParsed = false;
-        private boolean skipField = false;
+//        private boolean bodyParsed = false;
+//        private boolean skipField = false;
 
 
         private final TProtocol oproto;
+        private ParsePhase parsePhase = ParsePhase.INIT;
 
         class StackNode {
             final DataType dataType;
@@ -257,8 +277,9 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         //当前处理数据节点
         StackNode current;
+        String currentHeader;
         //标志是否是第一个object
-        boolean inited = false;
+//        boolean inited = false;
         //onStartField的时候, 记录是否找到该Field. 如果没找到,那么需要skip这个field
         boolean foundField = true;
 
@@ -296,46 +317,86 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onStartObject() throws TException {
-            assert current.dataType.kind == DataType.KIND.STRUCT || current.dataType.kind == DataType.KIND.MAP;
-            if (!inited) {
-                oproto.writeStructBegin(new TStruct(current.struct.name));
-                inited = true;
-            } else {
-                if (peek() != null && isMultiElementKind(peek().dataType.kind)) {
-                    peek().increaseElement();
-                    //集合套集合的变态处理方式
-                    current = new StackNode(peek().dataType.valueType, byteBuf.writerIndex(), current.struct);
-                }
-                switch (current.dataType.kind) {
-                    case STRUCT:
-                        Struct struct = current.struct;//findStruct(current.dataType.qualifiedName, service);
-                        if (struct == null) {
-                            logger.info("struct not found");
-                        }
-                        oproto.writeStructBegin(new TStruct(struct.name));
-                        break;
-                    case MAP:
-                        assert isValidMapKeyType(current.dataType.keyType.kind);
-                        // 压缩模式下, default size不能设置为0...
-                        oproto.writeMapBegin(new TMap(dataType2Byte(current.dataType.keyType), dataType2Byte(current.dataType.valueType), 1));
-                        break;
-                }
+//            assert current.dataType.kind == DataType.KIND.STRUCT || current.dataType.kind == DataType.KIND.MAP;
+            switch (parsePhase) {
+                case INIT:
+                    break;
+                case HEADER_BEGIN:
+                    parsePhase = ParsePhase.HEADER;
+                    break;
+                case HEADER:
+                    logger.error("should not come here");
+                case HEADER_END:
+                    break;
+                case BODY_BEGIN:
+                    new SoaHeaderSerializer().write(buildSoaHeader(), oproto);
+                    oproto.writeStructBegin(new TStruct(current.struct.name));
+                    //初始化当前数据节点
+                    DataType initDataType = new DataType();
+                    initDataType.setKind(DataType.KIND.STRUCT);
+                    initDataType.qualifiedName = struct.name;
+                    current = new StackNode(initDataType, byteBuf.writerIndex(), struct);
+                    parsePhase = ParsePhase.BODY;
+                    break;
+                case BODY:
+                    if (peek() != null && isMultiElementKind(peek().dataType.kind)) {
+                        peek().increaseElement();
+                        //集合套集合的变态处理方式
+                        current = new StackNode(peek().dataType.valueType, byteBuf.writerIndex(), current.struct);
+                    }
+                    switch (current.dataType.kind) {
+                        case STRUCT:
+                            Struct struct = current.struct;//findStruct(current.dataType.qualifiedName, service);
+                            if (struct == null) {
+                                logger.info("struct not found");
+                            }
+                            oproto.writeStructBegin(new TStruct(struct.name));
+                            break;
+                        case MAP:
+                            assert isValidMapKeyType(current.dataType.keyType.kind);
+                            // 压缩模式下, default size不能设置为0...
+                            oproto.writeMapBegin(new TMap(dataType2Byte(current.dataType.keyType), dataType2Byte(current.dataType.valueType), 1));
+                            break;
+                    }
+                    break;
+                default:
+                    logger.error("should not come here, current phase:" + parsePhase);
+                    break;
             }
         }
 
         @Override
         public void onEndObject() throws TException {
-            assert current.dataType.kind == DataType.KIND.STRUCT || current.dataType.kind == DataType.KIND.MAP;
+//            assert current.dataType.kind == DataType.KIND.STRUCT || current.dataType.kind == DataType.KIND.MAP;
 
-            switch (current.dataType.kind) {
-                case STRUCT:
-                    oproto.writeFieldStop();
-                    oproto.writeStructEnd();
+            switch (parsePhase) {
+                case HEADER_BEGIN:
+                    logger.error("should not come here");
                     break;
-                case MAP:
-                    oproto.writeMapEnd();
+                case HEADER:
+                    parsePhase = ParsePhase.HEADER_END;
+                    break;
+                case HEADER_END:
+                    logger.error("should not come here");
+                    break;
+                case BODY_BEGIN:
+                    logger.error("should not come here");
+                    break;
+                case BODY:
+                    switch (current.dataType.kind) {
+                        case STRUCT:
+                            oproto.writeFieldStop();
+                            oproto.writeStructEnd();
+                            if (current.struct.name.equals(struct.name)) {
+                                parsePhase = ParsePhase.BODY_END;
+                            }
+                            break;
+                        case MAP:
+                            oproto.writeMapEnd();
 
-                    reWriteByteBuf();
+                            reWriteByteBuf();
+                            break;
+                    }
                     break;
             }
         }
@@ -348,6 +409,8 @@ public class JsonSerializer implements BeanSerializer<String> {
         @Override
         public void onStartArray() throws TException {
             assert isCollectionKind(current.dataType.kind);
+
+            if (parsePhase != ParsePhase.BODY) return;
 
             if (peek() != null && isMultiElementKind(peek().dataType.kind)) {
                 peek().increaseElement();
@@ -370,6 +433,8 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onEndArray() throws TException {
+            if (parsePhase != ParsePhase.BODY) return;
+
             pop();
 
             assert isCollectionKind(current.dataType.kind);
@@ -388,43 +453,56 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onStartField(String name) throws TException {
-            if (current == null) {
-                if (name.equals("header")) {
-                    if (bodyParsed) skipField = true;
-                } else if (name.equals("body")) {
-                    bodyParsed = true;
-                    skipField = false;
+            switch (parsePhase) {
+                case INIT:
+                    if (name.equals("header")) {
+                        parsePhase = ParsePhase.HEADER_BEGIN;
+                    } else if (name.equals("body")) {
+                        parsePhase = ParsePhase.BODY_BEGIN;
+                    } else {
+                        logger.warning("skip field(" + name + ")@pase:" + parsePhase);
+                    }
+                    break;
+                case HEADER:
+                    currentHeader = name;
+                    break;
+                case HEADER_END:
+                    if (name.equals("body")) {
+                        parsePhase = ParsePhase.BODY_BEGIN;
+                    } else {
+                        logger.warning("skip field(" + name + ")@pase:" + parsePhase);
+                    }
+                    break;
+                case BODY:
+                    if (current.dataType.kind == DataType.KIND.MAP) {
+                        stackNew(new StackNode(current.dataType.keyType, byteBuf.writerIndex(), null));
+                        assert isValidMapKeyType(current.dataType.keyType.kind);
+                        if (current.dataType.kind == DataType.KIND.STRING) {
+                            oproto.writeString(name);
+                        } else {
+                            writeIntField(name, current.dataType.kind);
+                        }
+                        pop();
+                        stackNew(new StackNode(current.dataType.valueType, byteBuf.writerIndex(), findStruct(current.dataType.valueType.qualifiedName, service)));
+                    } else {
+                        Field field = findField(name, current.struct);
+                        if (field == null) {
+                            foundField = false;
+                            logger.info("field(" + name + ") not found. just skip");
+                            return;
+                        } else {
+                            foundField = true;
+                        }
 
-                    //初始化当前数据节点
-                    DataType initDataType = new DataType();
-                    initDataType.setKind(DataType.KIND.STRUCT);
-                    initDataType.qualifiedName = struct.name;
-                    this.current = new StackNode(initDataType, byteBuf.writerIndex(), struct);
-                }
+                        oproto.writeFieldBegin(new TField(field.name, dataType2Byte(field.dataType), (short) field.getTag()));
+                        stackNew(new StackNode(field.dataType, byteBuf.writerIndex(), findStruct(field.dataType.qualifiedName, service)));
+                    }
+                    break;
+                case BODY_END:
+                    logger.warning("skip field(" + name + ")@pase:" + parsePhase);
+                    break;
             }
-            if (current.dataType.kind == DataType.KIND.MAP) {
-                stackNew(new StackNode(current.dataType.keyType, byteBuf.writerIndex(), null));
-                assert isValidMapKeyType(current.dataType.keyType.kind);
-                if (current.dataType.kind == DataType.KIND.STRING) {
-                    oproto.writeString(name);
-                } else {
-                    writeIntField(name, current.dataType.kind);
-                }
-                pop();
-                stackNew(new StackNode(current.dataType.valueType, byteBuf.writerIndex(), findStruct(current.dataType.valueType.qualifiedName, service)));
-            } else {
-                Field field = findField(name, current.struct);
-                if (field == null) {
-                    foundField = false;
-                    logger.info("field(" + name + ") not found. just skip");
-                    return;
-                } else {
-                    foundField = true;
-                }
 
-                oproto.writeFieldBegin(new TField(field.name, dataType2Byte(field.dataType), (short) field.getTag()));
-                stackNew(new StackNode(field.dataType, byteBuf.writerIndex(), findStruct(field.dataType.qualifiedName, service)));
-            }
         }
 
         private void writeIntField(String value, DataType.KIND kind) throws TException {
@@ -445,6 +523,8 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onEndField() throws TException {
+            if (parsePhase != ParsePhase.BODY) return;
+
             if (!foundField) return;
 
             pop();
@@ -457,57 +537,91 @@ public class JsonSerializer implements BeanSerializer<String> {
 
         @Override
         public void onBoolean(boolean value) throws TException {
-            if (peek() != null && isMultiElementKind(peek().dataType.kind)) peek().increaseElement();
-            oproto.writeBool(value);
+            switch (parsePhase) {
+                case HEADER:
+                    logger.warning("skip boolean(" + value + ")@pase:" + parsePhase);
+                    break;
+                case BODY:
+                    if (peek() != null && isMultiElementKind(peek().dataType.kind)) peek().increaseElement();
+                    oproto.writeBool(value);
+                    break;
+                default:
+                    logger.warning("skip boolean(" + value + ")@pase:" + parsePhase);
+            }
+
         }
 
         @Override
         public void onNumber(double value) throws TException {
-            DataType.KIND currentType = current.dataType.kind;
+            switch (parsePhase) {
+                case HEADER:
+                    fillIntToInvocationCtx((int) value);
+                    break;
+                case BODY:
+                    DataType.KIND currentType = current.dataType.kind;
 
-            if (peek() != null && isMultiElementKind(peek().dataType.kind)) peek().increaseElement();
+                    if (peek() != null && isMultiElementKind(peek().dataType.kind)) peek().increaseElement();
 
-            switch (currentType) {
-                case SHORT:
-                    oproto.writeI16((short) value);
-                    break;
-                case INTEGER:
-                    oproto.writeI32((int) value);
-                    break;
-                case LONG:
-                    oproto.writeI64((long) value);
-                    break;
-                case DOUBLE:
-                    oproto.writeDouble(value);
-                    break;
-                case BIGDECIMAL:
-                    //TODO
-                    break;
-                case BYTE:
-                    //TODO
+                    switch (currentType) {
+                        case SHORT:
+                            oproto.writeI16((short) value);
+                            break;
+                        case INTEGER:
+                            oproto.writeI32((int) value);
+                            break;
+                        case LONG:
+                            oproto.writeI64((long) value);
+                            break;
+                        case DOUBLE:
+                            oproto.writeDouble(value);
+                            break;
+                        case BIGDECIMAL:
+                            //TODO
+                            break;
+                        case BYTE:
+                            //TODO
+                            break;
+                        default:
+                            throw new TException("DataType(" + current.dataType.kind + ") for " + current.dataType.qualifiedName + " is not a Number");
+
+                    }
                     break;
                 default:
-                    throw new TException("DataType(" + current.dataType.kind + ") for " + current.dataType.qualifiedName + " is not a Number");
-
+                    logger.warning("skip number(" + value + ")@pase:" + parsePhase);
             }
         }
 
         @Override
         public void onNull() throws TException {
-            //重置writerIndex
-            byteBuf.writerIndex(current.byteBufPosition);
+            switch (parsePhase) {
+                case HEADER:
+                    break;
+                case BODY:
+                    //重置writerIndex
+                    byteBuf.writerIndex(current.byteBufPosition);
+                    break;
+            }
         }
 
         @Override
         public void onString(String value) throws TException {
-            if (peek() != null && isMultiElementKind(peek().dataType.kind)) peek().increaseElement();
+            switch (parsePhase) {
+                case HEADER:
+                    fillStringToInvocationCtx(value);
+                    break;
+                case BODY:
+                    if (peek() != null && isMultiElementKind(peek().dataType.kind)) peek().increaseElement();
 
-            if (current.dataType.kind == DataType.KIND.ENUM) {
-                TEnum tEnum = findEnum(current.dataType.qualifiedName, service);
-                oproto.writeI32(findEnumItemValue(tEnum, value));
-                return;
+                    if (current.dataType.kind == DataType.KIND.ENUM) {
+                        TEnum tEnum = findEnum(current.dataType.qualifiedName, service);
+                        oproto.writeI32(findEnumItemValue(tEnum, value));
+                        return;
+                    }
+                    oproto.writeString(value);
+                    break;
+                default:
+                    logger.warning("skip boolean(" + value + ")@pase:" + parsePhase);
             }
-            oproto.writeString(value);
         }
 
         private void stackNew(StackNode node) {
@@ -553,21 +667,71 @@ public class JsonSerializer implements BeanSerializer<String> {
 
             byteBuf.writerIndex(currentIndex);
         }
+
+        private SoaHeader buildSoaHeader() {
+            SoaHeader header = new SoaHeader();
+            header.setServiceName(invocationContext.getServiceName());
+            header.setMethodName(invocationContext.getMethodName());
+            header.setVersionName(invocationContext.getVersionName());
+            header.setCallerFrom(invocationContext.getCallerFrom());
+            header.setCallerIp(invocationContext.getCallerIp());
+            header.setCustomerId(invocationContext.getCustomerId());
+            header.setCustomerName(invocationContext.getCustomerName());
+            header.setOperatorId(invocationContext.getOperatorId());
+
+            return header;
+        }
+
+        private void fillStringToInvocationCtx(String value) {
+            if ("serviceName".equals(currentHeader)) {
+                invocationContext.setServiceName(value);
+            } else if ("methodName".equals(currentHeader)) {
+                invocationContext.setMethodName(value);
+            } else if ("versionName".equals(currentHeader)) {
+                invocationContext.setVersionName(value);
+            } else if ("calleeIp".equals(currentHeader)) {
+                invocationContext.setCalleeIp(Optional.of(value));
+            } else if ("callerFrom".equals(currentHeader)) {
+                invocationContext.setCallerFrom(Optional.of(value));
+            } else if ("callerIp".equals(currentHeader)) {
+                invocationContext.setCallerFrom(Optional.of(value));
+            } else if ("customerName".equals(currentHeader)) {
+                invocationContext.setCustomerName(Optional.of(value));
+            } else {
+                logger.warning("skip field(" + currentHeader + ")@pase:" + parsePhase);
+            }
+        }
+
+        private void fillIntToInvocationCtx(int value) {
+            if ("calleePort".equals(currentHeader)) {
+                invocationContext.setCalleePort(Optional.of(value));
+            } else if ("operatorId".equals(currentHeader)) {
+                invocationContext.setOperatorId(Optional.of(value));
+            } else if ("customerId".equals(currentHeader)) {
+                invocationContext.setCustomerId(Optional.of(value));
+            } else if ("transactionSequence".equals(currentHeader)) {
+                invocationContext.setTransactionSequence(Optional.of(value));
+            } else {
+                logger.warning("skip field(" + currentHeader + ")@pase:" + parsePhase);
+            }
+        }
     }
+
 
     // json -> thrift
 
     /**
      * {
-     *     header:{
-     *
-     *     },
-     *     boday:{
-     *         ${struct.name}:{
-     *
-     *         }
-     *     }
+     * header:{
+     * <p>
+     * },
+     * boday:{
+     * ${struct.name}:{
+     * <p>
      * }
+     * }
+     * }
+     *
      * @param input
      * @param oproto
      * @throws TException

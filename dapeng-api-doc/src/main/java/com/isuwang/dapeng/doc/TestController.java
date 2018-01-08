@@ -1,8 +1,9 @@
 package com.isuwang.dapeng.doc;
 
-import com.isuwang.dapeng.client.json.JSONPost;
+import com.isuwang.dapeng.client.json.JsonPost;
+import com.isuwang.dapeng.core.InvocationContext;
+import com.isuwang.dapeng.core.InvocationContextImpl;
 import com.isuwang.dapeng.core.metadata.Service;
-import com.isuwang.dapeng.core.SoaHeader;
 import com.isuwang.dapeng.doc.cache.ServiceCache;
 import com.isuwang.dapeng.util.SoaSystemEnvProperties;
 import org.slf4j.Logger;
@@ -38,7 +39,7 @@ public class TestController {
     @Autowired
     private ServiceCache serviceCache;
 
-    private JSONPost jsonPost;
+    private JsonPost jsonPost = new JsonPost(SoaSystemEnvProperties.SOA_CONTAINER_IP, SoaSystemEnvProperties.SOA_CONTAINER_PORT, true);
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
@@ -51,14 +52,13 @@ public class TestController {
 
         Service service = serviceCache.getService(serviceName, versionName);
 
-        SoaHeader header = new SoaHeader();
-        header.setServiceName(serviceName);
-        header.setVersionName(versionName);
-        header.setMethodName(methodName);
-        header.setCallerFrom(Optional.of("TestController"));
+        InvocationContext invocationContext = InvocationContextImpl.Factory.getCurrentInstance();
+        invocationContext.setServiceName(serviceName);
+        invocationContext.setVersionName(versionName);
+        invocationContext.setMethodName(methodName);
+        invocationContext.setCallerFrom(Optional.of("TestController"));
         try {
-            jsonPost = new JSONPost(SoaSystemEnvProperties.SOA_CONTAINER_IP, SoaSystemEnvProperties.SOA_CONTAINER_PORT, true);
-            return jsonPost.callServiceMethod(header, jsonParameter, service);
+            return jsonPost.callServiceMethod(invocationContext, jsonParameter, service);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }

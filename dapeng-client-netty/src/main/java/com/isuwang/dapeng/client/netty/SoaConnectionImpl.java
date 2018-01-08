@@ -1,6 +1,7 @@
 package com.isuwang.dapeng.client.netty;
 
 import com.isuwang.dapeng.client.filter.LoadBalanceFilter;
+import com.isuwang.dapeng.client.json.JsonSerializer;
 import com.isuwang.dapeng.core.*;
 import com.isuwang.dapeng.core.filter.*;
 import com.isuwang.dapeng.util.SoaMessageBuilder;
@@ -149,6 +150,48 @@ public class SoaConnectionImpl implements SoaConnection {
         return resultFuture;
     }
 
+    public <REQ, RESP> RESP sendJson(REQ request, BeanSerializer<REQ> requestSerializer, BeanSerializer<RESP> responseSerializer) throws SoaException {
+int seqid = this.seqidAtomic.getAndIncrement();
+
+        Filter dispatchFilter = new Filter() {
+            private FilterChain getPrevChain(FilterContext ctx) {
+                SharedChain chain = (SharedChain) ctx.getAttach(this, "chain");
+                return new SharedChain(chain.head, chain.shared, chain.tail, chain.size() - 2);
+            }
+            @Override
+            public void onEntry(FilterContext ctx, FilterChain next) throws SoaException{
+
+                ByteBuf requestBuf = buildJsonRequestBuf(seqid, request, requestSerializer);
+
+                // TODO filter
+                checkChannel();
+                ByteBuf responseBuf = client.send(channel,seqid, requestBuf); //发送请求，返回结果
+                ((JsonSerializer)responseSerializer).setByteBuf(responseBuf);
+                processResponse(responseBuf,responseSerializer,ctx,this);
+                onExit(ctx, getPrevChain(ctx));
+            }
+
+            @Override
+            public void onExit(FilterContext ctx, FilterChain prev)  {
+
+            }
+        };
+
+        SharedChain sharedChain = new SharedChain(new LoadBalanceFilter(), new ArrayList<>(), dispatchFilter, 0);
+
+        FilterContextImpl filterContext = new FilterContextImpl();
+        filterContext.setAttach(dispatchFilter, "chain", sharedChain);
+
+        try {
+            sharedChain.onEntry(filterContext);
+        } catch (TException e) {
+            throw new SoaException(e);
+        }
+        RESP response = (RESP) filterContext.getAttach(dispatchFilter,"response");
+
+        return response;
+    }
+
     private SoaHeader buildHeader(String service, String version, String method) {
         SoaHeader header = new SoaHeader();
         header.setServiceName(service);
@@ -173,6 +216,23 @@ public class SoaConnectionImpl implements SoaConnection {
                     .body(request, requestSerializer)
                     .seqid(seqid)
                     .build();
+            return buf;
+        } catch (TException e) {
+            throw new SoaException(e);
+        }
+    }
+
+    private <REQ> ByteBuf buildJsonRequestBuf(int seqid, REQ request, BeanSerializer<REQ> requestSerializer) throws SoaException {
+        final ByteBuf requestBuf = PooledByteBufAllocator.DEFAULT.buffer(8192);//Unpooled.directBuffer(8192);  // TODO Pooled
+
+        SoaMessageBuilder<REQ> builder = new SoaMessageBuilder<>();
+
+        ((JsonSerializer)requestSerializer).setByteBuf(requestBuf);
+        try {
+            ByteBuf buf = builder.buffer(requestBuf)
+                    .body(request, requestSerializer)
+                    .seqid(seqid)
+                    .buildJson();
             return buf;
         } catch (TException e) {
             throw new SoaException(e);
