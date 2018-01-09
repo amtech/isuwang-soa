@@ -346,15 +346,16 @@ package com.isuwang.soa;
           }
         }
 
-        public static class getServiceMetadata<I extends com.isuwang.soa.service.SchedualService> extends SoaFunctionDefinition.Sync<I, getServiceMetadata_args, getServiceMetadata_result> {
+        public static class getServiceMetadata<I extends SchedualServiceAsync> extends SoaFunctionDefinition.Async<I, getServiceMetadata_args, getServiceMetadata_result> {
           public getServiceMetadata() {
             super("getServiceMetadata", new GetServiceMetadata_argsSerializer(), new GetServiceMetadata_resultSerializer());
           }
 
           @Override
-          public getServiceMetadata_result apply(I iface, getServiceMetadata_args args) {
+          public CompletableFuture<getServiceMetadata_result> apply(I iface, getServiceMetadata_args args) {
             getServiceMetadata_result result = new getServiceMetadata_result();
 
+           return CompletableFuture.supplyAsync(() -> {
             try (InputStreamReader isr = new InputStreamReader(SchedualServiceCodec.class.getClassLoader().getResourceAsStream("com.isuwang.soa.service.SchedualService.xml"));
             BufferedReader in = new BufferedReader(isr)) {
               int len = 0;
@@ -377,6 +378,7 @@ package com.isuwang.soa;
             }
 
             return result;
+          });
           }
 
         }

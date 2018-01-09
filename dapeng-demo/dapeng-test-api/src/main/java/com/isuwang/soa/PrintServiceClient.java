@@ -35,6 +35,9 @@ package com.isuwang.soa;
         
        /**
        * 
+
+ 我是中文
+
        **/
           
             public void print() throws SoaException{

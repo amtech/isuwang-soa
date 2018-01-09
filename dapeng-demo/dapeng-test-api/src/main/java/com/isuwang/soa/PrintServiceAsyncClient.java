@@ -37,6 +37,9 @@ package com.isuwang.soa;
           
             /**
             * 
+
+ 我是中文
+
             **/
             
               public CompletableFuture<Void> print(long timeout) throws SoaException{

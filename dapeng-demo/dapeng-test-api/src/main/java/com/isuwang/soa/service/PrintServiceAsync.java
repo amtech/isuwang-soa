@@ -17,10 +17,13 @@
         **/
         @Service(name="com.isuwang.soa.service.PrintService",version = "1.0.0")
         @Processor(className = "com.isuwang.soa.PrintServiceAsyncCodec$Processor")
-        public interface PrintServiceAsync {
+        public interface PrintServiceAsync  extends com.isuwang.dapeng.core.definition.AsyncService {
         
             /**
             * 
+
+ 我是中文
+
             **/
             
             
