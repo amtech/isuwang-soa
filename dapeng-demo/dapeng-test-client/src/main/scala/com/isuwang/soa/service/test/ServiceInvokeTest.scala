@@ -45,12 +45,13 @@ object ServiceInvokeTest {
     */
   def main(args: Array[String]): Unit = {
 
-    new PriceServiceClient().insertPrice(new Price().orderId(1).price(1000.0))
-    new com.isuwang.soa.price.scala.PriceServiceClient().insertPrice(com.isuwang.soa.price.scala.domain.Price(2,2000.0))
+//    new PriceServiceClient().insertPrice(new Price().orderId(1).price(1000.0))
+//    new com.isuwang.soa.price.scala.PriceServiceClient().insertPrice(com.isuwang.soa.price.scala.domain.Price(2,2000.0))
     val javaPrices = new PriceServiceAsyncClient().getPrices(5000).get(3000, TimeUnit.MILLISECONDS)
-    assert(javaPrices.size() == 2, " javaPrices size not match")
+    println(s" javaPrices: ${javaPrices}")
+//    assert(javaPrices.size() == 2, " javaPrices size not match")
     new com.isuwang.soa.price.scala.PriceServiceAsyncClient().getPrices(5000).onComplete({
-      case Success(scalaPrices) => assert(scalaPrices.size == 2, " scalaPrices size not match..")
+      case Success(scalaPrices) => println(s" scalaPrices: ${scalaPrices}")
       case Failure(e) => throw e
     })
 
@@ -58,9 +59,9 @@ object ServiceInvokeTest {
       .id(1).orderId(1).cash_credit(1000).cash_debit(100).remark(Optional.of("settle remark")))
     new com.isuwang.soa.settle.scala.SettleServiceClient().createSettle(com.isuwang.soa.settle.scala.domain.Settle(2,2,2000,2000,Option.apply("scala settle remark")))
     val javaSettle = new SettleServiceAsyncClient().getSettleById(1,5000).get(3000, TimeUnit.MILLISECONDS)
-    assert(javaSettle.orderId == 1, " java settle not match")
+    println(s" javaSettle: ${javaSettle}")
     new com.isuwang.soa.settle.scala.SettleServiceAsyncClient().getSettleById(2,5000).onComplete({
-      case Success(scalaSettle) => assert(scalaSettle.orderId == 2, " scalaSettle not match..")
+      case Success(scalaSettle) => println(s"scalaSettle: ${scalaSettle}")
       case Failure(e) => throw e
     })
 
@@ -69,9 +70,9 @@ object ServiceInvokeTest {
 
     new com.isuwang.soa.user.scala.UserServiceClient().createUser(com.isuwang.soa.user.scala.domain.User(2,"userName2","123","123456"))
     val javaUser = new UserServiceAsyncClient().getUserById(1,5000).get(3000, TimeUnit.MILLISECONDS)
-    assert(javaUser.name.equals("userName1"), " javaUser not match")
+    println(s" javaUser: ${javaUser}")
     new com.isuwang.soa.user.scala.UserServiceAsyncClient().getUserById(2,5000).onComplete({
-      case Success(scalaUser) => assert(scalaUser.name.equals("userName2"), " scalaUser not match..")
+      case Success(scalaUser) => println(s" scalaUser: ${scalaUser}")
       case Failure(e) => throw e
     })
 
@@ -80,9 +81,9 @@ object ServiceInvokeTest {
     new com.isuwang.soa.order.scala.OrderServiceClient().createOrder(com.isuwang.soa.order.scala.domain.Order(2,"2",2,2000))
 
     val javaOrder = new OrderServiceAsyncClient().getOrderById(1,5000).get(3000, TimeUnit.MILLISECONDS)
-    assert(javaOrder.order_no.equals("1"), " javaOrder not match")
+    println(s" javaOrder: ${javaOrder}")
     new com.isuwang.soa.order.scala.OrderServiceAsyncClient().getOrderById(2,5000).onComplete({
-      case Success(scalaOrder) => assert(scalaOrder.order_no.equals("2"), " scalaUser not match..")
+      case Success(scalaOrder) => println(s" scalaOrder: ${scalaOrder}")
       case Failure(e) => throw e
     })
 
