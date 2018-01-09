@@ -21,7 +21,7 @@
                             <kind>LIST</kind>
                             <valueType>
 <kind>STRUCT</kind>
-<ref>com.isuwang.dapeng.monitor.api.domain.QPSStat</ref>
+<ref>com.isuwang.soa.monitor.api.domain.QPSStat</ref>
                             </valueType>
                         </dataType>
                         <doc></doc>
@@ -89,7 +89,7 @@
                             <kind>LIST</kind>
                             <valueType>
 <kind>STRUCT</kind>
-<ref>com.isuwang.dapeng.monitor.api.domain.DataSourceStat</ref>
+<ref>com.isuwang.soa.monitor.api.domain.DataSourceStat</ref>
                             </valueType>
                         </dataType>
                         <doc></doc>

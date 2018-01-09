@@ -166,17 +166,14 @@ package com.isuwang.soa;
               }
 
               @Override
-              public print_result apply(I iface, print_args print_args)
+              public print_result apply(I iface, print_args print_args) throws SoaException
               {
 
                 print_result result = new print_result();
 
 
-                try {
+                
                  iface.print();
-                } catch (SoaException e) {
-                e.printStackTrace();
-              }
                 
 
                 return result;
@@ -386,17 +383,14 @@ package com.isuwang.soa;
               }
 
               @Override
-              public printInfo_result apply(I iface, printInfo_args printInfo_args)
+              public printInfo_result apply(I iface, printInfo_args printInfo_args) throws SoaException
               {
 
                 printInfo_result result = new printInfo_result();
 
 
-                try {
+                
                 result.success = iface.printInfo(printInfo_args.info);
-                } catch (SoaException e) {
-                e.printStackTrace();
-              }
                 
 
                 return result;
@@ -602,17 +596,14 @@ package com.isuwang.soa;
               }
 
               @Override
-              public printInfo2_result apply(I iface, printInfo2_args printInfo2_args)
+              public printInfo2_result apply(I iface, printInfo2_args printInfo2_args) throws SoaException
               {
 
                 printInfo2_result result = new printInfo2_result();
 
 
-                try {
+                
                 result.success = iface.printInfo2(printInfo2_args.name);
-                } catch (SoaException e) {
-                e.printStackTrace();
-              }
                 
 
                 return result;
@@ -818,17 +809,14 @@ package com.isuwang.soa;
               }
 
               @Override
-              public printInfo3_result apply(I iface, printInfo3_args printInfo3_args)
+              public printInfo3_result apply(I iface, printInfo3_args printInfo3_args) throws SoaException
               {
 
                 printInfo3_result result = new printInfo3_result();
 
 
-                try {
+                
                 result.success = iface.printInfo3(printInfo3_args.accountType);
-                } catch (SoaException e) {
-                e.printStackTrace();
-              }
                 
 
                 return result;

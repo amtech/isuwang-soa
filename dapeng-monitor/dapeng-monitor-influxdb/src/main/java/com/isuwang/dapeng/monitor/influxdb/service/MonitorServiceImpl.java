@@ -1,10 +1,10 @@
 package com.isuwang.dapeng.monitor.influxdb.service;
 
 import com.isuwang.dapeng.core.SoaException;
-import com.isuwang.dapeng.monitor.api.domain.DataSourceStat;
-import com.isuwang.dapeng.monitor.api.domain.PlatformProcessData;
-import com.isuwang.dapeng.monitor.api.domain.QPSStat;
-import com.isuwang.dapeng.monitor.api.service.MonitorService;
+import com.isuwang.soa.monitor.api.domain.DataSourceStat;
+import com.isuwang.soa.monitor.api.domain.PlatformProcessData;
+import com.isuwang.soa.monitor.api.domain.QPSStat;
+import com.isuwang.soa.monitor.api.service.MonitorService;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.BatchPoints;
@@ -90,7 +90,7 @@ public class MonitorServiceImpl implements MonitorService {
             double value = 0.0;
 
             if (qpsStat.getCallCount() != 0)// value = callcount / period
-                value = new BigDecimal(qpsStat.getCallCount().toString()).divide(new BigDecimal(qpsStat.getPeriod().toString()), BigDecimal.ROUND_DOWN).doubleValue();
+                value = new BigDecimal(qpsStat.getCallCount()).divide(new BigDecimal(qpsStat.getPeriod()), BigDecimal.ROUND_DOWN).doubleValue();
 
             Point point = Point.measurement("qps")
                     .time(qpsStat.getAnalysisTime(), TimeUnit.MILLISECONDS)
@@ -98,8 +98,8 @@ public class MonitorServiceImpl implements MonitorService {
                     .tag("method_name", qpsStat.getMethodName())
                     .tag("version_name", qpsStat.getVersionName())
                     .tag("server_ip", qpsStat.getServerIP())
-                    .tag("server_port", qpsStat.getServerPort().toString())
-                    .tag("period", qpsStat.getPeriod().toString())
+                    .tag("server_port", String.valueOf(qpsStat.getServerPort()))
+                    .tag("period", String.valueOf(qpsStat.getPeriod()))
                     .field("value", value)
                     .build();
 
@@ -118,12 +118,12 @@ public class MonitorServiceImpl implements MonitorService {
 
         for (PlatformProcessData processData : platformProcessDatas) {
             Point point = Point.measurement("platform_process")
-                    .tag("period", processData.getPeriod().toString())
+                    .tag("period", String.valueOf(processData.getPeriod()))
                     .tag("service_name", processData.getServiceName())
                     .tag("method_name", processData.getMethodName())
                     .tag("version_name", processData.getVersionName())
                     .tag("server_ip", processData.getServerIP())
-                    .tag("server_port", processData.getServerPort().toString())
+                    .tag("server_port", String.valueOf(processData.getServerPort()))
                     .time(processData.getAnalysisTime(), TimeUnit.MILLISECONDS)
                     .field("p_mintime", processData.getPMinTime())
                     .field("p_maxtime", processData.getPMaxTime())
@@ -156,9 +156,9 @@ public class MonitorServiceImpl implements MonitorService {
 
         for (DataSourceStat stat : dataSourceStat) {
             Point point = Point.measurement("datasource_stat")
-                    .tag("period", stat.getPeriod().toString())
+                    .tag("period", String.valueOf(stat.getPeriod()))
                     .tag("server_ip", stat.getServerIP())
-                    .tag("server_port", stat.getServerPort().toString())
+                    .tag("server_port", String.valueOf(stat.getServerPort()))
                     .tag("url", stat.getUrl())
                     .tag("user_name", stat.getUserName())
                     .tag("identity", stat.getIdentity())

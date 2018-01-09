@@ -20,7 +20,7 @@ public class PrintServiceImpl implements PrintService {
     }
 
     @Override
-    public String printInfo2(String name){
+    public String printInfo2(String name) throws SoaException {
 
         System.out.println("Receiver String Message : " + name);
         return "hello,"+name;

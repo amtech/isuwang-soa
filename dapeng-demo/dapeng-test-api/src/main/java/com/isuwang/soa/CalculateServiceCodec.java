@@ -246,17 +246,14 @@ package com.isuwang.soa;
               }
 
               @Override
-              public calcualteWordCount_result apply(I iface, calcualteWordCount_args calcualteWordCount_args)
+              public calcualteWordCount_result apply(I iface, calcualteWordCount_args calcualteWordCount_args) throws SoaException
               {
 
                 calcualteWordCount_result result = new calcualteWordCount_result();
 
 
-                try {
+                
                 result.success = iface.calcualteWordCount(calcualteWordCount_args.filename,calcualteWordCount_args.word);
-                } catch (SoaException e) {
-                e.printStackTrace();
-              }
                 
 
                 return result;
@@ -479,17 +476,14 @@ package com.isuwang.soa;
               }
 
               @Override
-              public calcualteWordsCount_result apply(I iface, calcualteWordsCount_args calcualteWordsCount_args)
+              public calcualteWordsCount_result apply(I iface, calcualteWordsCount_args calcualteWordsCount_args) throws SoaException
               {
 
                 calcualteWordsCount_result result = new calcualteWordsCount_result();
 
 
-                try {
+                
                 result.success = iface.calcualteWordsCount(calcualteWordsCount_args.fileName);
-                } catch (SoaException e) {
-                e.printStackTrace();
-              }
                 
 
                 return result;

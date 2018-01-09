@@ -193,17 +193,14 @@ package com.isuwang.soa;
               }
 
               @Override
-              public test_result apply(I iface, test_args test_args)
+              public test_result apply(I iface, test_args test_args) throws SoaException
               {
 
                 test_result result = new test_result();
 
 
-                try {
+                
                 result.success = iface.test();
-                } catch (SoaException e) {
-                e.printStackTrace();
-              }
                 
 
                 return result;

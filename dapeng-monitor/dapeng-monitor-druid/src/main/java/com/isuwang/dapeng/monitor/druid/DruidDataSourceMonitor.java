@@ -1,10 +1,10 @@
 package com.isuwang.dapeng.monitor.druid;
 
 import com.alibaba.druid.stat.DruidStatManagerFacade;
-import com.isuwang.dapeng.core.IPUtils;
-import com.isuwang.dapeng.core.SoaSystemEnvProperties;
-import com.isuwang.dapeng.monitor.api.MonitorServiceClient;
-import com.isuwang.dapeng.monitor.api.domain.DataSourceStat;
+import com.isuwang.dapeng.util.IPUtils;
+import com.isuwang.dapeng.util.SoaSystemEnvProperties;
+import com.isuwang.soa.monitor.api.MonitorServiceClient;
+import com.isuwang.soa.monitor.api.domain.DataSourceStat;
 import com.isuwang.org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

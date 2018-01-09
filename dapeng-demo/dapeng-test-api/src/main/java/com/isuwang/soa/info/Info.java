@@ -9,6 +9,9 @@ package com.isuwang.soa.info;
  *  @generated
 
         *
+
+ 中文测试
+
         **/
         public class Info{
         

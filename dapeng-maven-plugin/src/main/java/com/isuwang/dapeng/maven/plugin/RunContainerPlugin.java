@@ -60,7 +60,7 @@ public class RunContainerPlugin extends SoaAbstractMojo {
 
                 while (iterator.hasNext()) {
                     URL url = iterator.next();
-                    if (removeTwitterAndScalaDependency(iterator,url)) continue;
+                    if (removeTwitterDependency(iterator,url)) continue;
                     if (removeContainerAndBootstrap(iterator, url)) continue;
                 }
                 List<URL> platformUrls = new ArrayList<>(Arrays.asList(urls));
@@ -115,7 +115,7 @@ public class RunContainerPlugin extends SoaAbstractMojo {
         return false;
     }
 
-    private boolean removeTwitterAndScalaDependency(Iterator<URL> iterator, URL url){
+    private boolean removeTwitterDependency(Iterator<URL> iterator, URL url){
         if(url.getFile().matches("^.*/twitter.*\\.jar$")) {
             iterator.remove();
             return true;
