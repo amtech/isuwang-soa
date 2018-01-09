@@ -1,7 +1,5 @@
 package com.isuwang.dapeng.impl.plugins.netty;
 
-
-import com.isuwang.dapeng.client.netty.TSoaTransport;
 import com.isuwang.dapeng.core.*;
 import com.isuwang.dapeng.core.enums.CodecProtocol;
 import com.isuwang.org.apache.thrift.TException;
