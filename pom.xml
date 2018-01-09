@@ -44,7 +44,7 @@
         <module>dapeng-code-generator</module>
         <!--<module>dapeng-bootstrap</module>-->
         <module>dapeng-api-doc</module>
-        <!--<module>dapeng-monitor</module>-->
+        <module>dapeng-monitor</module>
         <module>dapeng-route</module>
         <!--<module>dapeng-tools</module>-->
         <module>dapeng-message</module>

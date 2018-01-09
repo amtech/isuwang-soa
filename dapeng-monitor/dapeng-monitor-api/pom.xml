@@ -14,7 +14,7 @@
     <dependencies>
         <dependency>
             <groupId>com.isuwang</groupId>
-            <artifactId>dapeng-remoting-api</artifactId>
+            <artifactId>dapeng-core</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
