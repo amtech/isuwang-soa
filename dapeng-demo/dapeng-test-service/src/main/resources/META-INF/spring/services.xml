@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:soa="http://soa-springtag.isuwang.com/schema/service"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://soa-springtag.isuwang.com/schema/service
+        http://soa-springtag.isuwang.com/schema/service/service.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="com.isuwang.soa"/>
+
+
+    <bean id="priceService" class="com.isuwang.soa.service.PriceServiceAsyncImpl"></bean>
+    <soa:service ref="priceService" />
+
+    <bean id="userService" class="com.isuwang.soa.service.UserServiceSyncImpl"></bean>
+    <soa:service ref="userService" />
+
+    <bean id="orderService" class="com.isuwang.soa.scala.service.OrderServiecSyncImpl"></bean>
+    <soa:service ref="orderService" />
+
+    <bean id="settleService" class="com.isuwang.soa.scala.service.SettleServiceAsyncImpl"></bean>
+    <soa:service ref="settleService" />
+
+</beans>

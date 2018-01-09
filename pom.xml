@@ -53,6 +53,8 @@
         <module>dapeng-utils</module>
         <module>dapeng-client-netty</module>
         <module>dapeng-transaction</module>
+        <module>dapeng-json</module>
+        <module>dapeng-demo</module>
     </modules>
 
     <properties>
