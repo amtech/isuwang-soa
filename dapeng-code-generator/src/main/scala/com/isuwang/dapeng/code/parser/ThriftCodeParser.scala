@@ -37,6 +37,30 @@ class ThriftCodeParser(var language: String) {
   private val mapEnumCache = new util.HashMap[String, metadata.TEnum]()
 
   /**
+    * like
+    * val namespace = com.isuwang.soa.service
+    * toScalaNamespace(namespace) => com.isuwang.soa.scala.service
+    * toScalaNamespace(namespace, 1) => com.isuwang.scala.soa.service
+    *
+    * @param namespace
+    * @param lastIndexCount
+    * @return
+    */
+  private def toScalaNamespace(namespace: String, lastIndexCount: Int = 0) = {
+    if (namespace != null && namespace.length > 0) {
+      var int = lastIndexCount
+      var beginStr = namespace
+      var endStr = ""
+      while ((int >= 0) ) {
+        endStr = s"${beginStr.substring(beginStr.lastIndexOf("."))}${endStr}"
+        beginStr = beginStr.substring(0,beginStr.lastIndexOf("."))
+        int -= 1
+      }
+      s"${beginStr}.scala${endStr}"
+    } else namespace
+  }
+
+  /**
     * 生成文档
     *
     * @param resource 源文件
@@ -49,9 +73,20 @@ class ThriftCodeParser(var language: String) {
     val br = new BufferedReader(new InputStreamReader(new FileInputStream(resource), Charsets.UTF_8))
     val txt = CharStreams.toString(br)
 
+    //如果是scala，需要重写namespace
+    val finalTxt = if (language.equals("scala")) {
+      // getNamespaceLine => "namespace java xxxxxx.xx.xx"
+      val namespaceLine = txt.split("\n")(0)
+      // getNamespace => xx.xx.xx
+      val namespace = namespaceLine.split(" ").reverse.head
+      val scalaNamespace = toScalaNamespace(namespace)
+
+      txt.replace(namespace,scalaNamespace)
+    } else txt
+
     val importer = Importer(Seq(homeDir))
     val parser = new ThriftParser(importer, true)
-    val doc = parser.parse(txt, parser.document)
+    val doc = parser.parse(finalTxt, parser.document)
 
     try {
       TypeResolver()(doc).document
