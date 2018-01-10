@@ -1,13 +1,13 @@
 package com.isuwang.dapeng.impl.filters;
 
 
-import com.isuwang.dapeng.client.netty.TSoaTransport;
 import com.isuwang.dapeng.core.BeanSerializer;
 import com.isuwang.dapeng.core.TransactionContext;
 import com.isuwang.dapeng.core.filter.FilterChain;
 import com.isuwang.dapeng.core.filter.FilterContext;
 import com.isuwang.dapeng.core.filter.Filter;
 import com.isuwang.dapeng.impl.plugins.netty.SoaMessageProcessor;
+import com.isuwang.dapeng.impl.plugins.netty.TSoaTransport;
 import com.isuwang.org.apache.thrift.TException;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
