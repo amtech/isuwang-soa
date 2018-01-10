@@ -54,6 +54,9 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
                 } catch (TException e) {
                     LOGGER.error(e.getMessage(), e);
                     writeErrorMessage(ctx, context, new SoaException(SoaBaseCode.UnKnown, e.getMessage()));
+                    if (reqMessage.refCnt()>0){
+                        reqMessage.release();
+                    }
                 }
             });
         } catch (TException ex) {
@@ -61,6 +64,9 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
             if (context.getHeader() == null)
                 context.setHeader(new SoaHeader());
             writeErrorMessage(ctx, context, new SoaException(SoaBaseCode.UnKnown, "读请求异常"));
+            if(reqMessage.refCnt()>0){
+                reqMessage.release();
+            }
         }
 
     }
@@ -190,6 +196,9 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
             LOGGER.info("{} {} {} response header:{} body:{null}", soaHeader.getServiceName(), soaHeader.getVersionName(), soaHeader.getMethodName(), soaHeader.toString());
         } catch (Throwable e1) {
             LOGGER.error(e1.getMessage(), e1);
+            if (outputBuf.refCnt()>0){
+                outputBuf.release();
+            }
         }
 
     }
