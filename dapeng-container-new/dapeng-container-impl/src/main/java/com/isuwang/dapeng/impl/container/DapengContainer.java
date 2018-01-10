@@ -34,6 +34,13 @@ public class DapengContainer implements Container {
     private Map<ProcessorKey, SoaServiceDefinition<?>> processors = new ConcurrentHashMap<>();
     private Map<ProcessorKey,Application>  applicationMap = new ConcurrentHashMap<>();
     private final List<ClassLoader> applicationCls;
+    private final Executor poolExecutor = Executors.newFixedThreadPool(SoaSystemEnvProperties.SOA_CORE_POOL_SIZE);
+    private final Executor unpoolExecutor = new Executor() {
+        @Override
+        public void execute(Runnable command) {
+            command.run();
+        }
+    };
 
     private final static CountDownLatch shutdownSignal = new CountDownLatch(1);
 
@@ -120,15 +127,10 @@ public class DapengContainer implements Container {
     @Override
     public Executor getDispatcher() {
         if(!SoaSystemEnvProperties.SOA_CONTAINER_USETHREADPOOL){
-            return new Executor() {
-                @Override
-                public void execute(Runnable command) {
-                    command.run();
-                }
-            };
+            return unpoolExecutor;
         }
         else {
-            return Executors.newFixedThreadPool(SoaSystemEnvProperties.SOA_CORE_POOL_SIZE);
+            return poolExecutor;
         }
     }
 
