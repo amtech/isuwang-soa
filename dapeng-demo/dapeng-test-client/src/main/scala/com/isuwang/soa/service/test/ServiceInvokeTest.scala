@@ -45,8 +45,8 @@ object ServiceInvokeTest {
     */
   def main(args: Array[String]): Unit = {
 
-//    new PriceServiceClient().insertPrice(new Price().orderId(1).price(1000.0))
-//    new com.isuwang.soa.price.scala.PriceServiceClient().insertPrice(com.isuwang.soa.price.scala.domain.Price(2,2000.0))
+    new PriceServiceClient().insertPrice(new Price().orderId(1).price(1000.0))
+    new com.isuwang.soa.price.scala.PriceServiceClient().insertPrice(com.isuwang.soa.price.scala.domain.Price(2,2000.0))
     val javaPrices = new PriceServiceAsyncClient().getPrices(5000).get(3000, TimeUnit.MILLISECONDS)
     println(s" javaPrices: ${javaPrices}")
 //    assert(javaPrices.size() == 2, " javaPrices size not match")
