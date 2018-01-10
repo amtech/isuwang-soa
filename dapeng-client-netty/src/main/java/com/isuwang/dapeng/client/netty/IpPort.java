@@ -37,6 +37,6 @@ public class IpPort {
 
     @Override
     public int hashCode() {
-        return this.port+this.ip.hashCode();
+        return (this.port+this.ip).hashCode();
     }
 }
