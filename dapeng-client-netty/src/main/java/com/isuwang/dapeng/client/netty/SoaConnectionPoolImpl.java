@@ -22,6 +22,11 @@ public class SoaConnectionPoolImpl implements SoaConnectionPool {
     private Map<IpPort, SubPool> subPools = new ConcurrentHashMap<>();
     private ZkClientAgent zkAgent = new ZkClientAgentImpl();
 
+    public SoaConnectionPoolImpl(){
+        IdleConnectionManager connectionManager = new IdleConnectionManager();
+        connectionManager.start();
+    }
+
     //TODO
     List<WeakReference<ClientInfo>> clientInfos;
 
