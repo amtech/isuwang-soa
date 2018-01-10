@@ -2,7 +2,6 @@ package com.isuwang.dapeng.impl.plugins.netty;
 
 
 import com.isuwang.dapeng.api.*;
-import com.isuwang.dapeng.client.netty.TSoaTransport;
 import com.isuwang.dapeng.core.*;
 import com.isuwang.dapeng.core.definition.SoaFunctionDefinition;
 import com.isuwang.dapeng.core.definition.SoaServiceDefinition;
