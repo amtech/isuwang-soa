@@ -5,7 +5,7 @@ package com.isuwang.soa.order;
       import java.util.concurrent.CompletableFuture;
       import java.util.concurrent.Future;
       import java.util.ServiceLoader;
-      import com.isuwang.soa.order.OrderServiceCodec.*;
+      import com.isuwang.soa.order.OrderServiceAsyncCodec.*;
       import com.isuwang.soa.order.service.OrderServiceAsync;
 
       /**

@@ -5,7 +5,7 @@ package com.isuwang.soa.user;
       import java.util.concurrent.CompletableFuture;
       import java.util.concurrent.Future;
       import java.util.ServiceLoader;
-      import com.isuwang.soa.user.UserServiceCodec.*;
+      import com.isuwang.soa.user.UserServiceAsyncCodec.*;
       import com.isuwang.soa.user.service.UserServiceAsync;
 
       /**

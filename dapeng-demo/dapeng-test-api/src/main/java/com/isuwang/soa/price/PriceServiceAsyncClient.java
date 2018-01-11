@@ -5,7 +5,7 @@ package com.isuwang.soa.price;
       import java.util.concurrent.CompletableFuture;
       import java.util.concurrent.Future;
       import java.util.ServiceLoader;
-      import com.isuwang.soa.price.PriceServiceCodec.*;
+      import com.isuwang.soa.price.PriceServiceAsyncCodec.*;
       import com.isuwang.soa.price.service.PriceServiceAsync;
 
       /**
