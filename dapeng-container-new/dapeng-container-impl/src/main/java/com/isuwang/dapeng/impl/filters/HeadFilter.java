@@ -3,9 +3,9 @@ package com.isuwang.dapeng.impl.filters;
 
 import com.isuwang.dapeng.core.BeanSerializer;
 import com.isuwang.dapeng.core.TransactionContext;
+import com.isuwang.dapeng.core.filter.Filter;
 import com.isuwang.dapeng.core.filter.FilterChain;
 import com.isuwang.dapeng.core.filter.FilterContext;
-import com.isuwang.dapeng.core.filter.Filter;
 import com.isuwang.dapeng.impl.plugins.netty.SoaMessageProcessor;
 import com.isuwang.dapeng.impl.plugins.netty.TSoaTransport;
 import com.isuwang.org.apache.thrift.TException;
@@ -39,12 +39,14 @@ public class HeadFilter implements Filter {
             TransactionContext context = (TransactionContext) ctx.getAttach("context");
             BeanSerializer serializer = (BeanSerializer) ctx.getAttach("respSerializer");
             Object result = ctx.getAttach("result");
+            boolean isOldVersion = (boolean) ctx.getAttach("isOldVersion");
 
             if(channelHandlerContext!=null) {
                 outputBuf = channelHandlerContext.alloc().buffer(8192);  // TODO 8192?
                 TSoaTransport transport = new TSoaTransport(outputBuf);
 
                 SoaMessageProcessor builder = new SoaMessageProcessor(transport);
+                builder.setOldVersion(isOldVersion);
                 builder.writeHeader(context);
                 if(serializer != null && result != null) {
                     builder.writeBody(serializer, result);

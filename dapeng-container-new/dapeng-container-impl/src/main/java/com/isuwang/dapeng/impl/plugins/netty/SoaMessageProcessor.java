@@ -3,10 +3,7 @@ package com.isuwang.dapeng.impl.plugins.netty;
 import com.isuwang.dapeng.core.*;
 import com.isuwang.dapeng.core.enums.CodecProtocol;
 import com.isuwang.org.apache.thrift.TException;
-import com.isuwang.org.apache.thrift.protocol.TBinaryProtocol;
-import com.isuwang.org.apache.thrift.protocol.TCompactProtocol;
-import com.isuwang.org.apache.thrift.protocol.TJSONProtocol;
-import com.isuwang.org.apache.thrift.protocol.TProtocol;
+import com.isuwang.org.apache.thrift.protocol.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,12 +17,23 @@ public class SoaMessageProcessor {
     private final byte STX = 0x02;
     private final byte ETX = 0x03;
     private final byte VERSION = 1;
+    private final String OLD_VERSION = "1.0.0";
 
     private TProtocol headerProtocol;
     private TProtocol contentProtocol;
 
+    private boolean oldVersion = false;
+
 
     public TSoaTransport transport;
+
+    public boolean isOldVersion() {
+        return oldVersion;
+    }
+
+    public void setOldVersion(boolean oldVersion) {
+        this.oldVersion = oldVersion;
+    }
 
     public TProtocol getHeaderProtocol() {
         return headerProtocol;
@@ -60,7 +68,11 @@ public class SoaMessageProcessor {
         headerProtocol = new TBinaryProtocol(transport);
 
         headerProtocol.writeByte(STX);
-        headerProtocol.writeByte(VERSION);
+        if (isOldVersion()) {
+            headerProtocol.writeString(OLD_VERSION);
+        } else{
+            headerProtocol.writeByte(VERSION);
+        }
         headerProtocol.writeByte(context.getCodecProtocol().getCode());
         headerProtocol.writeI32(context.getSeqid());
 
@@ -79,7 +91,12 @@ public class SoaMessageProcessor {
                 break;
         }
 
-        new SoaHeaderSerializer().write(context.getHeader(), headerProtocol);
+        if (isOldVersion()) {
+            new SoaHeaderSerializer().write(context.getHeader(), contentProtocol);
+            contentProtocol.writeMessageBegin(new TMessage(context.getHeader().getMethodName(),TMessageType.CALL,context.getSeqid()));
+        }else{
+            new SoaHeaderSerializer().write(context.getHeader(), headerProtocol);
+        }
     }
 
     public <RESP>void writeBody(BeanSerializer<RESP> respSerializer, RESP result ) throws TException {
@@ -101,8 +118,14 @@ public class SoaMessageProcessor {
 
         // version
         byte version = headerProtocol.readByte();
-        if (version!=VERSION) {
-            throw new TException("通讯协议不正确(协议版本号)");
+        if (version != VERSION) {
+            getTransport().flushBack(1);
+            String oldVersion = headerProtocol.readString();
+            if (!OLD_VERSION.equals(oldVersion)) {
+                throw new TException("通讯协议不正确(协议版本号)");
+            } else {
+                this.setOldVersion(true);
+            }
         }
 
         byte protocol = headerProtocol.readByte();
@@ -125,9 +148,17 @@ public class SoaMessageProcessor {
         }
 
         context.setSeqid(headerProtocol.readI32());
-        SoaHeader soaHeader =new SoaHeaderSerializer().read( headerProtocol);
+        SoaHeader soaHeader ;
+
+        if (isOldVersion()) {
+            soaHeader = new SoaHeaderSerializer().read( contentProtocol);
+            contentProtocol.readMessageBegin();
+        }else{
+            soaHeader = new SoaHeaderSerializer().read( headerProtocol);
+        }
         context.setHeader(soaHeader);
         return soaHeader;
+
     }
 
     public void writeMessageEnd() throws TException {

@@ -80,4 +80,12 @@ public class TSoaTransport extends TTransport {
         byteBuf.writerIndex(beginIndex).writeInt(length);
         byteBuf.writerIndex(endIndex);
     }
+
+    @Override
+    public void flushBack(int len) throws TTransportException {
+        int endIndex = byteBuf.readerIndex();
+        byteBuf.readerIndex(endIndex - len);
+    }
+
+
 }

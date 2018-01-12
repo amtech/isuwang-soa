@@ -38,6 +38,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         ByteBuf reqMessage = (ByteBuf) msg;
+
         TSoaTransport inputSoaTransport = new TSoaTransport(reqMessage);
         SoaMessageProcessor parser = new SoaMessageProcessor(inputSoaTransport);
         final TransactionContext context = TransactionContext.Factory.createNewInstance();
@@ -50,7 +51,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
 
             container.getDispatcher().execute(() -> {
                 try {
-                    processRequest(ctx, parser.getContentProtocol(), processor, reqMessage, context);
+                    processRequest(ctx, parser.getContentProtocol(), processor, reqMessage, context,parser.isOldVersion());
                 } catch (TException e) {
                     LOGGER.error(e.getMessage(), e);
                     writeErrorMessage(ctx, context, new SoaException(SoaBaseCode.UnKnown, e.getMessage()));
@@ -79,7 +80,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     private <I, REQ, RESP> void processRequest(ChannelHandlerContext channelHandlerContext, TProtocol contentProtocol, SoaServiceDefinition<I> serviceDef,
-                                               ByteBuf reqMessage, TransactionContext context) throws TException {
+                                               ByteBuf reqMessage, TransactionContext context,boolean isOldVersion) throws TException {
 
         SoaHeader soaHeader = context.getHeader();
         Application application = container.getApplication(new ProcessorKey(soaHeader.getServiceName(), soaHeader.getVersionName()));
@@ -114,13 +115,13 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
                         SoaFunctionDefinition.Async asyncFunc = (SoaFunctionDefinition.Async) soaFunction;
                         CompletableFuture<RESP> future = (CompletableFuture<RESP>) asyncFunc.apply(iface, args);
                         future.whenComplete((realResult, ex) -> {
-                            processResult(channelHandlerContext, soaFunction, context, realResult, application, ctx);
+                            processResult(channelHandlerContext, soaFunction, context, realResult, application, ctx,isOldVersion);
                             onExit(ctx, getPrevChain(ctx));
                         });
                     } else {
                         SoaFunctionDefinition.Sync syncFunction = (SoaFunctionDefinition.Sync) soaFunction;
                         RESP result = (RESP) syncFunction.apply(iface, args);
-                        processResult(channelHandlerContext, soaFunction, context, result, application, ctx);
+                        processResult(channelHandlerContext, soaFunction, context, result, application, ctx,isOldVersion);
                         onExit(ctx, getPrevChain(ctx));
                     }
                 } catch (Exception e) {
@@ -146,7 +147,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
         sharedChain.onEntry(filterContext);
     }
 
-    private void processResult(ChannelHandlerContext channelHandlerContext, SoaFunctionDefinition soaFunction, TransactionContext context, Object result, Application application, FilterContext filterContext) {
+    private void processResult(ChannelHandlerContext channelHandlerContext, SoaFunctionDefinition soaFunction, TransactionContext context, Object result, Application application, FilterContext filterContext,boolean isOldVersion) {
         SoaHeader soaHeader = context.getHeader();
         soaHeader.setRespCode(Optional.of("0000"));
         soaHeader.setRespMessage(Optional.of("ok"));
@@ -158,6 +159,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
             filterContext.setAttach("context", context);
             filterContext.setAttach("respSerializer", soaFunction.respSerializer);
             filterContext.setAttach("result", result);
+            filterContext.setAttach("isOldVersion",isOldVersion);
 
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);

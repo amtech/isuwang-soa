@@ -160,4 +160,7 @@ public abstract class TTransport implements Closeable {
    * @param len
    */
   public void consumeBuffer(int len) {}
+
+
+  public void flushBack(int len) throws TTransportException {}
 }
