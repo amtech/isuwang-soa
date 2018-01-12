@@ -20,6 +20,7 @@ public class SoaMessageBuilder<T> {
     public final byte STX = 0x02;
     public final byte ETX = 0x03;
     public final byte VERSION = 1;
+    public final String OLD_VERSION = "1.0.0";
 
     private SoaHeader header;
     private T body;
@@ -28,6 +29,8 @@ public class SoaMessageBuilder<T> {
     private int seqid;
 
     private ByteBuf buffer;
+
+    private boolean isOldVersion;
 
 
     public SoaMessageBuilder<T> header(SoaHeader header) {
@@ -89,6 +92,11 @@ public class SoaMessageBuilder<T> {
         return this.buffer;
     }
 
+    public boolean isOldVersion() {
+        return isOldVersion;
+    }
 
-
+    public void setOldVersion(boolean oldVersion) {
+        isOldVersion = oldVersion;
+    }
 }
