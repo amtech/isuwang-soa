@@ -16,14 +16,14 @@ public class SubPool {
 
     private SoaConnection connection;
 
-    public SubPool(String ip, int port ) {
+    public SubPool(String ip, int port) {
         this.ip = ip;
         this.port = port;
     }
 
     public SoaConnection getConnection() {
-        if (connection == null){
-            connection = new SoaConnectionImpl(ip,port);
+        if (connection == null) {
+            connection = new SoaConnectionImpl(ip, port);
         }
         return this.connection;
     }

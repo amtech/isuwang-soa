@@ -24,7 +24,7 @@ public class IpPort {
         } else if (this == obj) {
             return true;
         } else if (obj instanceof IpPort) {
-            IpPort ipPort = (IpPort)obj;
+            IpPort ipPort = (IpPort) obj;
             if (ip.equals(ipPort.ip) && port == ipPort.port) {
                 return true;
             } else {
@@ -37,6 +37,6 @@ public class IpPort {
 
     @Override
     public int hashCode() {
-        return (this.port+this.ip).hashCode();
+        return (this.port + this.ip).hashCode();
     }
 }
