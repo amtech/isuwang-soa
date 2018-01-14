@@ -125,7 +125,7 @@ import com.isuwang.dapeng.core.*;
       public void validate(uploadQPSStat_args bean) throws TException{
       
               if(bean.getQpsStats() == null)
-              throw new SoaException(SoaBaseCode.NotNull, "qpsStats字段不允许为空");
+              throw new SoaException(SoaCode.NotNull, "qpsStats字段不允许为空");
             
     }
     
@@ -324,7 +324,7 @@ import com.isuwang.dapeng.core.*;
       public void validate(uploadPlatformProcessData_args bean) throws TException{
       
               if(bean.getPlatformProcessDatas() == null)
-              throw new SoaException(SoaBaseCode.NotNull, "platformProcessDatas字段不允许为空");
+              throw new SoaException(SoaCode.NotNull, "platformProcessDatas字段不允许为空");
             
     }
     
@@ -523,7 +523,7 @@ import com.isuwang.dapeng.core.*;
       public void validate(uploadDataSourceStat_args bean) throws TException{
       
               if(bean.getDataSourceStat() == null)
-              throw new SoaException(SoaBaseCode.NotNull, "dataSourceStat字段不允许为空");
+              throw new SoaException(SoaCode.NotNull, "dataSourceStat字段不允许为空");
             
     }
     
@@ -745,7 +745,7 @@ import com.isuwang.dapeng.core.*;
           public void validate(getServiceMetadata_result bean) throws TException {
 
             if (bean.getSuccess() == null)
-            throw new SoaException(SoaBaseCode.NotNull, "success字段不允许为空");
+            throw new SoaException(SoaCode.NotNull, "success字段不允许为空");
           }
 
           @Override

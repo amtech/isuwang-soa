@@ -81,7 +81,7 @@ package com.isuwang.soa.price.scala
       override def validate(bean: insertPrice_args): Unit = {
       
               if(bean.price == null)
-              throw new SoaException(SoaBaseCode.NotNull, "price字段不允许为空")
+              throw new SoaException(SoaCode.NotNull, "price字段不允许为空")
             
                 if(bean.price != null)
                 new com.isuwang.soa.price.scala.domain.serializer.PriceSerializer().validate(bean.price)
@@ -280,7 +280,7 @@ package com.isuwang.soa.price.scala
       override def validate(bean: getPrices_result): Unit = {
       
               if(bean.success == null)
-              throw new SoaException(SoaBaseCode.NotNull, "success字段不允许为空")
+              throw new SoaException(SoaCode.NotNull, "success字段不允许为空")
             
     }
     
@@ -389,7 +389,7 @@ package com.isuwang.soa.price.scala
           @throws[TException]
           override def validate(bean: getServiceMetadata_result): Unit = {
             if (bean.success == null)
-            throw new SoaException(SoaBaseCode.NotNull, "success字段不允许为空")
+            throw new SoaException(SoaCode.NotNull, "success字段不允许为空")
           }
 
           override def toString(bean: getServiceMetadata_result): String = if (bean == null) "null" else bean.toString

@@ -1,7 +1,7 @@
  package com.isuwang.soa.monitor.api.domain.serializer;
 
  import com.isuwang.dapeng.core.BeanSerializer;
- import com.isuwang.dapeng.core.SoaBaseCode;
+ import com.isuwang.dapeng.core.SoaCode;
  import com.isuwang.dapeng.core.SoaException;
  import com.isuwang.org.apache.thrift.TException;
  import com.isuwang.org.apache.thrift.protocol.*;
@@ -175,16 +175,16 @@
       public void validate(QPSStat bean) throws TException{
       
               if(bean.getServerIP() == null)
-              throw new SoaException(SoaBaseCode.NotNull, "serverIP字段不允许为空");
+              throw new SoaException(SoaCode.NotNull, "serverIP字段不允许为空");
             
               if(bean.getServiceName() == null)
-              throw new SoaException(SoaBaseCode.NotNull, "serviceName字段不允许为空");
+              throw new SoaException(SoaCode.NotNull, "serviceName字段不允许为空");
             
               if(bean.getMethodName() == null)
-              throw new SoaException(SoaBaseCode.NotNull, "methodName字段不允许为空");
+              throw new SoaException(SoaCode.NotNull, "methodName字段不允许为空");
             
               if(bean.getVersionName() == null)
-              throw new SoaException(SoaBaseCode.NotNull, "versionName字段不允许为空");
+              throw new SoaException(SoaCode.NotNull, "versionName字段不允许为空");
             
     }
     

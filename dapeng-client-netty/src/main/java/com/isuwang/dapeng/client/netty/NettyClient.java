@@ -1,6 +1,6 @@
 package com.isuwang.dapeng.client.netty;
 
-import com.isuwang.dapeng.core.SoaBaseCode;
+import com.isuwang.dapeng.core.SoaCode;
 import com.isuwang.dapeng.core.SoaException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -17,8 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -83,7 +81,7 @@ public class NettyClient {
             while (fwt != null && fwt.expired < now) {
                 CompletableFuture future = fwt.future;
                 if (future.isDone() == false) {
-                    future.completeExceptionally(new SoaException(SoaBaseCode.TimeOut));
+                    future.completeExceptionally(new SoaException(SoaCode.TimeOut));
                 }
 
                 futuresCachesWithTimeout.remove();
@@ -127,7 +125,7 @@ public class NettyClient {
             ByteBuf respByteBuf = future.get(30000, TimeUnit.MILLISECONDS);
             return respByteBuf;
         } catch (Exception e) {
-            throw new SoaException(SoaBaseCode.UnKnown, e.getMessage());
+            throw new SoaException(SoaCode.UnKnown, e.getMessage());
         } finally {
             RequestQueue.remove(seqid);
         }

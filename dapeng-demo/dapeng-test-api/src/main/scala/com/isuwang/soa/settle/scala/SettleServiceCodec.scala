@@ -81,7 +81,7 @@ package com.isuwang.soa.settle.scala
       override def validate(bean: createSettle_args): Unit = {
       
               if(bean.settle == null)
-              throw new SoaException(SoaBaseCode.NotNull, "settle字段不允许为空")
+              throw new SoaException(SoaCode.NotNull, "settle字段不允许为空")
             
                 if(bean.settle != null)
                 new com.isuwang.soa.settle.scala.domain.serializer.SettleSerializer().validate(bean.settle)
@@ -285,7 +285,7 @@ package com.isuwang.soa.settle.scala
       override def validate(bean: getSettleById_result): Unit = {
       
               if(bean.success == null)
-              throw new SoaException(SoaBaseCode.NotNull, "success字段不允许为空")
+              throw new SoaException(SoaCode.NotNull, "success字段不允许为空")
             
                 if(bean.success != null)
                 new com.isuwang.soa.settle.scala.domain.serializer.SettleSerializer().validate(bean.success)
@@ -397,7 +397,7 @@ package com.isuwang.soa.settle.scala
           @throws[TException]
           override def validate(bean: getServiceMetadata_result): Unit = {
             if (bean.success == null)
-            throw new SoaException(SoaBaseCode.NotNull, "success字段不允许为空")
+            throw new SoaException(SoaCode.NotNull, "success字段不允许为空")
           }
 
           override def toString(bean: getServiceMetadata_result): String = if (bean == null) "null" else bean.toString

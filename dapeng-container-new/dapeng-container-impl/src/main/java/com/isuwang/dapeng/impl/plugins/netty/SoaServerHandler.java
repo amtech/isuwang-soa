@@ -53,7 +53,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
                     processRequest(ctx, parser.getContentProtocol(), processor, reqMessage, context);
                 } catch (TException e) {
                     LOGGER.error(e.getMessage(), e);
-                    writeErrorMessage(ctx, context, new SoaException(SoaBaseCode.UnKnown, e.getMessage()));
+                    writeErrorMessage(ctx, context, new SoaException(SoaCode.UnKnown, e.getMessage()));
                 }
             });
         } catch (TException ex) {
@@ -65,7 +65,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
 
             if (context.getHeader() == null)
                 context.setHeader(new SoaHeader());
-            writeErrorMessage(ctx, context, new SoaException(SoaBaseCode.UnKnown, "读请求异常"));
+            writeErrorMessage(ctx, context, new SoaException(SoaCode.UnKnown, "读请求异常"));
 
         }
 
@@ -119,7 +119,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
                         }
                     } catch (Exception e) {
                         LOGGER.error(e.getMessage(), e);
-                        writeErrorMessage(channelHandlerContext, context, new SoaException(SoaBaseCode.UnKnown, e.getMessage()));
+                        writeErrorMessage(channelHandlerContext, context, new SoaException(SoaCode.UnKnown, e.getMessage()));
                     }
                 }
 
@@ -158,7 +158,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
 
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            writeErrorMessage(channelHandlerContext, context, filterContext, new SoaException(SoaBaseCode.UnKnown, e.getMessage()));
+            writeErrorMessage(channelHandlerContext, context, filterContext, new SoaException(SoaCode.UnKnown, e.getMessage()));
         } finally {
             TransactionContext.Factory.removeCurrentInstance();
         }

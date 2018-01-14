@@ -81,7 +81,7 @@ package com.isuwang.soa.order.scala
       override def validate(bean: createOrder_args): Unit = {
       
               if(bean.order == null)
-              throw new SoaException(SoaBaseCode.NotNull, "order字段不允许为空")
+              throw new SoaException(SoaCode.NotNull, "order字段不允许为空")
             
                 if(bean.order != null)
                 new com.isuwang.soa.order.scala.domain.serializer.OrderSerializer().validate(bean.order)
@@ -285,7 +285,7 @@ package com.isuwang.soa.order.scala
       override def validate(bean: getOrderById_result): Unit = {
       
               if(bean.success == null)
-              throw new SoaException(SoaBaseCode.NotNull, "success字段不允许为空")
+              throw new SoaException(SoaCode.NotNull, "success字段不允许为空")
             
                 if(bean.success != null)
                 new com.isuwang.soa.order.scala.domain.serializer.OrderSerializer().validate(bean.success)
@@ -397,7 +397,7 @@ package com.isuwang.soa.order.scala
           @throws[TException]
           override def validate(bean: getServiceMetadata_result): Unit = {
             if (bean.success == null)
-            throw new SoaException(SoaBaseCode.NotNull, "success字段不允许为空")
+            throw new SoaException(SoaCode.NotNull, "success字段不允许为空")
           }
 
           override def toString(bean: getServiceMetadata_result): String = if (bean == null) "null" else bean.toString

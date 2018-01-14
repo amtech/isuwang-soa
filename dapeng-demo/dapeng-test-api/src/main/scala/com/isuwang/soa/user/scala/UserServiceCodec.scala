@@ -81,7 +81,7 @@ package com.isuwang.soa.user.scala
       override def validate(bean: createUser_args): Unit = {
       
               if(bean.user == null)
-              throw new SoaException(SoaBaseCode.NotNull, "user字段不允许为空")
+              throw new SoaException(SoaCode.NotNull, "user字段不允许为空")
             
                 if(bean.user != null)
                 new com.isuwang.soa.user.scala.domain.serializer.UserSerializer().validate(bean.user)
@@ -285,7 +285,7 @@ package com.isuwang.soa.user.scala
       override def validate(bean: getUserById_result): Unit = {
       
               if(bean.success == null)
-              throw new SoaException(SoaBaseCode.NotNull, "success字段不允许为空")
+              throw new SoaException(SoaCode.NotNull, "success字段不允许为空")
             
                 if(bean.success != null)
                 new com.isuwang.soa.user.scala.domain.serializer.UserSerializer().validate(bean.success)
@@ -397,7 +397,7 @@ package com.isuwang.soa.user.scala
           @throws[TException]
           override def validate(bean: getServiceMetadata_result): Unit = {
             if (bean.success == null)
-            throw new SoaException(SoaBaseCode.NotNull, "success字段不允许为空")
+            throw new SoaException(SoaCode.NotNull, "success字段不允许为空")
           }
 
           override def toString(bean: getServiceMetadata_result): String = if (bean == null) "null" else bean.toString

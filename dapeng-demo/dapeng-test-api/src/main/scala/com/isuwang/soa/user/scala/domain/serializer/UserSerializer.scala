@@ -112,13 +112,13 @@
       override def validate(bean: com.isuwang.soa.user.scala.domain.User): Unit = {
       
               if(bean.name == null)
-              throw new SoaException(SoaBaseCode.NotNull, "name字段不允许为空")
+              throw new SoaException(SoaCode.NotNull, "name字段不允许为空")
             
               if(bean.phoneNumber == null)
-              throw new SoaException(SoaBaseCode.NotNull, "phoneNumber字段不允许为空")
+              throw new SoaException(SoaCode.NotNull, "phoneNumber字段不允许为空")
             
               if(bean.password == null)
-              throw new SoaException(SoaBaseCode.NotNull, "password字段不允许为空")
+              throw new SoaException(SoaCode.NotNull, "password字段不允许为空")
             
     }
     

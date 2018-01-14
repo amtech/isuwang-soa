@@ -112,7 +112,7 @@
       override def validate(bean: com.isuwang.soa.order.scala.domain.Order): Unit = {
       
               if(bean.order_no == null)
-              throw new SoaException(SoaBaseCode.NotNull, "order_no字段不允许为空")
+              throw new SoaException(SoaCode.NotNull, "order_no字段不允许为空")
             
     }
     

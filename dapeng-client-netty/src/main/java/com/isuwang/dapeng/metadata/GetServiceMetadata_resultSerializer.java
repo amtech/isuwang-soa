@@ -1,7 +1,7 @@
 package com.isuwang.dapeng.metadata;
 
 import com.isuwang.dapeng.core.BeanSerializer;
-import com.isuwang.dapeng.core.SoaBaseCode;
+import com.isuwang.dapeng.core.SoaCode;
 import com.isuwang.dapeng.core.SoaException;
 import com.isuwang.org.apache.thrift.TException;
 import com.isuwang.org.apache.thrift.protocol.*;
@@ -59,7 +59,7 @@ public class GetServiceMetadata_resultSerializer implements BeanSerializer<getSe
     public void validate(getServiceMetadata_result bean) throws TException {
 
         if (bean.getSuccess() == null)
-            throw new SoaException(SoaBaseCode.NotNull, "success字段不允许为空");
+            throw new SoaException(SoaCode.NotNull, "success字段不允许为空");
     }
 
     @Override
