@@ -109,7 +109,7 @@ public class SoaConnectionImpl implements SoaConnection {
                         checkChannel();
                         client.sendAsync(channel, seqid, requestBuf, responseBufFuture, timeout); //发送请求，返回结果
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        LOGGER.error(e.getMessage(), e);
                     }
                     CompletableFuture<RESP> responseFuture = responseBufFuture.thenApply((ByteBuf responseBuf) -> {
                         try {
@@ -124,7 +124,7 @@ public class SoaConnectionImpl implements SoaConnection {
                     });
                     ctx.setAttach(this, "response", responseFuture);
                 }catch (Exception e){
-                    e.printStackTrace();
+                    LOGGER.error(e.getMessage(), e);
                 }
             }
 

@@ -24,7 +24,7 @@ public class HeadFilter implements Filter {
         try {
             next.onEntry(ctx);
         } catch (TException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(),e);
         }
 
 

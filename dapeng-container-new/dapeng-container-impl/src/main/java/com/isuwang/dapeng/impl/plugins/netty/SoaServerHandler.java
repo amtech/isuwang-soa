@@ -67,6 +67,8 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
             if(reqMessage.refCnt()>0){
                 reqMessage.release();
             }
+        } finally {
+            assert(reqMessage.refCnt() == 0);
         }
 
     }

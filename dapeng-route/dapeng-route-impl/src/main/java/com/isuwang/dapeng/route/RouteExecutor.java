@@ -3,6 +3,8 @@ package com.isuwang.dapeng.route;
 
 import com.isuwang.dapeng.core.InvocationContext;
 import com.isuwang.dapeng.route.pattern.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -16,6 +18,7 @@ import java.util.Set;
  */
 public class RouteExecutor {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RouteExecutor.class);
 
     /**
      * 通过请求上下文，规则列表，当前服务ip，判断该请求是否可以访问此ip
@@ -83,7 +86,7 @@ public class RouteExecutor {
                     InetAddress inetAddress = InetAddress.getByName(server);
                     added.add(inetAddress);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOGGER.error(e.getMessage(),e);
                 }
             }
         }
@@ -109,7 +112,7 @@ public class RouteExecutor {
                     inetAddresses.add(inetAddress);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.error(e.getMessage(),e);
             }
         }
         return inetAddresses;
@@ -208,7 +211,7 @@ public class RouteExecutor {
             try {
                 return matched(InetAddress.getByName((String) value), (IpPattern) pattern);
             } catch (Exception e) {
-                System.out.print(e.getLocalizedMessage());
+               LOGGER.error(e.getLocalizedMessage());
             }
         }
         return false;
@@ -272,7 +275,7 @@ public class RouteExecutor {
         try {
             ip = InetAddress.getByName(ipPattern.getIp());
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(),e);
 //            System.out.println(e.getLocalizedMessage());
             return false;
         }
