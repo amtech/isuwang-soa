@@ -103,6 +103,8 @@ public class NettyClient {
         if (futureCaches.containsKey(seqid)) {
             CompletableFuture<ByteBuf> future = (CompletableFuture<ByteBuf>) futureCaches.get(seqid);
             future.complete(msg);
+
+            futureCaches.remove(seqid);
         }else{
 
             LOGGER.error("返回结果超时，siqid为：" + String.valueOf(seqid));
@@ -137,13 +139,16 @@ public class NettyClient {
         AsyncRequestWithTimeout fwt = futuresCachesWithTimeout.peek();
 
         while (fwt != null && fwt.getTimeout() < System.currentTimeMillis()) {
-            LOGGER.info("异步任务({})超时...", fwt.getSeqid());
-            futuresCachesWithTimeout.remove();
+            if (fwt.getFuture().isDone()) {
+                futuresCachesWithTimeout.remove();
+            } else {
+                LOGGER.info("异步任务({})超时...", fwt.getSeqid());
+                futuresCachesWithTimeout.remove();
 
-            CompletableFuture future = futureCaches.get(fwt.getSeqid());
-            future.completeExceptionally(new SoaException(SoaBaseCode.TimeOut));
-            futureCaches.remove(fwt.getSeqid());
-
+                CompletableFuture future = futureCaches.get(fwt.getSeqid());
+                future.completeExceptionally(new SoaException(SoaBaseCode.TimeOut));
+                futureCaches.remove(fwt.getSeqid());
+            }
             fwt = futuresCachesWithTimeout.peek();
         }
         Thread.sleep(DEFAULT_SLEEP_TIME);
