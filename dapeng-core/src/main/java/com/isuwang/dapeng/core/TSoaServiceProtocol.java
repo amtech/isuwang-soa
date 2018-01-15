@@ -25,7 +25,7 @@ public class TSoaServiceProtocol extends TProtocol {
     private TProtocol realContentProtocol;
 
     private final boolean isRequestFlag;
-    private boolean oldVersion = false;
+    private boolean oldVersion = true;
 
     //private TCommonTransport trans;
 
@@ -79,10 +79,11 @@ public class TSoaServiceProtocol extends TProtocol {
                 break;
         }
 
-        new SoaHeaderSerializer().write(context.getHeader(), this); // TODO readHeaderProtocol
-
         if (isOldVersion()) {
+            new SoaHeaderSerializer().write(context.getHeader(), realContentProtocol); // TODO readHeaderProtocol
             realContentProtocol.writeMessageBegin(message);
+        }else{
+            new SoaHeaderSerializer().write(context.getHeader(), realHeaderProtocol);
         }
     }
 
@@ -211,9 +212,9 @@ public class TSoaServiceProtocol extends TProtocol {
             String oldVersion = realHeaderProtocol.readString();
             if (!OLD_VERSION.equals(oldVersion)) {
                 throw new TException("通讯协议不正确(协议版本号)");
-            } else {
-                this.setOldVersion(true);
             }
+        }else{
+            this.setOldVersion(false);
         }
 
         byte protocol = realHeaderProtocol.readByte();
@@ -236,16 +237,19 @@ public class TSoaServiceProtocol extends TProtocol {
         }
 
         context.setSeqid(realHeaderProtocol.readI32());
-
-        SoaHeader soaHeader = new SoaHeaderSerializer().read(this);
-        context.setHeader(soaHeader);
+        SoaHeader soaHeader;
+        TMessage tm;
 
         if (isOldVersion()) {
-            return realContentProtocol.readMessageBegin();
+            soaHeader = new SoaHeaderSerializer().read(realContentProtocol);
+            tm = realContentProtocol.readMessageBegin();
         } else {
-            TMessage tm =new TMessage(null,(byte)0,context.getSeqid());
-            return tm;
+            soaHeader = new SoaHeaderSerializer().read(realHeaderProtocol);
+            tm =new TMessage(null,(byte)0,context.getSeqid());
         }
+
+        context.setHeader(soaHeader);
+        return tm;
     }
 
     @Override

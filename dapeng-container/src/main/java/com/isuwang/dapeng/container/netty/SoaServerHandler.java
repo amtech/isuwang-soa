@@ -132,7 +132,6 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
                 intoPool = true;
 
             } else {
-
                 if (soaHeader.isAsyncCall()) {
                     isAsync = true;
                     processRequestAsync(ctx, inputBuf, inputSoaTransport, inputProtocol, context, startTime, processData);
@@ -293,8 +292,8 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
         String responseCode = "-", responseMsg = "-";
         try {
             outputProtocol = new TSoaServiceProtocol(outputSoaTransport, false);
-            if (inputProtocol.isOldVersion()) {
-                outputProtocol.setOldVersion(true);
+            if (!inputProtocol.isOldVersion()) {
+                outputProtocol.setOldVersion(false);
             }
 
             TProcessor<?> soaProcessor = soaProcessors.get(new ProcessorKey(soaHeader.getServiceName(), soaHeader.getVersionName()));
