@@ -39,8 +39,8 @@
                         <dataType>
                             <kind>LIST</kind>
                             <valueType>
-<kind>STRUCT</kind>
-<ref>com.isuwang.soa.price.domain.Price</ref>
+                                <kind>STRUCT</kind>
+                                <ref>com.isuwang.soa.price.domain.Price</ref>
                             </valueType>
                         </dataType>
                         <doc></doc>
