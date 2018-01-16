@@ -51,7 +51,7 @@ public class BaseCommonServiceClient extends BaseClient {
             SoaCommonConnection conn = connectionPool.getCommonConnection();
 
             try {
-                RESP resp = conn.send(request, requestSerializer, responseSerializer,false);
+                RESP resp = conn.send(request, requestSerializer, responseSerializer,true);
                 chain.setAttribute(StubFilterChain.ATTR_KEY_RESPONSE, resp);
             } catch (SoaException e) {
 

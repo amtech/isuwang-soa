@@ -41,8 +41,8 @@ public class SoaConnectionImpl implements SoaConnection {
 
         try {
             outputProtocol = new TSoaServiceProtocol(outputSoaTransport, true);
-            if(isOldVersion){
-                outputProtocol.setOldVersion(true);
+            if(!isOldVersion){
+                outputProtocol.setOldVersion(false);
             }
             outputProtocol.writeMessageBegin(new TMessage(soaHeader.getServiceName() + ":" + soaHeader.getMethodName(), TMessageType.CALL, context.getSeqid()));
             requestSerializer.write(request, outputProtocol);
@@ -63,13 +63,9 @@ public class SoaConnectionImpl implements SoaConnection {
 
                 TMessage msg = inputProtocol.readMessageBegin();
                     soaHeader=InvocationContext.Factory.getCurrentInstance().getHeader();
-                if (TMessageType.EXCEPTION == msg.type) {
-                    TApplicationException x = TApplicationException.read(inputProtocol);
-                    inputProtocol.readMessageEnd();
-                    throw x;
-                } else if (SoaBaseCode.VersionNotMatch.getCode().equals(soaHeader.getRespCode().get())) {
+                 if (SoaBaseCode.VersionException.getCode().equals(soaHeader.getRespCode().get())) {
                     outputSoaTransport.close();
-                    return send(request,response,requestSerializer,responseSerializer,true);
+                    return send(request,response,requestSerializer,responseSerializer,false);
 
                 }else if (context.getSeqid() != msg.seqid) {
                     throw new TApplicationException(4, soaHeader.getMethodName() + " failed: out of sequence response");

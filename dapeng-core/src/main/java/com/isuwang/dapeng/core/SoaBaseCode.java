@@ -11,7 +11,7 @@ public enum SoaBaseCode implements SoaBaseCodeInterface {
     NotFoundServer("Err-Core-098", "无可用的服务实例"),
     NotConnected("Error-Core-002", "连接失败"),
     TimeOut("Error-Core-003", "请求超时"),
-    VersionNotMatch("Error-Core-004","版本不兼容");
+    VersionException("Error-Core-004","报文版本错误");
 
     private String code;
     private String msg;
