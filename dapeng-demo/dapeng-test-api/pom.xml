@@ -103,7 +103,7 @@
                             <goal>thriftGenerator</goal>
                         </goals>
                         <configuration>
-                            <language>java</language>
+                            <language>scala</language>
                         </configuration>
                     </execution>
                 </executions>
