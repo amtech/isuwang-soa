@@ -51,6 +51,7 @@
         <module>dapeng-route</module>
         <module>dapeng-tools</module>
         <module>dapeng-message</module>
+        <module>dapeng-service-invoke</module>
     </modules>
 
     <properties>

@@ -10,7 +10,7 @@ import com.isuwang.dapeng.transaction.api.domain.TGlobalTransactionsStatus;
 /**
  *
  **/
-@Service(version = "1.0.0")
+@Service(name="com.isuwang.dapeng.transaction.api.service.GlobalTransactionService" ,version = "1.0.0")
 @Processor(className = "com.isuwang.dapeng.transaction.api.GlobalTransactionServiceCodec$Processor")
 public interface GlobalTransactionService {
 

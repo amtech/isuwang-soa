@@ -110,7 +110,7 @@ public class RegistryAgentImpl implements RegistryAgent {
             if (processor.getInterfaceClass().getClass() != null) {
                 Service service = processor.getInterfaceClass().getAnnotation(Service.class);
 
-                this.registerService(processor.getInterfaceClass().getName(), service.version());
+                this.registerService(service.name(), service.version());
             }
         }
 

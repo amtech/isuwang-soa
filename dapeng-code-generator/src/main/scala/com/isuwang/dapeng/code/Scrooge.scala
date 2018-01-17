@@ -115,12 +115,14 @@ object Scrooge {
         val xmlFiles = resourcePath.listFiles().filter(_.getName.endsWith(".xml"))
         if (xmlFiles.exists(xmlFile => thriftModifyTimes.exists(_ > xmlFile.lastModified()))) {
           true
-        } else if (xmlFiles.size <= 0
-          || (language.equals("scala") && xmlFiles.filter(_.getName.contains("scala")).size == 0)
-          || (language.equals("java") && xmlFiles.filterNot(_.getName.contains("scala")).size == 0)) {
+        } else if (xmlFiles.size <= 0) {
           true
         } else {
-          false
+          val files = getFile(outDir)
+          language match {
+            case "java" => if (files.filter(_.getName.endsWith(".java")).size <= 0) true else false
+            case "scala" => if (files.filter(_.getName.endsWith(".scala")).size <= 0) true else false
+          }
         }
       }
 
@@ -156,6 +158,14 @@ object Scrooge {
 
   def failed(): Unit = {
 
+  }
+
+  def getFile(path: String): List[File] = {
+    if (new File(path).isDirectory) {
+      new File(path).listFiles().flatMap(i => getFile(i.getPath)).toList
+    } else {
+      List(new File(path))
+    }
   }
 
 }

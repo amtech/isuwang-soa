@@ -14,7 +14,7 @@ import java.util.Date;
 /**
  *
  **/
-@Service(version = "1.0.0")
+@Service(name="com.isuwang.dapeng.transaction.api.service.GlobalTransactionProcessService", version = "1.0.0")
 @Processor(className = "com.isuwang.dapeng.transaction.api.GlobalTransactionProcessServiceCodec$Processor")
 public interface GlobalTransactionProcessService {
 

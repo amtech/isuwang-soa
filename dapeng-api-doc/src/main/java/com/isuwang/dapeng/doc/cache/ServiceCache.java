@@ -66,7 +66,7 @@ public class ServiceCache {
 
                 Service service = processor.getInterfaceClass().getAnnotation(Service.class);
 
-                String serviceName = processor.getInterfaceClass().getName();
+                String serviceName = service.name();
                 String version = service.version();
 
 
