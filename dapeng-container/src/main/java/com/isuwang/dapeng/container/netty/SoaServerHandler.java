@@ -90,7 +90,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
             final int requestLength = getRequestLength(inputBuf);
 
             final TransactionContext context = TransactionContext.Factory.getNewInstance();
-            final SoaHeader soaHeader = new SoaHeader();
+            SoaHeader soaHeader = new SoaHeader();
             inputSoaTransport = new TSoaTransport(inputBuf);
             context.setHeader(soaHeader);
             TransactionContext.Factory.setCurrentInstance(context);
@@ -102,6 +102,7 @@ public class SoaServerHandler extends ChannelInboundHandlerAdapter {
             final TSoaServiceProtocol inputProtocol = new TSoaServiceProtocol(inputSoaTransport, false);
             TMessage tMessage = inputProtocol.readMessageBegin();
             context.setSeqid(tMessage.seqid);
+            soaHeader = context.getHeader();
 
             /**
              * check if use executorService for this service and
