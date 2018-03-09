@@ -109,7 +109,7 @@ object Scrooge {
       //1. 如果thrift文件修改时间 > xml的时间 => needUpdate
       //2. 如果没有xml文件 => needUpdate
       //3. 如果 language equals scala && scalaXmlCount ==0 => needUpdate
-      val resourcePath = new File(resources(0)).getParentFile.getParentFile
+      val resourcePath = new File(outDir+ System.getProperty("file.separator")+"resources")
       val thriftModifyTimes = resources.map(file => new File(file).lastModified())
       val needUpdate = {
         val xmlFiles = resourcePath.listFiles().filter(_.getName.endsWith(".xml"))
