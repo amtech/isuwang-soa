@@ -31,6 +31,12 @@ public class GenerateFilePlugin extends AbstractMojo {
     @Parameter(property = "thriftGenerator.language", defaultValue = "both")
     private String language;
 
+    /**
+     * delete old file
+     */
+    @Parameter(property = "thriftGenerator.isDelete", defaultValue = "true")
+    private String isDelete;
+
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -46,7 +52,7 @@ public class GenerateFilePlugin extends AbstractMojo {
         if (language.equals("both") || language.equals("java")) {
             Scrooge.main(new String[]{"-gen", "java", "-all",
                     "-in", sourceFilePath,
-                    "-out", targetFilePath});
+                    "-out", targetFilePath,(isDelete.equals("true")?"":"-del" )});
 //            File commonFile = new File(projectPath + "src/main/java/com/isuwang/soa/common");
 //            if (commonFile.exists()) {
 //                deleteDir(commonFile);
@@ -55,7 +61,7 @@ public class GenerateFilePlugin extends AbstractMojo {
         if (language.equals("both") || language.equals("scala")) {
             Scrooge.main(new String[]{"-gen", "scala", "-all",
                     "-in", sourceFilePath,
-                    "-out", targetFilePath});
+                    "-out", targetFilePath,(isDelete.equals("true")?"":"-notDel" )});
 
 //            File scalaCommonFile = new File(projectPath + "src/main/scala/com/isuwang/soa/scala/common");
 //            if (scalaCommonFile.exists()) {
