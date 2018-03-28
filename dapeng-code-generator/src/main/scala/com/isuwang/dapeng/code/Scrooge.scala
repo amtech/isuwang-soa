@@ -114,18 +114,20 @@ object Scrooge {
       val resourcePath = new File(outDir+ System.getProperty("file.separator")+"resources")
       val thriftModifyTimes = resources.map(file => new File(file).lastModified())
       val needUpdate = {
-        val xmlFiles = resourcePath.listFiles().filter(_.getName.endsWith(".xml"))
-        if (xmlFiles.exists(xmlFile => thriftModifyTimes.exists(_ > xmlFile.lastModified()))) {
-          true
-        } else if (xmlFiles.size <= 0) {
-          true
-        } else {
-          val files = getFile(outDir)
-          language match {
-            case "java" => if (files.filter(_.getName.endsWith(".java")).size <= 0) true else false
-            case "scala" => if (files.filter(_.getName.endsWith(".scala")).size <= 0) true else false
+        if(resourcePath.isFile) {
+          val xmlFiles = resourcePath.listFiles().filter(_.getName.endsWith(".xml"))
+          if (xmlFiles.exists(xmlFile => thriftModifyTimes.exists(_ > xmlFile.lastModified()))) {
+            true
+          } else if (xmlFiles.size <= 0) {
+            true
+          } else {
+            val files = getFile(outDir)
+            language match {
+              case "java" => if (files.filter(_.getName.endsWith(".java")).size <= 0) true else false
+              case "scala" => if (files.filter(_.getName.endsWith(".scala")).size <= 0) true else false
+            }
           }
-        }
+        }else true
       }
 
       if (outDir == null) // 如果输出路径为空,则默认为当前目录
