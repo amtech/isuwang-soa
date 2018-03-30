@@ -133,11 +133,10 @@ object Scrooge {
       if (outDir == null) // 如果输出路径为空,则默认为当前目录
         outDir = System.getProperty("user.dir")
 
-      if (resources != null && language != "" && needUpdate) {
+      if (resources != null && language != "" ) {
         //删除文件再生成
-        if(isDelete) {
           fileDel(new File(outDir))
-        }
+
 
         val parserLanguage = if (language == "scala") "scala" else "java"
         val services = new ThriftCodeParser(parserLanguage).toServices(resources, version)
