@@ -52,7 +52,7 @@ public class GenerateFilePlugin extends AbstractMojo {
         if (language.equals("both") || language.equals("java")) {
             Scrooge.main(new String[]{"-gen", "java", "-all",
                     "-in", sourceFilePath,
-                    "-out", targetFilePath,(isDelete.equals("true")?"":"-del" )});
+                    "-out", targetFilePath,(isDelete.equals("true")?"":"-notDel" )});
 //            File commonFile = new File(projectPath + "src/main/java/com/isuwang/soa/common");
 //            if (commonFile.exists()) {
 //                deleteDir(commonFile);
